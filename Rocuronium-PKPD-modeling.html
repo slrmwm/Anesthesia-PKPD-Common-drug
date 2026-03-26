@@ -1,0 +1,1257 @@
+<!--
+/**
+ * Rocuronium PK Simulator
+ * Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+ * (Dr. Joosuk Oh, Dept. of Anesthesiology & Pain Medicine,
+ *  Inje University Busan Paik Hospital)
+ * All rights reserved.
+ */
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rocuronium PK Simulator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+/**
+ * Rocuronium PK Simulator — Styles
+ * Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+ */
+:root {
+  --bg: #0d0f18;
+  --surface: #161923;
+  --surface2: #1e2235;
+  --border: #262c45;
+  --text: #dde2f0;
+  --text-dim: #7a85a3;
+  --green: #34d399;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --radius: 10px;
+  /* Rocuronium accent colors */
+  --roc-k: #e85d75;
+  --roc-w: #eab308;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px; min-height: 100vh; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+/* ═══ HEADER NAV ═══ */
+header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0; display: flex; flex-direction: column;
+  flex-shrink: 0;
+}
+.header-top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px; height: 48px;
+}
+.logo {
+  width: 34px; height: 28px; border-radius: 6px; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900; color: #fff; letter-spacing: 1px;
+  background: linear-gradient(135deg, #e85d75, #eab308, #f97316);
+}
+header .title { font-size: 15px; font-weight: 700; white-space: nowrap; }
+header .credit {
+  margin-left: auto; font-size: 10px; color: var(--text-dim);
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* ═══ CONTENT AREA ═══ */
+.content { flex: 1; overflow: hidden; position: relative; }
+.tab-panel { display: none; position: absolute; inset: 0; }
+.tab-panel.active { display: flex; }
+
+/* ═══ LAYOUT GRID (Sidebar + Main) ═══ */
+.layout { display: grid; grid-template-columns: 310px 1fr; width: 100%; height: 100%; }
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  background: var(--surface); border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 14px 14px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.sec-title {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--text-dim); margin-bottom: 7px;
+}
+
+/* SEX */
+.sex-row { display: flex; gap: 7px; }
+.sex-btn {
+  flex: 1; padding: 7px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text-dim); cursor: pointer; font-size: 12px; font-weight: 600; transition: .15s;
+}
+.sex-btn.active { background: rgba(232,93,117,.2); color: var(--roc-k); border-color: var(--roc-k); }
+
+/* SLIDER + NUM INPUT */
+.slider-group { display: flex; flex-direction: column; gap: 9px; }
+.slider-row { display: flex; flex-direction: column; gap: 3px; }
+.slider-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.slider-name { font-size: 12px; font-weight: 600; flex: 1; }
+.num-input {
+  width: 70px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 3px 6px; color: var(--roc-k);
+  font-size: 12px; font-weight: 700; text-align: right; outline: none; transition: border-color .15s;
+}
+.num-input:focus { border-color: var(--roc-k); }
+.num-input::-webkit-inner-spin-button { opacity: 0.5; }
+.unit-label { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+.rate-hint { font-size: 10.5px; color: var(--yellow); text-align: right; margin-top: 2px; min-height: 14px; letter-spacing: 0.02em; }
+
+input[type=range] { width: 100%; height: 5px; accent-color: var(--roc-k); cursor: pointer; margin-top: 1px; }
+
+/* MODE BUTTONS */
+.mode-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.mode-btn {
+  padding: 7px 4px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim); cursor: pointer;
+  font-size: 11px; font-weight: 600; transition: .15s; text-align: center; line-height: 1.3;
+}
+.mode-btn.active { background: rgba(232,93,117,.2); color: var(--roc-k); border-color: var(--roc-k); }
+.phase-label {
+  font-size: 10px; color: var(--text-dim); margin-bottom: 4px;
+  padding: 2px 6px; background: rgba(232,93,117,.08);
+  border-left: 2px solid var(--roc-k); border-radius: 0 4px 4px 0;
+}
+
+/* TARGET */
+.target-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.target-input {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 6px 10px; color: var(--text); font-size: 13px; width: 100%;
+  outline: none;
+}
+.target-input:focus { border-color: var(--roc-k); }
+.dose-label { display: flex; justify-content: space-between; margin-bottom: 3px; }
+.dose-name { font-size: 12px; font-weight: 600; }
+
+/* TIME RANGE */
+.time-range-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.tr-btn {
+  flex: 1; padding: 6px; border-radius: 7px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim); cursor: pointer;
+  font-size: 11px; font-weight: 700; text-align: center; min-width: 48px; transition: .15s;
+}
+.tr-btn.active { background: rgba(232,93,117,.2); color: var(--roc-k); border-color: var(--roc-k); }
+
+/* STAT CARDS */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 10px; }
+.stat-model { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.stat-label { font-size: 10px; color: var(--text-dim); }
+.stat-value { font-size: 12px; font-weight: 700; }
+
+/* MAIN */
+.main { display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
+.chart-area { flex: 1; padding: 16px 20px 8px; min-height: 0; }
+.chart-area canvas { width: 100% !important; height: 100% !important; }
+
+/* LEGEND */
+.legend-bar {
+  padding: 6px 20px 10px;
+  display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); }
+
+/* CONC SELECTOR */
+.conc-row { display: flex; gap: 6px; }
+.conc-btn {
+  flex: 1; padding: 6px; border-radius: 7px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim); cursor: pointer;
+  font-size: 11px; font-weight: 700; text-align: center; transition: .15s;
+}
+.conc-btn.active { background: rgba(232,93,117,.2); color: var(--roc-k); border-color: var(--roc-k); }
+
+/* MODEL RADIO SELECTOR */
+.model-sel { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.model-sel-label { font-size: 10px; color: var(--text-dim); font-weight: 600; }
+.model-radio {
+  padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim); cursor: pointer;
+  font-size: 10px; font-weight: 700; transition: .15s;
+}
+.model-radio.active { background: rgba(52,211,153,.15); color: var(--green); border-color: var(--green); }
+
+/* NMB NOTE BOX */
+.nmb-note {
+  background: rgba(232,93,117,.06); border: 1px solid rgba(232,93,117,.25);
+  border-radius: 8px; padding: 8px 10px;
+}
+.nmb-note-title {
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--roc-k); margin-bottom: 5px;
+}
+.nmb-ref-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.nmb-ref-label { font-size: 9.5px; color: var(--text-dim); }
+.nmb-ref-val { font-size: 10px; font-weight: 700; }
+
+/* ═══ FOOTER ═══ */
+footer {
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 6px 16px; display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: var(--text-dim); flex-shrink: 0;
+}
+footer a { color: var(--text-dim); text-decoration: none; }
+footer a:hover { color: var(--text); }
+
+/* ═══ MOBILE RESPONSIVE (360px viewport base) ═══ */
+@media (max-width: 720px) {
+  html, body {
+    overflow: visible !important;
+    overflow-x: hidden;
+    min-height: unset;
+    height: auto;
+    font-size: 12px;
+  }
+  .content {
+    overflow: visible !important;
+    position: static !important;
+    flex: unset;
+    height: auto;
+  }
+  .tab-panel {
+    position: static !important;
+    inset: unset !important;
+    height: auto !important;
+  }
+  .tab-panel.active {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+  }
+  .layout {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow-y: visible !important;
+    max-height: none !important;
+    height: auto;
+    padding: 10px 10px;
+    gap: 10px;
+  }
+  .main {
+    overflow: visible !important;
+    height: auto;
+  }
+  .chart-area {
+    height: 260px !important;
+    min-height: 260px !important;
+    flex: unset !important;
+    padding: 8px 6px 4px !important;
+  }
+  .header-top {
+    padding: 0 8px;
+    height: 40px;
+    gap: 6px;
+  }
+  .header-top .logo {
+    width: 28px;
+    height: 24px;
+    font-size: 10px;
+    border-radius: 5px;
+  }
+  header .title {
+    font-size: 13px;
+  }
+  header .credit {
+    font-size: 8px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sec-title {
+    font-size: 9px;
+    margin-bottom: 5px;
+  }
+  .sex-btn {
+    padding: 6px 4px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+  .slider-group { gap: 7px; }
+  .slider-row { gap: 2px; }
+  .slider-name { font-size: 11px; }
+  .num-input {
+    width: 58px;
+    font-size: 11px;
+    padding: 3px 4px;
+    border-radius: 5px;
+  }
+  .unit-label { font-size: 10px; }
+  .rate-hint { font-size: 9.5px; }
+  input[type=range] {
+    height: 6px;
+    margin-top: 0;
+  }
+  .mode-row {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+  }
+  .mode-btn {
+    padding: 6px 2px;
+    font-size: 10px;
+    border-radius: 6px;
+    line-height: 1.2;
+  }
+  .mode-btn small { font-size: 9px; }
+  .phase-label {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+  .conc-row { gap: 4px; }
+  .conc-btn {
+    padding: 5px 4px;
+    font-size: 10px;
+    border-radius: 6px;
+  }
+  .conc-btn small { font-size: 9px; }
+  .target-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .target-input {
+    padding: 5px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+  .dose-name { font-size: 11px; }
+  .time-range-row {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+  .tr-btn {
+    padding: 5px 2px;
+    font-size: 10px;
+    border-radius: 6px;
+    min-width: unset;
+  }
+  .stat-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .stat-card {
+    padding: 7px 8px;
+    border-radius: 7px;
+  }
+  .stat-model {
+    font-size: 8px;
+    margin-bottom: 3px;
+  }
+  .stat-label { font-size: 9px; }
+  .stat-value { font-size: 11px; }
+  .nmb-note {
+    padding: 6px 8px;
+    border-radius: 7px;
+  }
+  .nmb-note-title {
+    font-size: 8px;
+    margin-bottom: 4px;
+  }
+  .nmb-ref-label { font-size: 8.5px; }
+  .nmb-ref-val { font-size: 9px; }
+  .model-sel { gap: 4px; }
+  .model-sel-label { font-size: 9px; }
+  .model-radio {
+    padding: 3px 7px;
+    font-size: 9px;
+    border-radius: 4px;
+  }
+  .legend-bar {
+    padding: 5px 8px 8px;
+    gap: 6px 10px;
+    justify-content: flex-start;
+  }
+  .legend-item {
+    font-size: 9px;
+    gap: 3px;
+  }
+  .legend-item svg {
+    width: 20px;
+    height: 8px;
+  }
+  .divider { margin: 2px 0; }
+  footer {
+    padding: 5px 8px;
+    font-size: 8px;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    text-align: center;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  HEADER                                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<header>
+  <div class="header-top">
+    <div class="logo">Rc</div>
+    <span class="title">Rocuronium PK Simulator</span>
+    <span class="credit">© 부산백병원 마취통증의학과 오주석</span>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  ROCURONIUM PANEL                                             -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="panelRoc">
+<div class="layout">
+  <div class="sidebar">
+    <div>
+      <div class="sec-title">Patient Covariates</div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:5px;">Sex</div>
+        <div class="sex-row">
+          <button class="sex-btn active" id="rc_btnM" onclick="rocSetSex('M')">♂ Male</button>
+          <button class="sex-btn" id="rc_btnF" onclick="rocSetSex('F')">♀ Female</button>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Age</span>
+            <input type="number" class="num-input" id="rc_inpAge" value="43" min="18" max="80" step="1" oninput="rocNum('age',this,18,80)">
+            <span class="unit-label">yr</span>
+          </div>
+          <input type="range" id="rc_slAge" min="18" max="80" value="43" oninput="rocSl('age',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Weight</span>
+            <input type="number" class="num-input" id="rc_inpWt" value="70" min="40" max="150" step="1" oninput="rocNum('wt',this,40,150)">
+            <span class="unit-label">kg</span>
+          </div>
+          <input type="range" id="rc_slWt" min="40" max="150" value="70" oninput="rocSl('wt',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Height</span>
+            <input type="number" class="num-input" id="rc_inpHt" value="170" min="140" max="210" step="1" oninput="rocNum('ht',this,140,210)">
+            <span class="unit-label">cm</span>
+          </div>
+          <input type="range" id="rc_slHt" min="140" max="210" value="170" oninput="rocSl('ht',+this.value)">
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Solution Concentration</div>
+      <div class="conc-row" id="rc_concRow">
+        <button class="conc-btn active" onclick="rocSetConc(10,this)">10 mg/mL</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Dosing Mode</div>
+      <div class="mode-row" style="margin-bottom:10px;">
+        <button class="mode-btn active" id="rc_btnBolus" onclick="rocSetMode('bolus')">Bolus<br><small>IV Push</small></button>
+        <button class="mode-btn" id="rc_btnCont" onclick="rocSetMode('continuous')">Continuous<br><small>Infusion</small></button>
+        <button class="mode-btn" id="rc_btnBolInf" onclick="rocSetMode('bolusinf')">Bolus +<br><small>Infusion</small></button>
+      </div>
+      <div id="rc_bolusCtrl">
+        <div class="slider-group">
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="rc_inpBolus" value="42" min="0" max="200" step="1" oninput="rocNum('bolus',this,0,200)">
+              <span class="unit-label">mg</span>
+            </div>
+            <input type="range" id="rc_slBolus" min="0" max="200" step="1" value="42" oninput="rocSl('bolus',+this.value)">
+            <div class="rate-hint" id="rc_bolusHint">≈ 0.60 mg/kg</div>
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="rc_inpBRate" value="1200" min="600" max="1200" step="50" oninput="rocNum('bolusRate',this,600,1200)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="rc_slBRate" min="600" max="1200" step="50" value="1200" oninput="rocSl('bolusRate',+this.value)">
+          </div>
+        </div>
+      </div>
+      <div id="rc_contCtrl" style="display:none;">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Infusion Rate</span>
+            <input type="number" class="num-input" id="rc_inpRate" value="10" min="1" max="60" step="1" oninput="rocNum('rate',this,1,60)">
+            <span class="unit-label">cc/hr</span>
+          </div>
+          <input type="range" id="rc_slRate" min="1" max="60" value="10" oninput="rocSl('rate',+this.value)">
+          <div class="rate-hint" id="rc_rateHint"></div>
+        </div>
+      </div>
+      <div id="rc_bolInfCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="phase-label">① Bolus phase</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="rc_inpBolus2" value="42" min="0" max="200" step="1" oninput="rocNum('bolus',this,0,200)">
+              <span class="unit-label">mg</span>
+            </div>
+            <input type="range" id="rc_slBolus2" min="0" max="200" step="1" value="42" oninput="rocSl('bolus',+this.value)">
+            <div class="rate-hint" id="rc_bolusHint2">≈ 0.60 mg/kg</div>
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="rc_inpBRate2" value="1200" min="600" max="1200" step="50" oninput="rocNum('bolusRate',this,600,1200)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="rc_slBRate2" min="600" max="1200" step="50" value="1200" oninput="rocSl('bolusRate',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:4px;">② Maintenance infusion</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Infusion Rate</span>
+              <input type="number" class="num-input" id="rc_inpRate2" value="10" min="1" max="60" step="1" oninput="rocNum('rate',this,1,60)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="rc_slRate2" min="1" max="60" value="10" oninput="rocSl('rate',+this.value)">
+            <div class="rate-hint" id="rc_rateHint2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Target Ce Band <span style="text-transform:none;">(μg/mL)</span></div>
+      <div class="target-row">
+        <div><div class="dose-label"><span class="dose-name">Lower</span></div>
+          <input type="number" class="target-input" id="rc_targLow" value="0.3" min="0" max="5" step="0.1" oninput="rocUpdate()"></div>
+        <div><div class="dose-label"><span class="dose-name">Upper</span></div>
+          <input type="number" class="target-input" id="rc_targHigh" value="1.0" min="0" max="5" step="0.1" oninput="rocUpdate()"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Time Range</div>
+      <div class="time-range-row" id="rc_trRow">
+        <button class="tr-btn" onclick="rocSetTR(15,this)">15 min</button>
+        <button class="tr-btn" onclick="rocSetTR(30,this)">30 min</button>
+        <button class="tr-btn active" onclick="rocSetTR(60,this)">1 hr</button>
+        <button class="tr-btn" onclick="rocSetTR(180,this)">3 hr</button>
+        <button class="tr-btn" onclick="rocSetTR(360,this)">6 hr</button>
+        <button class="tr-btn" onclick="rocSetTR(720,this)">12 hr</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">NMB Prediction (Kleijn/Wierda)</div>
+      <div class="nmb-note">
+        <div class="nmb-note-title">Ce → TOF Ratio (%)</div>
+        <canvas id="rc_nmbChart" width="270" height="130" style="width:100%;height:130px;display:block;margin-bottom:6px;"></canvas>
+        <div class="nmb-ref-row"><span class="nmb-ref-label" style="color:var(--roc-k);">Kleijn Ce@5min</span><span class="nmb-ref-val" id="rc_nmbEstK"></span></div>
+        <div class="nmb-ref-row"><span class="nmb-ref-label" style="color:var(--roc-w);">Wierda Ce@5min</span><span class="nmb-ref-val" id="rc_nmbEstW"></span></div>
+        <div style="height:3px;"></div>
+        <div class="nmb-ref-row" style="border-top:1px solid rgba(255,255,255,.06);padding-top:4px;">
+          <span class="nmb-ref-label">TOF 90% threshold Ce</span>
+          <span class="nmb-ref-val" style="color:var(--green);"><span id="rc_tofCe90"></span></span>
+        </div>
+        <div class="nmb-ref-row">
+          <span class="nmb-ref-label">TOF 25% threshold Ce</span>
+          <span class="nmb-ref-val" style="color:var(--yellow);"><span id="rc_tofCe25"></span></span>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Key Values</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--roc-k);">Kleijn 2011</div>
+          <div class="stat-row"><span class="stat-label">ke0</span><span class="stat-value" id="rc_kKe0">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5 min</span><span class="stat-value" id="rc_kCp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5 min</span><span class="stat-value" id="rc_kCe5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="rc_kPeak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="rc_kCss">—</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--roc-w);">Wierda 1995</div>
+          <div class="stat-row"><span class="stat-label">ke0</span><span class="stat-value" id="rc_wKe0">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5 min</span><span class="stat-value" id="rc_wCp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5 min</span><span class="stat-value" id="rc_wCe5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="rc_wPeak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="rc_wCss">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Combined View Model</div>
+      <div class="model-sel">
+        <span class="model-sel-label">Select:</span>
+        <button class="model-radio active" id="rc_selKleijn" onclick="rocSelectModel('kleijn')">Kleijn</button>
+        <button class="model-radio" id="rc_selWierda" onclick="rocSelectModel('wierda')">Wierda</button>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="chart-area"><canvas id="rc_chart"></canvas></div>
+    <div class="legend-bar">
+      <div class="legend-item" style="color:var(--roc-k);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#e85d75" stroke-width="2.5"/></svg>Kleijn Cp</div>
+      <div class="legend-item" style="color:var(--roc-k);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#e85d75" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Kleijn Ce</div>
+      <div class="legend-item" style="color:var(--roc-w);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#eab308" stroke-width="2.5"/></svg>Wierda Cp</div>
+      <div class="legend-item" style="color:var(--roc-w);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#eab308" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Wierda Ce</div>
+      <div class="legend-item" style="color:var(--green);"><svg width="28" height="10"><rect x="0" y="1" width="28" height="8" fill="rgba(52,211,153,.2)" stroke="#34d399" stroke-width="1"/></svg>Target Band</div>
+      <div class="legend-item" style="color:#e85d75;"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#e85d75" stroke-width="1.5" stroke-dasharray="2 3"/></svg>TOF(Kleijn)</div>
+      <div class="legend-item" style="color:#eab308;"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#eab308" stroke-width="1.5" stroke-dasharray="2 3"/></svg>TOF(Wierda)</div>
+      <div class="legend-item" style="color:rgba(52,211,153,.7);font-size:10px;">— TOF 90%</div>
+      <div class="legend-item" style="color:rgba(251,191,36,.7);font-size:10px;">— TOF 25%</div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <span>© 2026 부산백병원 마취통증의학과 오주석 | Rocuronium PK Simulator</span>
+  <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
+</footer>
+
+<script>
+/**
+ * Rocuronium PK Simulator — PK/PD Engine
+ * Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+ * (Dr. Joosuk Oh, Dept. of Anesthesiology & Pain Medicine,
+ *  Inje University Busan Paik Hospital)
+ * All rights reserved.
+ */
+
+// ═══════════════════════════════════════════════════════════════
+//  SHARED: Cubic Roots (Newton-Raphson) — for 3-compartment models
+// ═══════════════════════════════════════════════════════════════
+function cubicRoots(a2, a1, a0) {
+  // Solve x³ - a2*x² + a1*x - a0 = 0  (all roots positive for PK)
+  const f  = x => x*x*x - a2*x*x + a1*x - a0;
+  const df = x => 3*x*x - 2*a2*x + a1;
+  const found = [];
+  // Dense Newton-Raphson seeding (reliable for PK eigenvalues)
+  const seeds = [];
+  for (let i = 1; i <= 40; i++) seeds.push(a2 * i / 40);
+  seeds.push(0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 2.0, a2*1.1, a2*1.5);
+  for (const s of seeds) {
+    let x = Math.max(1e-12, s);
+    for (let i = 0; i < 500; i++) {
+      const fx = f(x), dfx = df(x);
+      if (Math.abs(dfx) < 1e-20) break;
+      const dx = fx / dfx; x -= dx;
+      if (x < 0) x = s * 0.5;  // prevent going negative
+      if (Math.abs(dx) < 1e-14) break;
+    }
+    if (x > 1e-10 && Math.abs(f(x)) < 1e-6 && !found.some(r => Math.abs(x - r) < 1e-7))
+      found.push(x);
+    if (found.length >= 3) break;
+  }
+  return found.sort((a, b) => b - a);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PATIENT STATE
+// ═══════════════════════════════════════════════════════════════
+const patient = { sex:'M', age:43, wt:70, ht:170 };
+
+// ═══════════════════════════════════════════════════════════════
+//  ROCURONIUM PK MODELS
+// ═══════════════════════════════════════════════════════════════
+
+// ── Model 1: Kleijn et al. 2011 (2-compartment) ──
+function kleijnParams(age, wt) {
+  const Fs75 = Math.pow(wt/70, 0.75);
+  const Fs1  = wt/70;
+  const CL  = 0.269 * Fs75 * (1 + (-0.00678) * (age - 43));  // L/min
+  const V1  = 4.73 * Fs1;                                      // L
+  const Q2  = 0.279 * Fs75;                                    // L/min
+  const V2  = 6.76 * Fs1 * Math.exp(0.00613 * (age - 43));    // L
+  const ke0 = 0.134 * Math.pow(wt/70, -0.25);                 // min⁻¹
+  const EC50 = 1.62 * 0.5298;  // μg/mL (~0.858)
+  const gamma = 7.52;
+  return {
+    V1, V2, CL, Q2, ke0, EC50, gamma,
+    k10: CL/V1,
+    k12: Q2/V1,
+    k21: Q2/V2,
+    nComp: 2
+  };
+}
+
+// ── Model 2: Wierda 1995 (3-compartment) ──
+function wierdaParams(age, wt) {
+  const Fs1  = wt/70;
+  const Fs75 = Math.pow(wt/70, 0.75);
+  const CL  = 0.0037 * 70 * Fs75;    // L/min (3.7 mL/kg/min base)
+  const V1  = 0.076 * 70 * Fs1;      // L
+  const V2  = 0.108 * 70 * Fs1;      // L
+  const V3  = 0.072 * 70 * Fs1;      // L
+  const CL2 = 0.00414 * 70 * Fs75;   // L/min
+  const CL3 = 0.00063 * 70 * Fs75;   // L/min
+  const ke0 = 0.19;                   // min⁻¹ (Cortínez 2007)
+  const EC50 = 0.92;                  // μg/mL
+  const gamma = 5.0;
+  return {
+    V1, V2, V3, CL, CL2, CL3, ke0, EC50, gamma,
+    k10: CL/V1,
+    k12: CL2/V1,
+    k21: CL2/V2,
+    k13: CL3/V1,
+    k31: CL3/V3,
+    nComp: 3
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  EIGENVALUE COMPUTATION
+// ═══════════════════════════════════════════════════════════════
+
+// 2-compartment: quadratic eigenvalues
+function getEigen2(p) {
+  const {V1, k10, k12, k21} = p;
+  const a1 = k10 + k12 + k21;
+  const a0 = k10 * k21;
+  const disc = Math.sqrt(Math.max(0, a1*a1 - 4*a0));
+  const l1 = (a1 + disc) / 2;  // faster root
+  const l2 = (a1 - disc) / 2;  // slower root
+  // Residual coefficients (standard 2-compartment mammillary)
+  const C1 = (k21 - l2) / (l1 - l2);
+  const C2 = (k21 - l1) / (l2 - l1);
+  return { l1, l2, C1, C2 };
+}
+
+// 3-compartment: cubic eigenvalues
+function getEigen3(p) {
+  const {V1, k10, k12, k21, k13, k31} = p;
+  const a2 = k10+k12+k21+k13+k31;
+  const a1 = k10*k21 + k31*(k10+k12) + k21*k13;
+  const a0 = k10*k21*k31;
+  const [l1, l2, l3] = cubicRoots(a2, a1, a0);
+  return {
+    l1, l2, l3,
+    C1: (k21-l1)*(k31-l1) / ((l1-l2)*(l1-l3)),
+    C2: (k21-l2)*(k31-l2) / ((l2-l1)*(l2-l3)),
+    C3: (k21-l3)*(k31-l3) / ((l3-l1)*(l3-l2))
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ANALYTICAL Cp SEGMENT (constant-rate infusion R0 mg/min for DUR min)
+// ═══════════════════════════════════════════════════════════════
+
+// 2-compartment segment
+function cpSeg2(t, R0, V1, DUR, l1, l2, C1, C2) {
+  const tI = Math.min(t, DUR), tD = Math.max(t - DUR, 0);
+  return (R0 / V1) * (
+    C1/l1 * (1 - Math.exp(-l1*tI)) * Math.exp(-l1*tD) +
+    C2/l2 * (1 - Math.exp(-l2*tI)) * Math.exp(-l2*tD)
+  );
+}
+
+// 3-compartment segment
+function cpSeg3(t, R0, V1, DUR, l1, l2, l3, C1, C2, C3) {
+  const tI = Math.min(t, DUR), tD = Math.max(t - DUR, 0);
+  return (R0 / V1) * (
+    C1/l1 * (1 - Math.exp(-l1*tI)) * Math.exp(-l1*tD) +
+    C2/l2 * (1 - Math.exp(-l2*tI)) * Math.exp(-l2*tD) +
+    C3/l3 * (1 - Math.exp(-l3*tI)) * Math.exp(-l3*tD)
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SIMULATE FUNCTION (handles both 2- and 3-compartment)
+// ═══════════════════════════════════════════════════════════════
+function rocSimulate(params, mode, ccPerHr, bolusMg, bolusRateCcHr, infRateCcHr, concMgMl, nPts, maxMin) {
+  const {V1, ke0, nComp} = params;
+  let eigen, cpSegFn;
+  if (nComp === 2) {
+    eigen = getEigen2(params);
+    cpSegFn = (t, R0, DUR) => cpSeg2(t, R0, V1, DUR, eigen.l1, eigen.l2, eigen.C1, eigen.C2);
+  } else {
+    eigen = getEigen3(params);
+    cpSegFn = (t, R0, DUR) => cpSeg3(t, R0, V1, DUR, eigen.l1, eigen.l2, eigen.l3, eigen.C1, eigen.C2, eigen.C3);
+  }
+
+  // Steady-state sum
+  let sumCiLi;
+  if (nComp === 2) {
+    sumCiLi = eigen.C1/eigen.l1 + eigen.C2/eigen.l2;
+  } else {
+    sumCiLi = eigen.C1/eigen.l1 + eigen.C2/eigen.l2 + eigen.C3/eigen.l3;
+  }
+
+  const dt = maxMin / nPts;
+
+  // Bolus infusion parameters
+  const vol_cc = bolusMg / concMgMl;
+  const DUR_b  = (vol_cc / bolusRateCcHr) * 60;  // min
+  const R0_b   = bolusMg / DUR_b;                 // mg/min
+
+  // Continuous infusion parameters
+  const effRate = mode === 'bolusinf' ? infRateCcHr : ccPerHr;
+  const R0_c   = effRate * concMgMl / 60;         // mg/min
+  const DUR_c  = maxMin;
+
+  const Css = (mode === 'continuous' || mode === 'bolusinf') ? (R0_c / V1) * sumCiLi : null;
+
+  const times = [], Cp_arr = [], Ce_arr = [];
+  let Ce = 0;
+  for (let i = 0; i <= nPts; i++) {
+    const t = i * dt;
+    let Cp = 0;
+    if (mode === 'continuous') {
+      Cp = cpSegFn(t, R0_c, DUR_c);
+    } else if (mode === 'bolus') {
+      Cp = cpSegFn(t, R0_b, DUR_b);
+    } else {
+      // bolusinf
+      Cp = cpSegFn(t, R0_b, DUR_b) + cpSegFn(t, R0_c, DUR_c);
+    }
+    if (i > 0) Ce += ke0 * (Cp - Ce) * dt;
+    Ce = Math.max(0, Ce);
+    times.push(+t.toFixed(4));
+    Cp_arr.push(+Math.max(0, Cp).toFixed(5));
+    Ce_arr.push(+Ce.toFixed(5));
+  }
+  return { times, Cp: Cp_arr, Ce: Ce_arr, Css };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PD MODEL: Neuromuscular Block (Hill equation)
+// ═══════════════════════════════════════════════════════════════
+function tofRatio(ce, EC50, gamma) {
+  if (ce <= 0) return 100;
+  return 100 * Math.pow(EC50, gamma) / (Math.pow(EC50, gamma) + Math.pow(ce, gamma));
+}
+
+function blockPct(ce, EC50, gamma) {
+  return 100 - tofRatio(ce, EC50, gamma);
+}
+
+// Find Ce for a given TOF ratio target
+function ceForTOF(target, EC50, gamma) {
+  // TOF = 100 * EC50^g / (EC50^g + Ce^g)
+  // => Ce^g = EC50^g * (100/TOF - 1)
+  // => Ce = EC50 * (100/TOF - 1)^(1/g)
+  if (target <= 0 || target >= 100) return null;
+  const ratio = 100 / target - 1;
+  if (ratio <= 0) return null;
+  return EC50 * Math.pow(ratio, 1/gamma);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ROCURONIUM STATE
+// ═══════════════════════════════════════════════════════════════
+const rocState = {
+  mode: 'bolus',
+  rate: 10,           // cc/hr for continuous
+  bolus: 42,          // mg (0.6 mg/kg for 70kg)
+  bolusRate: 1200,    // cc/hr push rate
+  concMgMl: 10,       // 10 mg/mL standard
+  timeRange: 60,
+  combinedModel: 'kleijn'
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  CHART SETUP
+// ═══════════════════════════════════════════════════════════════
+const rocCtx = document.getElementById('rc_chart').getContext('2d');
+const rocChart = new Chart(rocCtx, {
+  type: 'line',
+  data: { labels: [], datasets: [] },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 120 },
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1e2235',
+        borderColor: '#262c45',
+        borderWidth: 1,
+        titleColor: '#dde2f0',
+        bodyColor: '#7a85a3',
+        padding: 10,
+        filter: item => !['TH','TL','TOF 90%','TOF 25%'].includes(item.dataset.label),
+        callbacks: {
+          title: items => `t = ${(+items[0].label).toFixed(1)} min`,
+          label: ctx => {
+            if (ctx.dataset.yAxisID === 'yTOF') return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)}%`;
+            return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)} μg/mL`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'linear',
+        title: { display: true, text: 'Time', color: '#7a85a3', font: { size: 11 } },
+        ticks: { color: '#7a85a3', maxTicksLimit: 12, callback: v => v > 0 && v % 60 === 0 ? (v/60)+'h' : v+'m' },
+        grid: { color: 'rgba(38,44,69,.5)' }
+      },
+      y: {
+        position: 'left',
+        title: { display: true, text: 'Concentration (μg/mL)', color: '#7a85a3', font: { size: 11 } },
+        ticks: { color: '#7a85a3' },
+        grid: { color: 'rgba(38,44,69,.5)' },
+        min: 0
+      },
+      yTOF: {
+        position: 'right',
+        min: 0,
+        max: 100,
+        title: { display: true, text: 'TOF Ratio (%)', color: 'rgba(200,220,255,.5)', font: { size: 11 } },
+        ticks: { color: 'rgba(200,220,255,.4)', stepSize: 20 },
+        grid: { drawOnChartArea: false }
+      }
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  UPDATE FUNCTION
+// ═══════════════════════════════════════════════════════════════
+function rocUpdate() {
+  const {sex, age, wt, ht} = patient;
+  const {mode, rate, bolus, bolusRate, concMgMl, timeRange} = rocState;
+  const N = Math.min(1440, Math.max(600, Math.round(timeRange * 10)));
+
+  // Get parameters for both models
+  const kP = kleijnParams(age, wt);
+  const wP = wierdaParams(age, wt);
+
+  // Simulate both models
+  const simK = rocSimulate(kP, mode, rate, bolus, bolusRate, rate, concMgMl, N, timeRange);
+  const simW = rocSimulate(wP, mode, rate, bolus, bolusRate, rate, concMgMl, N, timeRange);
+
+  // Target band
+  const tL = parseFloat(document.getElementById('rc_targLow').value) || 0;
+  const tH = parseFloat(document.getElementById('rc_targHigh').value) || 0;
+
+  // TOF time-series
+  const tofK = simK.Ce.map(ce => +tofRatio(ce, kP.EC50, kP.gamma).toFixed(2));
+  const tofW = simW.Ce.map(ce => +tofRatio(ce, wP.EC50, wP.gamma).toFixed(2));
+
+  rocChart.data.labels = simK.times;
+  rocChart.data.datasets = [
+    // Target band
+    { label: 'TH', data: simK.times.map(() => tH), borderColor: 'transparent', backgroundColor: 'rgba(52,211,153,.12)', fill: '+1', pointRadius: 0, tension: 0, order: 10 },
+    { label: 'TL', data: simK.times.map(() => tL), borderColor: 'rgba(52,211,153,.5)', backgroundColor: 'transparent', fill: false, pointRadius: 0, borderDash: [3,4], borderWidth: 1.2, tension: 0, order: 10 },
+    // Kleijn Cp & Ce
+    { label: 'Kleijn Cp', data: simK.Cp, borderColor: '#e85d75', backgroundColor: 'transparent', borderWidth: 2.2, pointRadius: 0, tension: 0, order: 1 },
+    { label: 'Kleijn Ce', data: simK.Ce, borderColor: '#e85d75', backgroundColor: 'transparent', borderWidth: 2, borderDash: [7,4], pointRadius: 0, tension: 0, order: 2 },
+    // Wierda Cp & Ce
+    { label: 'Wierda Cp', data: simW.Cp, borderColor: '#eab308', backgroundColor: 'transparent', borderWidth: 2.2, pointRadius: 0, tension: 0, order: 3 },
+    { label: 'Wierda Ce', data: simW.Ce, borderColor: '#eab308', backgroundColor: 'transparent', borderWidth: 2, borderDash: [7,4], pointRadius: 0, tension: 0, order: 4 },
+    // TOF traces
+    { label: 'TOF(Kleijn)', data: tofK, borderColor: 'rgba(232,93,117,.5)', backgroundColor: 'transparent', borderWidth: 1.6, borderDash: [2,3], borderCapStyle: 'round', pointRadius: 0, tension: 0.3, yAxisID: 'yTOF', order: 5 },
+    { label: 'TOF(Wierda)', data: tofW, borderColor: 'rgba(234,179,8,.5)', backgroundColor: 'transparent', borderWidth: 1.6, borderDash: [2,3], borderCapStyle: 'round', pointRadius: 0, tension: 0.3, yAxisID: 'yTOF', order: 6 },
+    // Reference lines
+    { label: 'TOF 90%', data: simK.times.map(() => 90), borderColor: 'rgba(52,211,153,.45)', backgroundColor: 'transparent', borderWidth: 0.9, borderDash: [4,3], pointRadius: 0, tension: 0, yAxisID: 'yTOF', order: 12 },
+    { label: 'TOF 25%', data: simK.times.map(() => 25), borderColor: 'rgba(251,191,36,.45)', backgroundColor: 'transparent', borderWidth: 0.9, borderDash: [4,3], pointRadius: 0, tension: 0, yAxisID: 'yTOF', order: 12 },
+  ];
+  rocChart.update();
+
+  // ── Stat values ──
+  const fmt = v => v == null ? '—' : v.toFixed(3) + ' μg/mL';
+  const idx5 = Math.min(Math.round(5 / (timeRange / N)), N);
+
+  document.getElementById('rc_kKe0').textContent = kP.ke0.toFixed(4) + ' /min';
+  document.getElementById('rc_kCp5').textContent = fmt(simK.Cp[idx5]);
+  document.getElementById('rc_kCe5').textContent = fmt(simK.Ce[idx5]);
+  document.getElementById('rc_kPeak').textContent = fmt(Math.max(...simK.Cp));
+  document.getElementById('rc_kCss').textContent = simK.Css != null ? fmt(simK.Css) : '—';
+
+  document.getElementById('rc_wKe0').textContent = wP.ke0.toFixed(4) + ' /min';
+  document.getElementById('rc_wCp5').textContent = fmt(simW.Cp[idx5]);
+  document.getElementById('rc_wCe5').textContent = fmt(simW.Ce[idx5]);
+  document.getElementById('rc_wPeak').textContent = fmt(Math.max(...simW.Cp));
+  document.getElementById('rc_wCss').textContent = simW.Css != null ? fmt(simW.Css) : '—';
+
+  // ── mg/kg/hr rate hints ──
+  (function(){
+    const c = concMgMl;
+    const mgkghr = r => (r * c / patient.wt).toFixed(2);
+    const h1 = document.getElementById('rc_rateHint');
+    const h2 = document.getElementById('rc_rateHint2');
+    if(h1) h1.textContent = mode === 'continuous' ? '≈ ' + mgkghr(rate) + ' mg/kg/hr' : '';
+    if(h2) h2.textContent = mode === 'bolusinf'   ? '≈ ' + mgkghr(rate) + ' mg/kg/hr' : '';
+  })();
+
+  // ── Bolus mg/kg hint ──
+  (function(){
+    const bh1 = document.getElementById('rc_bolusHint');
+    const bh2 = document.getElementById('rc_bolusHint2');
+    const hint = '≈ ' + (bolus / patient.wt).toFixed(2) + ' mg/kg';
+    if(bh1) bh1.textContent = (mode === 'bolus') ? hint : '';
+    if(bh2) bh2.textContent = (mode === 'bolusinf') ? hint : '';
+  })();
+
+  // ── NMB prediction section (use Kleijn PD model as reference) ──
+  (function(){
+    const ceK5 = parseFloat(simK.Ce[idx5]) || 0;
+    const ceW5 = parseFloat(simW.Ce[idx5]) || 0;
+    const tofK5 = tofRatio(ceK5, kP.EC50, kP.gamma);
+    const tofW5 = tofRatio(ceW5, wP.EC50, wP.gamma);
+
+    const elK = document.getElementById('rc_nmbEstK');
+    const elW = document.getElementById('rc_nmbEstW');
+    if (elK) elK.textContent = 'TOF ' + tofK5.toFixed(1) + '%  (' + ceK5.toFixed(3) + ' μg/mL)';
+    if (elW) elW.textContent = 'TOF ' + tofW5.toFixed(1) + '%  (' + ceW5.toFixed(3) + ' μg/mL)';
+
+    // Use Kleijn PD params for threshold Ce values
+    const ce90 = ceForTOF(90, kP.EC50, kP.gamma);
+    const ce25 = ceForTOF(25, kP.EC50, kP.gamma);
+    const el90 = document.getElementById('rc_tofCe90');
+    const el25 = document.getElementById('rc_tofCe25');
+    if (el90) el90.textContent = ce90 ? ce90.toFixed(3) + ' μg/mL' : '—';
+    if (el25) el25.textContent = ce25 ? ce25.toFixed(3) + ' μg/mL' : '—';
+
+    drawNmbChart(kP, wP, ceK5, ceW5);
+  })();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  NMB CHART (Ce vs TOF%, Canvas 2D)
+// ═══════════════════════════════════════════════════════════════
+function drawNmbChart(kP, wP, ceK5, ceW5) {
+  const canvas = document.getElementById('rc_nmbChart');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  if (!W || !H) return;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const g = canvas.getContext('2d');
+  g.scale(dpr, dpr);
+  const PAD = { top: 6, right: 14, bottom: 22, left: 30 };
+  const cw = W - PAD.left - PAD.right, ch = H - PAD.top - PAD.bottom;
+  const xMax = 3;
+  const xP = ce => PAD.left + (ce / xMax) * cw;
+  const yP = tof => PAD.top + (1 - tof / 100) * ch;
+
+  // Background zones
+  const zones = [
+    { hi: 100, lo: 75, color: 'rgba(52,211,153,.12)', label: 'Recovery' },
+    { hi: 75,  lo: 25, color: 'rgba(251,191,36,.10)',  label: 'Moderate' },
+    { hi: 25,  lo: 10, color: 'rgba(232,93,117,.10)',  label: 'Deep' },
+    { hi: 10,  lo: 0,  color: 'rgba(79,142,247,.10)',  label: 'Complete' }
+  ];
+  for (const z of zones) {
+    g.fillStyle = z.color;
+    g.fillRect(PAD.left, yP(z.hi), cw, yP(z.lo) - yP(z.hi));
+    g.fillStyle = 'rgba(160,170,190,.45)';
+    g.font = '7px sans-serif'; g.textAlign = 'right';
+    g.fillText(z.label, PAD.left + cw - 2, yP((z.hi + z.lo) / 2) + 3);
+  }
+
+  // TOF 90% / 25% reference lines
+  for (const [tof, col] of [[90, 'rgba(52,211,153,.6)'], [25, 'rgba(251,191,36,.6)']]) {
+    g.strokeStyle = col; g.lineWidth = 0.8; g.setLineDash([4, 3]);
+    g.beginPath(); g.moveTo(PAD.left, yP(tof)); g.lineTo(PAD.left + cw, yP(tof)); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = col; g.font = '7px sans-serif'; g.textAlign = 'left';
+    g.fillText(tof + '%', PAD.left + 2, yP(tof) - 2);
+  }
+
+  // X axis labels
+  g.fillStyle = 'rgba(120,130,160,.7)'; g.font = '7px sans-serif'; g.textAlign = 'center';
+  for (let x = 0; x <= xMax; x += 0.5) {
+    g.fillText(x.toFixed(1), xP(x), PAD.top + ch + 12);
+  }
+  g.fillText('μg/mL', PAD.left + cw / 2, PAD.top + ch + 21);
+
+  // Y axis labels
+  g.textAlign = 'right';
+  for (const b of [0, 25, 50, 75, 100]) g.fillText(b, PAD.left - 3, yP(b) + 3);
+
+  // Kleijn TOF curve (coral)
+  g.strokeStyle = 'rgba(232,93,117,.9)'; g.lineWidth = 1.8; g.setLineDash([]);
+  g.beginPath();
+  for (let i = 0; i <= 200; i++) {
+    const ce = (i / 200) * xMax;
+    const tof = tofRatio(ce, kP.EC50, kP.gamma);
+    i === 0 ? g.moveTo(xP(ce), yP(tof)) : g.lineTo(xP(ce), yP(tof));
+  }
+  g.stroke();
+
+  // Wierda TOF curve (amber, dashed)
+  g.strokeStyle = 'rgba(234,179,8,.85)'; g.lineWidth = 1.8; g.setLineDash([6, 3]);
+  g.beginPath();
+  for (let i = 0; i <= 200; i++) {
+    const ce = (i / 200) * xMax;
+    const tof = tofRatio(ce, wP.EC50, wP.gamma);
+    i === 0 ? g.moveTo(xP(ce), yP(tof)) : g.lineTo(xP(ce), yP(tof));
+  }
+  g.stroke();
+  g.setLineDash([]);
+
+  // Axes
+  g.strokeStyle = 'rgba(100,115,150,.45)'; g.lineWidth = 0.7;
+  g.beginPath(); g.moveTo(PAD.left, PAD.top); g.lineTo(PAD.left, PAD.top + ch); g.lineTo(PAD.left + cw, PAD.top + ch); g.stroke();
+
+  // Kleijn Ce@5min marker
+  if (ceK5 > 0 && ceK5 <= xMax) {
+    const tK = tofRatio(ceK5, kP.EC50, kP.gamma);
+    g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 1; g.setLineDash([3, 3]);
+    g.beginPath(); g.moveTo(xP(ceK5), yP(0)); g.lineTo(xP(ceK5), yP(100)); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = '#e85d75';
+    g.beginPath(); g.arc(xP(ceK5), yP(tK), 3.5, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.8)'; g.font = '8px sans-serif';
+    g.textAlign = ceK5 > xMax * 0.7 ? 'right' : 'left';
+    g.fillText('K:' + tK.toFixed(0) + '%', ceK5 > xMax * 0.7 ? xP(ceK5) - 5 : xP(ceK5) + 4, yP(tK) - 5);
+  }
+
+  // Wierda Ce@5min marker
+  if (ceW5 > 0 && ceW5 <= xMax) {
+    const tW = tofRatio(ceW5, wP.EC50, wP.gamma);
+    g.strokeStyle = 'rgba(234,179,8,.3)'; g.lineWidth = 1; g.setLineDash([3, 3]);
+    g.beginPath(); g.moveTo(xP(ceW5), yP(0)); g.lineTo(xP(ceW5), yP(100)); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = '#eab308';
+    g.beginPath(); g.arc(xP(ceW5), yP(tW), 3.5, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.8)'; g.font = '8px sans-serif';
+    g.textAlign = ceW5 > xMax * 0.7 ? 'right' : 'left';
+    g.fillText('W:' + tW.toFixed(0) + '%', ceW5 > xMax * 0.7 ? xP(ceW5) - 5 : xP(ceW5) + 4, yP(tW) + 12);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  UI EVENT HANDLERS
+// ═══════════════════════════════════════════════════════════════
+function rocSetSex(s) {
+  patient.sex = s;
+  document.getElementById('rc_btnM').classList.toggle('active', s === 'M');
+  document.getElementById('rc_btnF').classList.toggle('active', s === 'F');
+  rocUpdate();
+}
+
+function rocSl(key, val) {
+  if (['age','wt','ht'].includes(key)) {
+    patient[key] = val;
+    const map = { age: 'rc_inpAge', wt: 'rc_inpWt', ht: 'rc_inpHt' };
+    const el = document.getElementById(map[key]); if (el) el.value = val;
+    if (key === 'wt') autoUpdateBolus();
+    rocUpdate();
+    return;
+  }
+  rocState[key] = val;
+  const numMap = {
+    rate: ['rc_inpRate', 'rc_inpRate2'],
+    bolus: ['rc_inpBolus', 'rc_inpBolus2'],
+    bolusRate: ['rc_inpBRate', 'rc_inpBRate2']
+  };
+  if (numMap[key]) numMap[key].forEach(id => { const el = document.getElementById(id); if (el) el.value = val; });
+  rocUpdate();
+}
+
+function rocNum(key, el, mn, mx) {
+  let val = parseFloat(el.value); if (isNaN(val)) return;
+  val = Math.min(mx, Math.max(mn, val));
+  if (['age','wt','ht'].includes(key)) {
+    patient[key] = val;
+    const slMap = { age: 'rc_slAge', wt: 'rc_slWt', ht: 'rc_slHt' };
+    const sl = document.getElementById(slMap[key]); if (sl) sl.value = val;
+    if (key === 'wt') autoUpdateBolus();
+    rocUpdate();
+    return;
+  }
+  rocState[key] = val;
+  const slMap = {
+    rate: ['rc_slRate', 'rc_slRate2'],
+    bolus: ['rc_slBolus', 'rc_slBolus2'],
+    bolusRate: ['rc_slBRate', 'rc_slBRate2']
+  };
+  if (slMap[key]) slMap[key].forEach(id => { const sl = document.getElementById(id); if (sl) sl.value = val; });
+  const numMap = {
+    rate: ['rc_inpRate', 'rc_inpRate2'],
+    bolus: ['rc_inpBolus', 'rc_inpBolus2'],
+    bolusRate: ['rc_inpBRate', 'rc_inpBRate2']
+  };
+  if (numMap[key]) numMap[key].forEach(id => { const e = document.getElementById(id); if (e && e !== el) e.value = val; });
+  rocUpdate();
+}
+
+function autoUpdateBolus() {
+  const wt = patient.wt;
+  const newBolus = Math.round(0.6 * wt);
+  rocState.bolus = newBolus;
+  ['rc_inpBolus', 'rc_inpBolus2'].forEach(id => { const el = document.getElementById(id); if (el) el.value = newBolus; });
+  ['rc_slBolus', 'rc_slBolus2'].forEach(id => { const el = document.getElementById(id); if (el) el.value = newBolus; });
+}
+
+function rocSetMode(m) {
+  rocState.mode = m;
+  ['rc_btnBolus', 'rc_btnCont', 'rc_btnBolInf'].forEach(id => document.getElementById(id).classList.remove('active'));
+  document.getElementById(m === 'bolus' ? 'rc_btnBolus' : m === 'continuous' ? 'rc_btnCont' : 'rc_btnBolInf').classList.add('active');
+  document.getElementById('rc_bolusCtrl').style.display = m === 'bolus' ? '' : 'none';
+  document.getElementById('rc_contCtrl').style.display = m === 'continuous' ? '' : 'none';
+  document.getElementById('rc_bolInfCtrl').style.display = m === 'bolusinf' ? '' : 'none';
+  rocUpdate();
+}
+
+function rocSetTR(min, btn) {
+  rocState.timeRange = min;
+  document.querySelectorAll('#rc_trRow .tr-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rocUpdate();
+}
+
+function rocSetConc(c, btn) {
+  rocState.concMgMl = c;
+  document.querySelectorAll('#rc_concRow .conc-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  rocUpdate();
+}
+
+function rocSelectModel(m) {
+  rocState.combinedModel = m;
+  document.getElementById('rc_selKleijn').classList.toggle('active', m === 'kleijn');
+  document.getElementById('rc_selWierda').classList.toggle('active', m === 'wierda');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+rocUpdate();
+</script>
+</body>
+</html>
