@@ -1,0 +1,2179 @@
+<!--
+/**
+ * TIVA PK Simulator
+ * Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+ * (Dr. Joosuk Oh, Dept. of Anesthesiology & Pain Medicine,
+ *  Inje University Busan Paik Hospital)
+ * All rights reserved.
+ */
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TIVA PK Simulator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+/**
+ * TIVA PK Simulator — Styles
+ * Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+ */
+:root {
+  --bg: #0d0f18;
+  --surface: #161923;
+  --surface2: #1e2235;
+  --border: #262c45;
+  --text: #dde2f0;
+  --text-dim: #7a85a3;
+  --green: #34d399;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --radius: 10px;
+  /* Drug accent colors */
+  --prop-s: #4f8ef7;
+  --prop-m: #f97316;
+  --remi-p: #a78bfa;
+  --rema-e: #22d3ee;
+  --rema-z: #fb923c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px; min-height: 100vh; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+/* ═══ HEADER NAV ═══ */
+header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 16px; display: flex; align-items: center; gap: 10px;
+  height: 52px; flex-shrink: 0;
+}
+.logo {
+  width: 34px; height: 28px; border-radius: 6px; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 900; color: #fff; letter-spacing: 1px;
+  background: linear-gradient(135deg, #4f8ef7, #a78bfa, #22d3ee);
+}
+header .title { font-size: 15px; font-weight: 700; white-space: nowrap; }
+.tab-bar { display: flex; gap: 4px; margin-left: 12px; }
+.tab-btn {
+  padding: 7px 14px; border-radius: 7px; border: 1px solid var(--border);
+  background: transparent; color: var(--text-dim); cursor: pointer;
+  font-size: 11px; font-weight: 700; transition: .15s; white-space: nowrap;
+}
+.tab-btn:hover { background: var(--surface2); color: var(--text); }
+.tab-btn.active { background: rgba(79,142,247,.15); color: var(--prop-s); border-color: var(--prop-s); }
+.tab-btn.active-remi { background: rgba(167,139,250,.15); color: var(--remi-p); border-color: var(--remi-p); }
+.tab-btn.active-rema { background: rgba(34,211,238,.15); color: var(--rema-e); border-color: var(--rema-e); }
+.tab-btn.combined-btn { border-color: rgba(52,211,153,.4); color: var(--green); }
+.tab-btn.combined-btn:hover { background: rgba(52,211,153,.12); }
+.tab-btn.active-combined { background: rgba(52,211,153,.18); color: var(--green); border-color: var(--green); }
+header .credit {
+  margin-left: auto; font-size: 10px; color: var(--text-dim);
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* ═══ CONTENT AREA ═══ */
+.content { flex: 1; overflow: hidden; position: relative; }
+.tab-panel { display: none; position: absolute; inset: 0; }
+.tab-panel.active { display: flex; }
+
+/* ═══ LAYOUT GRID (Sidebar + Main) ═══ */
+.layout { display: grid; grid-template-columns: 310px 1fr; width: 100%; height: 100%; }
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  background: var(--surface); border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 14px 14px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.sec-title {
+  font-size: 10px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--text-dim); margin-bottom: 7px;
+}
+
+/* SEX */
+.sex-row { display: flex; gap: 7px; }
+.sex-btn {
+  flex: 1; padding: 7px; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--surface2);
+  color: var(--text-dim); cursor: pointer; font-size: 12px; font-weight: 600; transition: .15s;
+}
+
+/* SLIDER + NUM INPUT */
+.slider-group { display: flex; flex-direction: column; gap: 9px; }
+.slider-row { display: flex; flex-direction: column; gap: 3px; }
+.slider-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.slider-name { font-size: 12px; font-weight: 600; flex: 1; }
+.num-input {
+  width: 70px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 3px 6px; color: var(--prop-s);
+  font-size: 12px; font-weight: 700; text-align: right; outline: none; transition: border-color .15s;
+}
+.num-input:focus { border-color: var(--prop-s); }
+.num-input::-webkit-inner-spin-button { opacity: 0.5; }
+.unit-label { font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+.rate-hint { font-size: 10.5px; color: var(--yellow); text-align: right; margin-top: 2px; min-height: 14px; letter-spacing: 0.02em; }
+
+input[type=range] { width: 100%; height: 5px; accent-color: var(--prop-s); cursor: pointer; margin-top: 1px; }
+
+/* MODE BUTTONS */
+.mode-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.mode-btn {
+  padding: 7px 4px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim); cursor: pointer;
+  font-size: 11px; font-weight: 600; transition: .15s; text-align: center; line-height: 1.3;
+}
+.phase-label {
+  font-size: 10px; color: var(--text-dim); margin-bottom: 4px;
+  padding: 2px 6px; background: rgba(79,142,247,.08);
+  border-left: 2px solid var(--prop-s); border-radius: 0 4px 4px 0;
+}
+
+/* TARGET */
+.target-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.target-input {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 6px 10px; color: var(--text); font-size: 13px; width: 100%;
+  outline: none;
+}
+.target-input:focus { border-color: var(--prop-s); }
+.dose-label { display: flex; justify-content: space-between; margin-bottom: 3px; }
+.dose-name { font-size: 12px; font-weight: 600; }
+
+/* TIME RANGE */
+.time-range-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.tr-btn {
+  flex: 1; padding: 6px; border-radius: 7px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim); cursor: pointer;
+  font-size: 11px; font-weight: 700; text-align: center; min-width: 48px; transition: .15s;
+}
+
+/* STAT CARDS */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 10px; }
+.stat-model { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.stat-label { font-size: 10px; color: var(--text-dim); }
+.stat-value { font-size: 12px; font-weight: 700; }
+
+/* MAIN */
+.main { display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
+.chart-area { flex: 1; padding: 16px 20px 8px; min-height: 0; }
+.chart-area canvas { width: 100% !important; height: 100% !important; }
+
+/* LEGEND */
+.legend-bar {
+  padding: 6px 20px 10px;
+  display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; }
+
+/* DIVIDER */
+.divider { height: 1px; background: var(--border); }
+
+/* CONC SELECTOR */
+.conc-row { display: flex; gap: 6px; }
+.conc-btn {
+  flex: 1; padding: 6px; border-radius: 7px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim); cursor: pointer;
+  font-size: 11px; font-weight: 700; text-align: center; transition: .15s;
+}
+
+/* TOGGLE */
+.toggle-row { display: flex; align-items: center; gap: 8px; }
+.toggle-label { font-size: 12px; font-weight: 600; flex: 1; }
+.toggle-switch { position: relative; width: 38px; height: 20px; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0; background: var(--border); border-radius: 20px; transition: .2s;
+}
+.toggle-track::before {
+  content: ''; position: absolute; width: 14px; height: 14px;
+  left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s;
+}
+.toggle-switch input:checked + .toggle-track { background: var(--rema-e); }
+.toggle-switch input:checked + .toggle-track::before { transform: translateX(18px); }
+
+/* PROPOFOL ACTIVE STYLES */
+#panelProp .sex-btn.active { background: rgba(79,142,247,.2); color: var(--prop-s); border-color: var(--prop-s); }
+#panelProp .mode-btn.active { background: rgba(79,142,247,.2); color: var(--prop-s); border-color: var(--prop-s); }
+#panelProp .tr-btn.active { background: rgba(79,142,247,.2); color: var(--prop-s); border-color: var(--prop-s); }
+#panelProp input[type=range] { accent-color: var(--prop-s); }
+#panelProp .num-input { color: var(--prop-s); }
+#panelProp .num-input:focus { border-color: var(--prop-s); }
+
+/* REMI ACTIVE STYLES */
+#panelRemi .sex-btn.active { background: rgba(167,139,250,.2); color: var(--remi-p); border-color: var(--remi-p); }
+#panelRemi .mode-btn.active { background: rgba(167,139,250,.2); color: var(--remi-p); border-color: var(--remi-p); }
+#panelRemi .tr-btn.active { background: rgba(167,139,250,.2); color: var(--remi-p); border-color: var(--remi-p); }
+#panelRemi .conc-btn.active { background: rgba(167,139,250,.2); color: var(--remi-p); border-color: var(--remi-p); }
+#panelRemi input[type=range] { accent-color: var(--remi-p); }
+#panelRemi .num-input { color: var(--remi-p); }
+#panelRemi .num-input:focus { border-color: var(--remi-p); }
+#panelRemi .phase-label { background: rgba(167,139,250,.08); border-left-color: var(--remi-p); }
+
+/* REMA ACTIVE STYLES */
+#panelRema .sex-btn.active { background: rgba(34,211,238,.15); color: var(--rema-e); border-color: var(--rema-e); }
+#panelRema .mode-btn.active { background: rgba(34,211,238,.15); color: var(--rema-e); border-color: var(--rema-e); }
+#panelRema .tr-btn.active { background: rgba(34,211,238,.15); color: var(--rema-e); border-color: var(--rema-e); }
+#panelRema .conc-btn.active { background: rgba(34,211,238,.15); color: var(--rema-e); border-color: var(--rema-e); }
+#panelRema input[type=range] { accent-color: var(--rema-e); }
+#panelRema .num-input { color: var(--rema-e); }
+#panelRema .num-input:focus { border-color: var(--rema-e); }
+#panelRema .phase-label { background: rgba(34,211,238,.07); border-left-color: var(--rema-e); }
+
+/* MODEL RADIO SELECTOR */
+.model-sel { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.model-sel-label { font-size: 10px; color: var(--text-dim); font-weight: 600; }
+.model-radio {
+  padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim); cursor: pointer;
+  font-size: 10px; font-weight: 700; transition: .15s;
+}
+.model-radio.active { background: rgba(52,211,153,.15); color: var(--green); border-color: var(--green); }
+
+/* ═══ COMBINED VIEW ═══ */
+#panelCombined { flex-direction: column; }
+.combined-header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 8px 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.combined-header .model-info {
+  font-size: 11px; color: var(--text-dim);
+}
+.combined-header .model-info b { color: var(--text); font-weight: 700; }
+.combined-header .patient-info {
+  font-size: 10px; color: var(--text-dim); margin-left: auto;
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+}
+.combined-header .patient-info b { color: var(--text); }
+.combined-charts { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 6px 16px; gap: 4px; }
+.mini-chart-wrap {
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden;
+}
+.mini-chart-header {
+  padding: 5px 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.mini-chart-header .drug-name { font-size: 12px; font-weight: 700; flex-shrink: 0; }
+/* Dosing mode badge */
+.mode-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 7px; border-radius: 10px;
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.15);
+  color: var(--text-dim); white-space: nowrap; flex-shrink: 0;
+}
+/* Dosing summary text */
+.dose-summary {
+  font-size: 9.5px; color: var(--text-dim); flex-shrink: 0;
+}
+.dose-summary b { color: var(--text); font-weight: 700; }
+/* Target Ce badge */
+.target-badge {
+  font-size: 9px; font-weight: 700; padding: 1px 7px; border-radius: 10px;
+  background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.3);
+  color: var(--green); white-space: nowrap; flex-shrink: 0;
+}
+.mini-chart-header .mini-stats { font-size: 10px; color: var(--text-dim); margin-left: auto; }
+.mini-chart-header .mini-stats b { font-weight: 700; color: var(--text); }
+.mini-chart-body { flex: 1; min-height: 0; padding: 4px 8px 2px; }
+.mini-chart-body canvas { width: 100% !important; height: 100% !important; }
+
+/* Combined time range */
+.combined-time-row {
+  padding: 6px 20px 8px; display: flex; gap: 6px; align-items: center;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.combined-time-row .sec-title { margin-bottom: 0; margin-right: 8px; }
+
+/* BIS in rema */
+.bis-note {
+  background: rgba(34,211,238,.06); border: 1px solid rgba(34,211,238,.2);
+  border-radius: 8px; padding: 8px 10px;
+}
+.bis-note-title {
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .07em; color: var(--rema-e); margin-bottom: 5px;
+}
+.bis-ref-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.bis-ref-label { font-size: 9.5px; color: var(--text-dim); }
+.bis-ref-val { font-size: 10px; font-weight: 700; }
+
+/* ═══ FOOTER ═══ */
+footer {
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 6px 16px; display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: var(--text-dim); flex-shrink: 0;
+}
+footer a { color: var(--text-dim); text-decoration: none; }
+footer a:hover { color: var(--text); }
+
+/* ═══ MOBILE RESPONSIVE ═══ */
+@media (max-width: 720px) {
+  html, body {
+    overflow: visible !important;
+    overflow-x: hidden;
+    min-height: unset;
+    height: auto;
+  }
+  .content {
+    overflow: visible !important;
+    position: static !important;
+    flex: unset;
+    height: auto;
+  }
+  .tab-panel {
+    position: static !important;
+    inset: unset !important;
+    height: auto !important;
+  }
+  .tab-panel.active {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+  }
+  .layout {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow-y: visible !important;
+    max-height: none !important;
+    height: auto;
+  }
+  .main {
+    overflow: visible !important;
+    height: auto;
+  }
+  .chart-area {
+    height: 280px !important;
+    min-height: 280px !important;
+    flex: unset !important;
+  }
+  .tab-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  /* Combined view */
+  #panelCombined {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .combined-charts {
+    overflow: visible !important;
+    height: auto !important;
+    flex: unset !important;
+  }
+  .mini-chart-wrap {
+    height: auto !important;
+    min-height: unset !important;
+  }
+  .mini-chart-body {
+    height: 160px !important;
+    min-height: 160px !important;
+  }
+  .combined-header {
+    flex-wrap: wrap;
+  }
+  .stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  HEADER + TAB NAV                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<header>
+  <div class="logo">TIVA</div>
+  <span class="title">TIVA PK Simulator</span>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabProp" onclick="switchTab('prop')">Propofol</button>
+    <button class="tab-btn" id="tabRemi" onclick="switchTab('remi')">Remifentanil</button>
+    <button class="tab-btn" id="tabRema" onclick="switchTab('rema')">Remimazolam</button>
+    <button class="tab-btn combined-btn" id="tabCombined" onclick="switchTab('combined')">Combined View ▶</button>
+  </div>
+  <span class="credit">© 부산백병원 마취통증의학과 오주석</span>
+</header>
+
+<div class="content">
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 1: PROPOFOL                                             -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="panelProp">
+<div class="layout">
+  <div class="sidebar">
+    <div>
+      <div class="sec-title">Patient Covariates</div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:5px;">Sex</div>
+        <div class="sex-row">
+          <button class="sex-btn active" id="p_btnM" onclick="propSetSex('M')">♂ Male</button>
+          <button class="sex-btn" id="p_btnF" onclick="propSetSex('F')">♀ Female</button>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Age</span>
+            <input type="number" class="num-input" id="p_inpAge" value="50" min="18" max="80" step="1" oninput="propNum('age',this,18,80)">
+            <span class="unit-label">yr</span>
+          </div>
+          <input type="range" id="p_slAge" min="18" max="80" value="50" oninput="propSl('age',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Weight</span>
+            <input type="number" class="num-input" id="p_inpWt" value="70" min="40" max="150" step="1" oninput="propNum('wt',this,40,150)">
+            <span class="unit-label">kg</span>
+          </div>
+          <input type="range" id="p_slWt" min="40" max="150" value="70" oninput="propSl('wt',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Height</span>
+            <input type="number" class="num-input" id="p_inpHt" value="170" min="140" max="210" step="1" oninput="propNum('ht',this,140,210)">
+            <span class="unit-label">cm</span>
+          </div>
+          <input type="range" id="p_slHt" min="140" max="210" value="170" oninput="propSl('ht',+this.value)">
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Dosing Mode</div>
+      <div class="mode-row" style="margin-bottom:10px;">
+        <button class="mode-btn active" id="p_btnCont" onclick="propSetMode('continuous')">Continuous<br><small>Infusion</small></button>
+        <button class="mode-btn" id="p_btnBolus" onclick="propSetMode('bolus')">Bolus<br><small>IV Push</small></button>
+        <button class="mode-btn" id="p_btnBolInf" onclick="propSetMode('bolusinf')">Bolus +<br><small>Infusion</small></button>
+      </div>
+      <div id="p_contCtrl">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Infusion Rate</span>
+            <input type="number" class="num-input" id="p_inpRate" value="60" min="10" max="300" step="5" oninput="propNum('rate',this,10,300)">
+            <span class="unit-label">cc/hr</span>
+          </div>
+          <input type="range" id="p_slRate" min="10" max="300" value="60" oninput="propSl('rate',+this.value)">
+          <div class="rate-hint" id="p_rateHint"></div>
+        </div>
+      </div>
+      <div id="p_bolusCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="p_inpBolus" value="120" min="50" max="300" step="10" oninput="propNum('bolus',this,50,300)">
+              <span class="unit-label">mg</span>
+            </div>
+            <input type="range" id="p_slBolus" min="50" max="300" value="120" oninput="propSl('bolus',+this.value)">
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="p_inpBRate" value="1200" min="800" max="1200" step="50" oninput="propNum('bolusRate',this,800,1200)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="p_slBRate" min="800" max="1200" step="50" value="1200" oninput="propSl('bolusRate',+this.value)">
+          </div>
+        </div>
+      </div>
+      <div id="p_bolInfCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="phase-label">① Bolus phase</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="p_inpBolus2" value="120" min="50" max="300" step="10" oninput="propNum('bolus',this,50,300)">
+              <span class="unit-label">mg</span>
+            </div>
+            <input type="range" id="p_slBolus2" min="50" max="300" value="120" oninput="propSl('bolus',+this.value)">
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="p_inpBRate2" value="1200" min="800" max="1200" step="50" oninput="propNum('bolusRate',this,800,1200)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="p_slBRate2" min="800" max="1200" step="50" value="1200" oninput="propSl('bolusRate',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:4px;">② Maintenance infusion</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Infusion Rate</span>
+              <input type="number" class="num-input" id="p_inpRate2" value="60" min="10" max="300" step="5" oninput="propNum('rate',this,10,300)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="p_slRate2" min="10" max="300" value="60" oninput="propSl('rate',+this.value)">
+            <div class="rate-hint" id="p_rateHint2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Target Ce Band <span style="text-transform:none;">(μg/mL)</span></div>
+      <div class="target-row">
+        <div><div class="dose-label"><span class="dose-name">Lower</span></div>
+          <input type="number" class="target-input" id="p_targLow" value="2" min="0" max="15" step="0.5" oninput="propUpdate()"></div>
+        <div><div class="dose-label"><span class="dose-name">Upper</span></div>
+          <input type="number" class="target-input" id="p_targHigh" value="4" min="0" max="15" step="0.5" oninput="propUpdate()"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Time Range</div>
+      <div class="time-range-row" id="p_trRow">
+        <button class="tr-btn" onclick="propSetTR(30,this)">30 min</button>
+        <button class="tr-btn active" onclick="propSetTR(60,this)">1 hr</button>
+        <button class="tr-btn" onclick="propSetTR(180,this)">3 hr</button>
+        <button class="tr-btn" onclick="propSetTR(360,this)">6 hr</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Key Values</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--prop-s);">Schnider</div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5 min</span><span class="stat-value" id="p_sS_cp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5 min</span><span class="stat-value" id="p_sS_ce5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="p_sS_peak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="p_sS_css">—</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--prop-m);">Marsh</div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5 min</span><span class="stat-value" id="p_sM_cp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5 min</span><span class="stat-value" id="p_sM_ce5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="p_sM_peak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="p_sM_css">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Combined View Model</div>
+      <div class="model-sel">
+        <span class="model-sel-label">Select:</span>
+        <button class="model-radio active" id="p_selSchnider" onclick="propSelectModel('schnider')">Schnider</button>
+        <button class="model-radio" id="p_selMarsh" onclick="propSelectModel('marsh')">Mod. Marsh</button>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="chart-area"><canvas id="p_chart"></canvas></div>
+    <div class="legend-bar">
+      <div class="legend-item" style="color:var(--prop-s);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#4f8ef7" stroke-width="2.5"/></svg>Schnider Cp</div>
+      <div class="legend-item" style="color:var(--prop-s);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#4f8ef7" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Schnider Ce</div>
+      <div class="legend-item" style="color:var(--prop-m);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#f97316" stroke-width="2.5"/></svg>Marsh Cp</div>
+      <div class="legend-item" style="color:var(--prop-m);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#f97316" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Marsh Ce</div>
+      <div class="legend-item" style="color:var(--green);"><svg width="28" height="10"><rect x="0" y="1" width="28" height="8" fill="rgba(52,211,153,.2)" stroke="#34d399" stroke-width="1"/></svg>Target Band</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 2: REMIFENTANIL                                         -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panelRemi">
+<div class="layout">
+  <div class="sidebar">
+    <div>
+      <div class="sec-title">Patient Covariates</div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:5px;">Sex</div>
+        <div class="sex-row">
+          <button class="sex-btn active" id="r_btnM" onclick="remiSetSex('M')">♂ Male</button>
+          <button class="sex-btn" id="r_btnF" onclick="remiSetSex('F')">♀ Female</button>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Age</span>
+            <input type="number" class="num-input" id="r_inpAge" value="40" min="18" max="80" step="1" oninput="remiNum('age',this,18,80)">
+            <span class="unit-label">yr</span>
+          </div>
+          <input type="range" id="r_slAge" min="18" max="80" value="40" oninput="remiSl('age',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Weight</span>
+            <input type="number" class="num-input" id="r_inpWt" value="70" min="40" max="150" step="1" oninput="remiNum('wt',this,40,150)">
+            <span class="unit-label">kg</span>
+          </div>
+          <input type="range" id="r_slWt" min="40" max="150" value="70" oninput="remiSl('wt',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Height</span>
+            <input type="number" class="num-input" id="r_inpHt" value="170" min="140" max="210" step="1" oninput="remiNum('ht',this,140,210)">
+            <span class="unit-label">cm</span>
+          </div>
+          <input type="range" id="r_slHt" min="140" max="210" value="170" oninput="remiSl('ht',+this.value)">
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Remifentanil Concentration</div>
+      <div class="conc-row" id="r_concRow">
+        <button class="conc-btn" onclick="remiSetConc(20,this)">20 mcg/mL</button>
+        <button class="conc-btn active" onclick="remiSetConc(50,this)">50 mcg/mL</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Dosing Mode</div>
+      <div class="mode-row" style="margin-bottom:10px;">
+        <button class="mode-btn active" id="r_btnCont" onclick="remiSetMode('continuous')">Continuous<br><small>Infusion</small></button>
+        <button class="mode-btn" id="r_btnBolInf" onclick="remiSetMode('bolusinf')">Bolus +<br><small>Infusion</small></button>
+        <button class="mode-btn" id="r_btnRC" onclick="remiSetMode('ratechange')">Rate<br><small>Change</small></button>
+      </div>
+      <div id="r_contCtrl">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Infusion Rate</span>
+            <input type="number" class="num-input" id="r_inpRate" value="20" min="1" max="100" step="1" oninput="remiNum('rate',this,1,100)">
+            <span class="unit-label">cc/hr</span>
+          </div>
+          <input type="range" id="r_slRate" min="1" max="100" value="20" oninput="remiSl('rate',+this.value)">
+          <div class="rate-hint" id="r_rateHint"></div>
+        </div>
+      </div>
+      <div id="r_bolInfCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="phase-label">① Bolus phase</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="r_inpBolus" value="25" min="5" max="200" step="5" oninput="remiNum('bolus',this,5,200)">
+              <span class="unit-label">mcg</span>
+            </div>
+            <input type="range" id="r_slBolus" min="5" max="200" value="25" oninput="remiSl('bolus',+this.value)">
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="r_inpBRate" value="1200" min="800" max="1200" step="50" oninput="remiNum('bolusRate',this,800,1200)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="r_slBRate" min="800" max="1200" step="50" value="1200" oninput="remiSl('bolusRate',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:4px;">② Maintenance infusion</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Infusion Rate</span>
+              <input type="number" class="num-input" id="r_inpRateBI" value="20" min="1" max="100" step="1" oninput="remiNum('rateBI',this,1,100)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="r_slRateBI" min="1" max="100" value="20" oninput="remiSl('rateBI',+this.value)">
+          <div class="rate-hint" id="r_rateBIHint"></div>
+          </div>
+        </div>
+      </div>
+      <div id="r_rcCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="phase-label">① Initial infusion</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Initial Rate</span>
+              <input type="number" class="num-input" id="r_inpRate1" value="20" min="1" max="100" step="1" oninput="remiNum('rate1',this,1,100)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="r_slRate1" min="1" max="100" value="20" oninput="remiSl('rate1',+this.value)">
+          <div class="rate-hint" id="r_rate1Hint"></div>
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Duration</span>
+              <input type="number" class="num-input" id="r_inpSwitchT" value="30" min="1" max="300" step="1" oninput="remiNum('switchT',this,1,300)">
+              <span class="unit-label">min</span>
+            </div>
+            <input type="range" id="r_slSwitchT" min="1" max="300" value="30" oninput="remiSl('switchT',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:4px;">② New infusion rate</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">New Rate</span>
+              <input type="number" class="num-input" id="r_inpRate2" value="10" min="0" max="100" step="1" oninput="remiNum('rate2',this,0,100)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="r_slRate2" min="0" max="100" value="10" oninput="remiSl('rate2',+this.value)">
+          <div class="rate-hint" id="r_rate2Hint"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Target Ce Band <span style="text-transform:none;">(ng/mL)</span></div>
+      <div class="target-row">
+        <div><div class="dose-label"><span class="dose-name">Lower</span></div>
+          <input type="number" class="target-input" id="r_targLow" value="2" min="0" max="20" step="0.5" oninput="remiUpdate()"></div>
+        <div><div class="dose-label"><span class="dose-name">Upper</span></div>
+          <input type="number" class="target-input" id="r_targHigh" value="5" min="0" max="20" step="0.5" oninput="remiUpdate()"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Time Range</div>
+      <div class="time-range-row" id="r_trRow">
+        <button class="tr-btn" onclick="remiSetTR(30,this)">30 min</button>
+        <button class="tr-btn active" onclick="remiSetTR(60,this)">1 hr</button>
+        <button class="tr-btn" onclick="remiSetTR(180,this)">3 hr</button>
+        <button class="tr-btn" onclick="remiSetTR(360,this)">6 hr</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Key Values</div>
+      <div class="stat-card">
+        <div class="stat-model" style="color:var(--remi-p);">Minto 1997</div>
+        <div class="stat-row"><span class="stat-label">LBM</span><span class="stat-value" id="r_sLBM">—</span></div>
+        <div class="stat-row"><span class="stat-label">ke0</span><span class="stat-value" id="r_sKe0">—</span></div>
+        <div class="stat-row"><span class="stat-label">Cp @ 5 min</span><span class="stat-value" id="r_sCp5">—</span></div>
+        <div class="stat-row"><span class="stat-label">Ce @ 5 min</span><span class="stat-value" id="r_sCe5">—</span></div>
+        <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="r_sPeak">—</span></div>
+        <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="r_sCss">—</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="chart-area"><canvas id="r_chart"></canvas></div>
+    <div class="legend-bar">
+      <div class="legend-item" style="color:var(--remi-p);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#a78bfa" stroke-width="2.5"/></svg>Cp (plasma)</div>
+      <div class="legend-item" style="color:var(--remi-p);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#a78bfa" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Ce (effect-site)</div>
+      <div class="legend-item" style="color:var(--green);"><svg width="28" height="10"><rect x="0" y="1" width="28" height="8" fill="rgba(52,211,153,.2)" stroke="#34d399" stroke-width="1"/></svg>Target Band</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 3: REMIMAZOLAM                                          -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panelRema">
+<div class="layout">
+  <div class="sidebar">
+    <div>
+      <div class="sec-title">Patient Covariates</div>
+      <div style="margin-bottom:9px;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Sex</div>
+        <div class="sex-row">
+          <button class="sex-btn active" id="m_btnM" onclick="remaSetSex('M')">♂ Male</button>
+          <button class="sex-btn" id="m_btnF" onclick="remaSetSex('F')">♀ Female</button>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Age</span>
+            <input type="number" class="num-input" id="m_inpAge" value="50" min="18" max="85" step="1" oninput="remaNum('age',this,18,85)">
+            <span class="unit-label">yr</span>
+          </div>
+          <input type="range" id="m_slAge" min="18" max="85" value="50" oninput="remaSl('age',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Weight</span>
+            <input type="number" class="num-input" id="m_inpWt" value="70" min="30" max="160" step="1" oninput="remaNum('wt',this,30,160)">
+            <span class="unit-label">kg</span>
+          </div>
+          <input type="range" id="m_slWt" min="30" max="160" value="70" oninput="remaSl('wt',+this.value)">
+        </div>
+      </div>
+      <div class="toggle-row" style="margin-top:9px;">
+        <span class="toggle-label">Concomitant Opioids</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="m_chkOpioids" onchange="remaState.opioids=this.checked;document.getElementById('m_lblOp').textContent=this.checked?'ON':'OFF';remaUpdate();">
+          <div class="toggle-track"></div>
+        </label>
+        <span style="font-size:10px;color:var(--text-dim);" id="m_lblOp">OFF</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Solution Concentration</div>
+      <div class="conc-row" id="m_concRow">
+        <button class="conc-btn active" onclick="remaSetConc(2,this)">2 mg/mL</button>
+        <button class="conc-btn" onclick="remaSetConc(1,this)">1 mg/mL</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Dosing Mode</div>
+      <div class="mode-row" style="margin-bottom:9px;">
+        <button class="mode-btn active" id="m_btnCont" onclick="remaSetMode('continuous')">Continuous<br><small>Infusion</small></button>
+        <button class="mode-btn" id="m_btnBolInf" onclick="remaSetMode('bolusinf')">Bolus +<br><small>Infusion</small></button>
+        <button class="mode-btn" id="m_btnRC" onclick="remaSetMode('ratechange')">Rate<br><small>Change</small></button>
+      </div>
+      <div id="m_contCtrl">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Infusion Rate</span>
+            <input type="number" class="num-input" id="m_inpRate" value="12" min="1" max="60" step="1" oninput="remaNum('rate',this,1,60)">
+            <span class="unit-label">mL/hr</span>
+          </div>
+          <input type="range" id="m_slRate" min="1" max="60" value="12" oninput="remaSl('rate',+this.value)">
+          <div class="rate-hint" id="m_rateHint"></div>
+        </div>
+      </div>
+      <div id="m_bolInfCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="phase-label">① Bolus</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="m_inpBolus" value="5" min="1" max="30" step="0.5" oninput="remaNum('bolus',this,1,30)">
+              <span class="unit-label">mg</span>
+            </div>
+            <input type="range" id="m_slBolus" min="1" max="30" step="0.5" value="5" oninput="remaSl('bolus',+this.value)">
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="m_inpBRate" value="1200" min="600" max="1200" step="50" oninput="remaNum('bolusRate',this,600,1200)">
+              <span class="unit-label">mL/hr</span>
+            </div>
+            <input type="range" id="m_slBRate" min="600" max="1200" step="50" value="1200" oninput="remaSl('bolusRate',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:3px;">② Maintenance</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Infusion Rate</span>
+              <input type="number" class="num-input" id="m_inpRateBI" value="12" min="1" max="60" step="1" oninput="remaNum('rateBI',this,1,60)">
+              <span class="unit-label">mL/hr</span>
+            </div>
+            <input type="range" id="m_slRateBI" min="1" max="60" value="12" oninput="remaSl('rateBI',+this.value)">
+          <div class="rate-hint" id="m_rateBIHint"></div>
+          </div>
+        </div>
+      </div>
+      <div id="m_rcCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="phase-label">① Initial infusion</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Initial Rate</span>
+              <input type="number" class="num-input" id="m_inpRate1" value="18" min="1" max="60" step="1" oninput="remaNum('rate1',this,1,60)">
+              <span class="unit-label">mL/hr</span>
+            </div>
+            <input type="range" id="m_slRate1" min="1" max="60" value="18" oninput="remaSl('rate1',+this.value)">
+          <div class="rate-hint" id="m_rate1Hint"></div>
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Duration</span>
+              <input type="number" class="num-input" id="m_inpSwitchT" value="30" min="1" max="300" step="1" oninput="remaNum('switchT',this,1,300)">
+              <span class="unit-label">min</span>
+            </div>
+            <input type="range" id="m_slSwitchT" min="1" max="300" value="30" oninput="remaSl('switchT',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:3px;">② New rate</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">New Rate</span>
+              <input type="number" class="num-input" id="m_inpRate2" value="9" min="0" max="60" step="1" oninput="remaNum('rate2',this,0,60)">
+              <span class="unit-label">mL/hr</span>
+            </div>
+            <input type="range" id="m_slRate2" min="0" max="60" value="9" oninput="remaSl('rate2',+this.value)">
+          <div class="rate-hint" id="m_rate2Hint"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Target Ce Band <span style="text-transform:none;">(ng/mL)</span></div>
+      <div class="target-row">
+        <div><div class="dose-label"><span class="dose-name">Lower</span></div>
+          <input type="number" class="target-input" id="m_targLow" value="650" min="0" max="3000" step="50" oninput="remaUpdate()"></div>
+        <div><div class="dose-label"><span class="dose-name">Upper</span></div>
+          <input type="number" class="target-input" id="m_targHigh" value="1300" min="0" max="3000" step="50" oninput="remaUpdate()"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Time Range</div>
+      <div class="time-range-row" id="m_trRow">
+        <button class="tr-btn" onclick="remaSetTR(30,this)">30 min</button>
+        <button class="tr-btn active" onclick="remaSetTR(60,this)">1 hr</button>
+        <button class="tr-btn" onclick="remaSetTR(180,this)">3 hr</button>
+        <button class="tr-btn" onclick="remaSetTR(360,this)">6 hr</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">BIS Correlation (Eleveld 2025)</div>
+      <div class="bis-note">
+        <div class="bis-note-title">Ce → Predicted BIS</div>
+        <canvas id="m_bisChart" width="270" height="120" style="width:100%;height:120px;display:block;margin-bottom:6px;"></canvas>
+        <div class="bis-ref-row"><span class="bis-ref-label">Eleveld Ce@5min</span><span class="bis-ref-val" id="m_bisEstE">—</span></div>
+        <div class="bis-ref-row"><span class="bis-ref-label">Zhou Ce@5min</span><span class="bis-ref-val" id="m_bisEstZ">—</span></div>
+        <div style="height:3px;"></div>
+        <div class="bis-ref-row" style="border-top:1px solid rgba(255,255,255,.06);padding-top:4px;">
+          <span class="bis-ref-label">BIS≤60 threshold Ce</span>
+          <span class="bis-ref-val" style="color:var(--green);"><span id="m_bisCe60">—</span></span>
+        </div>
+        <div class="bis-ref-row">
+          <span class="bis-ref-label">BIS≤40 threshold Ce</span>
+          <span class="bis-ref-val" style="color:#f87171;"><span id="m_bisCe40">—</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Key Values</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--rema-e);">Eleveld 2025</div>
+          <div class="stat-row"><span class="stat-label">ke0</span><span class="stat-value" id="m_eKe0">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5min</span><span class="stat-value" id="m_eCp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5min</span><span class="stat-value" id="m_eCe5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="m_ePeak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="m_eCss">—</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--rema-z);">Zhou 2020</div>
+          <div class="stat-row"><span class="stat-label">ke0</span><span class="stat-value" id="m_zKe0">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5min</span><span class="stat-value" id="m_zCp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5min</span><span class="stat-value" id="m_zCe5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="m_zPeak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="m_zCss">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Combined View Model</div>
+      <div class="model-sel">
+        <span class="model-sel-label">Select:</span>
+        <button class="model-radio active" id="m_selEleveld" onclick="remaSelectModel('eleveld')">Eleveld</button>
+        <button class="model-radio" id="m_selZhou" onclick="remaSelectModel('zhou')">Zhou</button>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="chart-area"><canvas id="m_chart"></canvas></div>
+    <div class="legend-bar">
+      <div class="legend-item" style="color:var(--rema-e);"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#22d3ee" stroke-width="2.5"/></svg>Eleveld Cp</div>
+      <div class="legend-item" style="color:var(--rema-e);"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#22d3ee" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Eleveld Ce</div>
+      <div class="legend-item" style="color:var(--rema-z);"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#fb923c" stroke-width="2.5"/></svg>Zhou Cp</div>
+      <div class="legend-item" style="color:var(--rema-z);"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Zhou Ce</div>
+      <div class="legend-item" style="color:var(--green);"><svg width="26" height="10"><rect x="0" y="1" width="26" height="8" fill="rgba(52,211,153,.2)" stroke="#34d399" stroke-width="1"/></svg>Target Band</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 4: COMBINED VIEW                                        -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panelCombined" style="flex-direction:column;">
+  <!-- Header: model selection summary + patient info -->
+  <div class="combined-header">
+    <span class="model-info" id="comb_modelInfo">Propofol: <b>Schnider</b> &nbsp;|&nbsp; Remifentanil: <b>Minto</b> &nbsp;|&nbsp; Remimazolam: <b>Eleveld</b></span>
+    <div class="patient-info" id="comb_patientInfo">
+      <span>Sex: <b id="comb_sex">M</b></span>
+      <span>Age: <b id="comb_age">50</b> yr</span>
+      <span>Wt: <b id="comb_wt">70</b> kg</span>
+      <span>Ht: <b id="comb_ht">170</b> cm</span>
+    </div>
+  </div>
+
+  <div class="combined-charts">
+    <!-- PROPOFOL mini chart -->
+    <div class="mini-chart-wrap">
+      <div class="mini-chart-header">
+        <span class="drug-name" style="color:var(--prop-s);">● Propofol</span>
+        <span class="mode-badge" id="comb_propModeBadge">Continuous</span>
+        <span class="dose-summary" id="comb_propDoseSummary">60 cc/hr</span>
+        <span class="target-badge" id="comb_propTarget">Ce 2–4 μg/mL</span>
+        <span class="mini-stats" id="comb_propStats">Cp@5min: — | Ce@5min: — | Css: —</span>
+      </div>
+      <div class="mini-chart-body"><canvas id="comb_propChart"></canvas></div>
+    </div>
+
+    <!-- REMIFENTANIL mini chart -->
+    <div class="mini-chart-wrap">
+      <div class="mini-chart-header">
+        <span class="drug-name" style="color:var(--remi-p);">● Remifentanil</span>
+        <span class="mode-badge" id="comb_remiModeBadge">Continuous</span>
+        <span class="dose-summary" id="comb_remiDoseSummary">20 cc/hr</span>
+        <span class="target-badge" id="comb_remiTarget">Ce 2–5 ng/mL</span>
+        <span class="mini-stats" id="comb_remiStats">Cp@5min: — | Ce@5min: — | Css: —</span>
+      </div>
+      <div class="mini-chart-body"><canvas id="comb_remiChart"></canvas></div>
+    </div>
+
+    <!-- REMIMAZOLAM mini chart -->
+    <div class="mini-chart-wrap">
+      <div class="mini-chart-header">
+        <span class="drug-name" style="color:var(--rema-e);">● Remimazolam</span>
+        <span class="mode-badge" id="comb_remaModeBadge">Continuous</span>
+        <span class="dose-summary" id="comb_remaDoseSummary">12 mL/hr</span>
+        <span class="target-badge" id="comb_remaTarget">Ce 650–1300 ng/mL</span>
+        <span class="mini-stats" id="comb_remaStats">Cp@5min: — | Ce@5min: — | Css: —</span>
+      </div>
+      <div class="mini-chart-body"><canvas id="comb_remaChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Linked time tooltip bar -->
+  <div id="comb_linkedBar" style="
+    display:none; padding:5px 18px; background:var(--surface2);
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    font-size:11px; flex-shrink:0; align-items:center; gap:18px; flex-wrap:wrap;
+  ">
+    <span style="color:var(--text-dim);font-size:10px;font-weight:700;" id="comb_linkedTime">t = 0.0 min</span>
+    <span style="color:var(--prop-s);">Propofol &mdash;
+      Cp: <b id="comb_ltPropCp">—</b>
+      Ce: <b id="comb_ltPropCe">—</b>
+    </span>
+    <span style="color:var(--remi-p);">Remifentanil &mdash;
+      Cp: <b id="comb_ltRemiCp">—</b>
+      Ce: <b id="comb_ltRemiCe">—</b>
+    </span>
+    <span id="comb_ltRemaSpan" style="color:var(--rema-e);">Remimazolam &mdash;
+      Cp: <b id="comb_ltRemaCp">—</b>
+      Ce: <b id="comb_ltRemaCe">—</b>
+    </span>
+  </div>
+
+  <div class="combined-time-row">
+    <span class="sec-title" style="margin-bottom:0;">Time Range</span>
+    <div class="time-range-row" id="comb_trRow">
+      <button class="tr-btn" onclick="combSetTR(30,this)" style="border-color:rgba(52,211,153,.3);">30 min</button>
+      <button class="tr-btn active" onclick="combSetTR(60,this)" style="background:rgba(52,211,153,.15);color:var(--green);border-color:var(--green);">1 hr</button>
+      <button class="tr-btn" onclick="combSetTR(180,this)" style="border-color:rgba(52,211,153,.3);">3 hr</button>
+      <button class="tr-btn" onclick="combSetTR(360,this)" style="border-color:rgba(52,211,153,.3);">6 hr</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <span>© 2026 부산백병원 마취통증의학과 오주석 | TIVA PK Simulator</span>
+  <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
+</footer>
+
+<script>
+/**
+ * TIVA PK Simulator — Shared PK Engine
+ * Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+ * (Dr. Joosuk Oh, Dept. of Anesthesiology & Pain Medicine,
+ *  Inje University Busan Paik Hospital)
+ * All rights reserved.
+ */
+
+// ═══════════════════════════════════════════════════════════════
+//  SHARED: Cubic Roots (Newton-Raphson)
+// ═══════════════════════════════════════════════════════════════
+function cubicRoots(a2, a1, a0) {
+  const f  = x => x*x*x - a2*x*x + a1*x - a0;
+  const df = x => 3*x*x - 2*a2*x + a1;
+  const found = [];
+  const seeds = [0.0001, a2*0.05, a2*0.2, a2*0.5, a2*0.8, a2, a2*1.2, 0.1, 0.5, 1.0, 2.0];
+  for (const s of seeds) {
+    let x = s;
+    for (let i = 0; i < 300; i++) {
+      const fx = f(x), dfx = df(x);
+      if (Math.abs(dfx) < 1e-15) break;
+      const dx = fx / dfx; x -= dx;
+      if (Math.abs(dx) < 1e-13) break;
+    }
+    if (!found.some(r => Math.abs(x-r) < 1e-6) && Math.abs(f(x)) < 1e-5 && x > 1e-9)
+      found.push(x);
+  }
+  return found.sort((a,b) => b-a);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════
+let currentTab = 'prop';
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active','active-remi','active-rema','active-combined');
+  });
+  document.getElementById('panel' + {prop:'Prop',remi:'Remi',rema:'Rema',combined:'Combined'}[tab]).classList.add('active');
+  const btn = document.getElementById('tab' + {prop:'Prop',remi:'Remi',rema:'Rema',combined:'Combined'}[tab]);
+  if (tab === 'prop') btn.classList.add('active');
+  else if (tab === 'remi') btn.classList.add('active-remi');
+  else if (tab === 'rema') btn.classList.add('active-rema');
+  else btn.classList.add('active-combined');
+
+  // Refresh charts on tab switch (Chart.js needs resize)
+  setTimeout(() => {
+    if (tab === 'prop') { propChart.resize(); propUpdate(); }
+    else if (tab === 'remi') { remiChart.resize(); remiUpdate(); }
+    else if (tab === 'rema') { remaChart.resize(); remaUpdate(); }
+    else if (tab === 'combined') { combUpdate(); }
+  }, 50);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PROPOFOL PK ENGINE
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+function schniderParams(sex, age, wt, ht) {
+  let LBM = sex === 'M'
+    ? 1.10*wt - 128*wt*wt / (10000*(ht/100)**2)
+    : 1.07*wt - 148*wt*wt / (10000*(ht/100)**2);
+  LBM = Math.max(20, LBM);
+  const V1  = 4.27;
+  const V2  = Math.max(1, 18.9 - 0.391*(age-53));
+  const V3  = 238;
+  const Cl1 = Math.max(0.1, 1.89 + 0.0456*(wt-77) - 0.0681*(LBM-59) + 0.0264*(ht-177));
+  const Cl2 = Math.max(0.01, 1.29 - 0.024*(age-53));
+  const Cl3 = 0.836;
+  const ke0 = 0.456;
+  return { V1, ke0, Cl1, k10:Cl1/V1, k12:Cl2/V1, k21:Cl2/V2, k13:Cl3/V1, k31:Cl3/V3 };
+}
+
+function marshParams(wt) {
+  const V1 = 0.228 * wt;
+  const k10=0.119, k12=0.112, k21=0.055, k13=0.0419, k31=0.0033, ke0=1.21;
+  return { V1, ke0, Cl1:k10*V1, k10, k12, k21, k13, k31 };
+}
+
+function propGetEigen(V1, k10, k12, k21, k13, k31) {
+  const a2=k10+k12+k21+k13+k31, a1=k10*k21+k31*(k10+k12)+k21*k13, a0=k10*k21*k31;
+  const [l1,l2,l3] = cubicRoots(a2, a1, a0);
+  return {
+    l1, l2, l3,
+    C1:(k21-l1)*(k31-l1)/((l1-l2)*(l1-l3)),
+    C2:(k21-l2)*(k31-l2)/((l2-l1)*(l2-l3)),
+    C3:(k21-l3)*(k31-l3)/((l3-l1)*(l3-l2))
+  };
+}
+
+function propCpSeg(t, R0, V1, DUR, l1,l2,l3, C1,C2,C3) {
+  const tI=Math.min(t,DUR), tD=Math.max(t-DUR,0);
+  return (R0/V1) * (
+    C1/l1*(1-Math.exp(-l1*tI))*Math.exp(-l1*tD) +
+    C2/l2*(1-Math.exp(-l2*tI))*Math.exp(-l2*tD) +
+    C3/l3*(1-Math.exp(-l3*tI))*Math.exp(-l3*tD)
+  );
+}
+
+function propSimulate(params, mode, ccPerHr, bolusMg, bolusRateCcHr, nPts, maxMin) {
+  const {V1,k10,k12,k21,k13,k31,ke0} = params;
+  const {l1,l2,l3,C1,C2,C3} = propGetEigen(V1,k10,k12,k21,k13,k31);
+  const sumCiLi = C1/l1+C2/l2+C3/l3;
+  const dt = maxMin/nPts;
+  const vol_cc = bolusMg/10;
+  const DUR_b = (vol_cc/bolusRateCcHr)*60;
+  const R0_b = bolusMg/DUR_b;
+  const R0_c = ccPerHr*10/60;
+  const DUR_c = maxMin;
+  const Css = (mode==='continuous'||mode==='bolusinf') ? (R0_c/V1)*sumCiLi : null;
+  const times=[], Cp_arr=[], Ce_arr=[];
+  let Ce=0;
+  for (let i=0; i<=nPts; i++) {
+    const t=i*dt; let Cp=0;
+    if (mode==='continuous') Cp = propCpSeg(t,R0_c,V1,DUR_c,l1,l2,l3,C1,C2,C3);
+    else if (mode==='bolus') Cp = propCpSeg(t,R0_b,V1,DUR_b,l1,l2,l3,C1,C2,C3);
+    else Cp = propCpSeg(t,R0_b,V1,DUR_b,l1,l2,l3,C1,C2,C3) + propCpSeg(t,R0_c,V1,DUR_c,l1,l2,l3,C1,C2,C3);
+    if (i>0) Ce += ke0*(Cp-Ce)*dt;
+    Ce = Math.max(0,Ce);
+    times.push(+t.toFixed(4));
+    Cp_arr.push(+Cp.toFixed(4));
+    Ce_arr.push(+Ce.toFixed(4));
+  }
+  return {times, Cp:Cp_arr, Ce:Ce_arr, Css};
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SHARED PATIENT STATE
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+//  sex/age/wt/ht are shared across ALL drug tabs.
+//  Changing covariates in one tab instantly updates all others.
+// ═══════════════════════════════════════════════════════════════
+const patient = { sex:'M', age:50, wt:70, ht:170 };
+
+// Sync all six patient UI elements across all three tabs
+function syncPatientUI() {
+  const {sex,age,wt,ht} = patient;
+  // Sex buttons
+  ['p','r','m'].forEach(pre => {
+    const bM = document.getElementById(`${pre}_btnM`);
+    const bF = document.getElementById(`${pre}_btnF`);
+    if (bM) bM.classList.toggle('active', sex==='M');
+    if (bF) bF.classList.toggle('active', sex==='F');
+  });
+  // Age
+  [['p_slAge','p_inpAge'],['r_slAge','r_inpAge'],['m_slAge','m_inpAge']].forEach(([sl,inp]) => {
+    const s=document.getElementById(sl), i=document.getElementById(inp);
+    if(s) s.value=age; if(i) i.value=age;
+  });
+  // Weight
+  [['p_slWt','p_inpWt'],['r_slWt','r_inpWt'],['m_slWt','m_inpWt']].forEach(([sl,inp]) => {
+    const s=document.getElementById(sl), i=document.getElementById(inp);
+    if(s) s.value=wt; if(i) i.value=wt;
+  });
+  // Height (propofol + remi tabs only; rema tab has no ht)
+  [['p_slHt','p_inpHt'],['r_slHt','r_inpHt']].forEach(([sl,inp]) => {
+    const s=document.getElementById(sl), i=document.getElementById(inp);
+    if(s) s.value=ht; if(i) i.value=ht;
+  });
+}
+
+// Called from any tab when sex/age/wt/ht changes
+// Updates shared state, syncs all UIs, re-runs all active charts + combined view
+function setPatient(key, val) {
+  patient[key] = val;
+  syncPatientUI();
+  propUpdate();
+  remiUpdate();
+  remaUpdate();
+  if (document.getElementById('panelCombined').classList.contains('active')) combUpdate();
+}
+
+// Trigger combined view refresh when any tab changes dosing or target
+function triggerCombined() {
+  if (document.getElementById('panelCombined').classList.contains('active')) combUpdate();
+}
+
+// Propofol State
+const propState = {
+  mode:'continuous', rate:60, bolus:120, bolusRate:1200,
+  timeRange:60, combinedModel:'schnider'
+};
+
+const propCtx = document.getElementById('p_chart').getContext('2d');
+const propChart = new Chart(propCtx, {
+  type:'line', data:{labels:[],datasets:[]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:120},
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#1e2235',borderColor:'#262c45',borderWidth:1,
+        titleColor:'#dde2f0',bodyColor:'#7a85a3',padding:10,
+        filter:item=>!['TH','TL'].includes(item.dataset.label),
+        callbacks:{
+          title:items=>`t = ${(+items[0].label).toFixed(1)} min`,
+          label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)} μg/mL`,
+        }
+      }
+    },
+    scales:{
+      x:{type:'linear',title:{display:true,text:'Time (min)',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3',maxTicksLimit:12},grid:{color:'rgba(38,44,69,.5)'}},
+      y:{title:{display:true,text:'Concentration (μg/mL)',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3'},grid:{color:'rgba(38,44,69,.5)'},min:0}
+    }
+  }
+});
+
+function propUpdate() {
+  const {sex,age,wt,ht}=patient;
+  const {mode,rate,bolus,bolusRate,timeRange}=propState;
+  const N=600;
+  const sP=schniderParams(sex,age,wt,ht), mP=marshParams(wt);
+  const simS=propSimulate(sP,mode,rate,bolus,bolusRate,N,timeRange);
+  const simM=propSimulate(mP,mode,rate,bolus,bolusRate,N,timeRange);
+  const tL=parseFloat(document.getElementById('p_targLow').value)||0;
+  const tH=parseFloat(document.getElementById('p_targHigh').value)||0;
+  propChart.data.labels=simS.times;
+  propChart.data.datasets=[
+    {label:'TH',data:simS.times.map(()=>tH),borderColor:'transparent',backgroundColor:'rgba(52,211,153,.12)',fill:'+1',pointRadius:0,tension:0,order:10},
+    {label:'TL',data:simS.times.map(()=>tL),borderColor:'rgba(52,211,153,.5)',backgroundColor:'transparent',fill:false,pointRadius:0,borderDash:[3,4],borderWidth:1.2,tension:0,order:10},
+    {label:'Schnider Cp',data:simS.Cp,borderColor:'#4f8ef7',backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:0,order:1},
+    {label:'Schnider Ce',data:simS.Ce,borderColor:'#4f8ef7',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:2},
+    {label:'Marsh Cp',data:simM.Cp,borderColor:'#f97316',backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:0,order:3},
+    {label:'Marsh Ce',data:simM.Ce,borderColor:'#f97316',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:4},
+  ];
+  propChart.update();
+  const fmt=v=>v==null?'—':v.toFixed(2)+' μg/mL';
+  const idx5=Math.min(Math.round(5/(timeRange/N)),N);
+  document.getElementById('p_sS_cp5').textContent=fmt(simS.Cp[idx5]);
+  document.getElementById('p_sS_ce5').textContent=fmt(simS.Ce[idx5]);
+  document.getElementById('p_sS_peak').textContent=fmt(Math.max(...simS.Cp));
+  document.getElementById('p_sS_css').textContent=simS.Css!=null?fmt(simS.Css):'—';
+  document.getElementById('p_sM_cp5').textContent=fmt(simM.Cp[idx5]);
+  document.getElementById('p_sM_ce5').textContent=fmt(simM.Ce[idx5]);
+  document.getElementById('p_sM_peak').textContent=fmt(Math.max(...simM.Cp));
+  document.getElementById('p_sM_css').textContent=simM.Css!=null?fmt(simM.Css):'—';
+  // mcg/kg/min rate hints — Propofol (10 mg/mL)
+  (function(){
+    const mcg = r => (r*10*1000/patient.wt/60).toFixed(1);
+    const h1=document.getElementById('p_rateHint');
+    const h2=document.getElementById('p_rateHint2');
+    if(h1) h1.textContent = mode==='continuous' ? '≈ '+mcg(rate)+' µg/kg/min' : '';
+    if(h2) h2.textContent = mode==='bolusinf'   ? '≈ '+mcg(rate)+' µg/kg/min' : '';
+  })();
+  triggerCombined();
+}
+
+// Patient covariate handlers — delegate to shared setPatient()
+function propSetSex(s)      { setPatient('sex', s); }
+function propSl(key,val) {
+  if (['age','wt','ht'].includes(key)) { setPatient(key, val); return; }
+  propState[key]=val;
+  const map={rate:['p_inpRate','p_inpRate2'],bolus:['p_inpBolus','p_inpBolus2'],bolusRate:['p_inpBRate','p_inpBRate2']};
+  const ids=Array.isArray(map[key])?map[key]:[map[key]];
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value=val;});
+  propUpdate();
+}
+function propNum(key,el,mn,mx) {
+  let val=parseFloat(el.value);if(isNaN(val))return;
+  val=Math.min(mx,Math.max(mn,val));
+  if (['age','wt','ht'].includes(key)) { setPatient(key, val); return; }
+  propState[key]=val;
+  const slMap={rate:['p_slRate','p_slRate2'],bolus:['p_slBolus','p_slBolus2'],bolusRate:['p_slBRate','p_slBRate2']};
+  const ids=Array.isArray(slMap[key])?slMap[key]:[slMap[key]];
+  ids.forEach(id=>{const sl=document.getElementById(id);if(sl)sl.value=val;});
+  const numMap={rate:['p_inpRate','p_inpRate2'],bolus:['p_inpBolus','p_inpBolus2'],bolusRate:['p_inpBRate','p_inpBRate2']};
+  if(numMap[key]) numMap[key].forEach(id=>{const e=document.getElementById(id);if(e&&e!==el)e.value=val;});
+  propUpdate();
+}
+function propSetMode(m) {
+  propState.mode=m;
+  ['p_btnCont','p_btnBolus','p_btnBolInf'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(m==='continuous'?'p_btnCont':m==='bolus'?'p_btnBolus':'p_btnBolInf').classList.add('active');
+  document.getElementById('p_contCtrl').style.display=m==='continuous'?'':'none';
+  document.getElementById('p_bolusCtrl').style.display=m==='bolus'?'':'none';
+  document.getElementById('p_bolInfCtrl').style.display=m==='bolusinf'?'':'none';
+  propUpdate();
+}
+function propSetTR(min,btn) {
+  propState.timeRange=min;
+  document.querySelectorAll('#p_trRow .tr-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  propUpdate();
+}
+function propSelectModel(m) {
+  propState.combinedModel=m;
+  document.getElementById('p_selSchnider').classList.toggle('active',m==='schnider');
+  document.getElementById('p_selMarsh').classList.toggle('active',m==='marsh');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  REMIFENTANIL PK ENGINE
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+function mintoParams(sex, age, wt, ht) {
+  const LBM = sex==='M'
+    ? Math.max(10, 1.10*wt - 128*wt*wt/(10000*(ht/100)**2))
+    : Math.max(10, 1.07*wt - 148*wt*wt/(10000*(ht/100)**2));
+  const V1=Math.max(0.1, 5.1-0.0201*(age-40)+0.072*(LBM-55));
+  const V2=Math.max(0.1, 9.82-0.0811*(age-40)+0.108*(LBM-55));
+  const V3=5.42;
+  const Cl1=Math.max(0.01, 2.6-0.0162*(age-40)+0.0191*(LBM-55));
+  const Cl2=Math.max(0.01, 2.05-0.0301*(age-40));
+  const Cl3=Math.max(0.001, 0.076-0.00113*(age-40));
+  const ke0=Math.max(0.01, 0.595-0.007*(age-40));
+  return { V1,V2,V3,Cl1,LBM,ke0, k10:Cl1/V1, k12:Cl2/V1, k21:Cl2/V2, k13:Cl3/V1, k31:Cl3/V3 };
+}
+
+function remiGetEigen(p) {
+  const {V1,k10,k12,k21,k13,k31}=p;
+  const a2=k10+k12+k21+k13+k31, a1=k10*k21+k31*(k10+k12)+k21*k13, a0=k10*k21*k31;
+  const [l1,l2,l3]=cubicRoots(a2,a1,a0);
+  return {l1,l2,l3,
+    C1:(k21-l1)*(k31-l1)/(V1*(l1-l2)*(l1-l3)),
+    C2:(k21-l2)*(k31-l2)/(V1*(l2-l1)*(l2-l3)),
+    C3:(k21-l3)*(k31-l3)/(V1*(l3-l1)*(l3-l2))
+  };
+}
+
+function remiCpSeg(t, R0, DUR, l1,l2,l3, C1,C2,C3) {
+  const tI=Math.min(t,DUR), tD=Math.max(t-DUR,0);
+  return R0*(
+    C1/l1*(1-Math.exp(-l1*tI))*Math.exp(-l1*tD)+
+    C2/l2*(1-Math.exp(-l2*tI))*Math.exp(-l2*tD)+
+    C3/l3*(1-Math.exp(-l3*tI))*Math.exp(-l3*tD)
+  );
+}
+
+function remiSimulate(p, mode, ccPerHr, bolus, bolusRate, rateBI, rate1, rate2, switchT, concMcgMl, nPts, maxMin) {
+  const {ke0}=p;
+  const {l1,l2,l3,C1,C2,C3}=remiGetEigen(p);
+  const sumCiLi=C1/l1+C2/l2+C3/l3;
+  const dt=maxMin/nPts;
+  const R0_c=ccPerHr*concMcgMl/60;
+  const vol_cc=bolus/concMcgMl;
+  const DUR_b=(vol_cc/bolusRate)*60;
+  const R0_b=bolus/DUR_b;
+  const R0_bi=rateBI*concMcgMl/60;
+  const R0_1=rate1*concMcgMl/60;
+  const R0_2=rate2*concMcgMl/60;
+  const DUR_s2=Math.max(0,maxMin-switchT);
+  const Css_cont=R0_c*sumCiLi;
+  const Css_bi=R0_bi*sumCiLi;
+  const Css_new=R0_2*sumCiLi;
+  const times=[],Cp_arr=[],Ce_arr=[];
+  let Ce=0, prevCp=0;
+  for (let i=0;i<=nPts;i++){
+    const t=i*dt; let Cp=0;
+    if(mode==='continuous') Cp=remiCpSeg(t,R0_c,maxMin,l1,l2,l3,C1,C2,C3);
+    else if(mode==='bolusinf') Cp=remiCpSeg(t,R0_b,DUR_b,l1,l2,l3,C1,C2,C3)+remiCpSeg(t,R0_bi,maxMin,l1,l2,l3,C1,C2,C3);
+    else { Cp=remiCpSeg(t,R0_1,switchT,l1,l2,l3,C1,C2,C3); if(t>switchT) Cp+=remiCpSeg(t-switchT,R0_2,DUR_s2,l1,l2,l3,C1,C2,C3); }
+    if(i>0) Ce+=ke0*(prevCp-Ce)*dt;
+    Ce=Math.max(0,Ce);
+    times.push(+t.toFixed(4));
+    Cp_arr.push(+Math.max(0,Cp).toFixed(5));
+    Ce_arr.push(+Ce.toFixed(5));
+    prevCp=Cp;
+  }
+  const Css=mode==='continuous'?Css_cont:mode==='bolusinf'?Css_bi:Css_new;
+  return {times,Cp:Cp_arr,Ce:Ce_arr,Css};
+}
+
+// Remi State (sex/age/wt/ht now come from shared 'patient' object)
+const remiState = {
+  mode:'continuous', rate:20, bolus:25, bolusRate:1200, rateBI:20,
+  rate1:20, rate2:10, switchT:30, concMcgMl:50, timeRange:60
+};
+
+const remiCtx = document.getElementById('r_chart').getContext('2d');
+const remiChart = new Chart(remiCtx, {
+  type:'line', data:{labels:[],datasets:[]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:120},
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#1e2235',borderColor:'#262c45',borderWidth:1,
+        titleColor:'#dde2f0',bodyColor:'#7a85a3',padding:10,
+        filter:item=>!['TH','TL'].includes(item.dataset.label),
+        callbacks:{
+          title:items=>`t = ${(+items[0].label).toFixed(1)} min`,
+          label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)} ng/mL`,
+        }
+      }
+    },
+    scales:{
+      x:{type:'linear',title:{display:true,text:'Time (min)',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3',maxTicksLimit:12},grid:{color:'rgba(38,44,69,.5)'}},
+      y:{title:{display:true,text:'Concentration (ng/mL)',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3'},grid:{color:'rgba(38,44,69,.5)'},min:0}
+    }
+  }
+});
+
+function remiUpdate() {
+  const {sex,age,wt,ht}=patient;
+  const {mode,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,concMcgMl,timeRange}=remiState;
+  const N=600;
+  const p=mintoParams(sex,age,wt,ht);
+  const sim=remiSimulate(p,mode,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,concMcgMl,N,timeRange);
+  const tL=parseFloat(document.getElementById('r_targLow').value)||0;
+  const tH=parseFloat(document.getElementById('r_targHigh').value)||0;
+  remiChart.data.labels=sim.times;
+  remiChart.data.datasets=[
+    {label:'TH',data:sim.times.map(()=>tH),borderColor:'transparent',backgroundColor:'rgba(52,211,153,.12)',fill:'+1',pointRadius:0,tension:0,order:10},
+    {label:'TL',data:sim.times.map(()=>tL),borderColor:'rgba(52,211,153,.5)',backgroundColor:'transparent',fill:false,pointRadius:0,borderDash:[3,4],borderWidth:1.2,tension:0,order:10},
+    {label:'Cp',data:sim.Cp,borderColor:'#a78bfa',backgroundColor:'transparent',borderWidth:2.5,pointRadius:0,tension:0,order:1},
+    {label:'Ce',data:sim.Ce,borderColor:'#a78bfa',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:2},
+  ];
+  remiChart.update();
+  const fmt=v=>v==null?'—':v.toFixed(3)+' ng/mL';
+  const idx5=Math.min(Math.round(5/(timeRange/N)),N);
+  document.getElementById('r_sLBM').textContent=p.LBM.toFixed(1)+' kg';
+  document.getElementById('r_sKe0').textContent=p.ke0.toFixed(4)+' /min';
+  document.getElementById('r_sCp5').textContent=fmt(sim.Cp[idx5]);
+  document.getElementById('r_sCe5').textContent=fmt(sim.Ce[idx5]);
+  document.getElementById('r_sPeak').textContent=fmt(Math.max(...sim.Cp));
+  document.getElementById('r_sCss').textContent=sim.Css!=null?fmt(sim.Css):'—';
+  // mcg/kg/min rate hints — Remifentanil (selected concentration)
+  (function(){
+    const c=remiState.concMcgMl, m2=remiState.mode;
+    const mcg = r => (r*c/patient.wt/60).toFixed(2);
+    const rh  = document.getElementById('r_rateHint');
+    const rhBI= document.getElementById('r_rateBIHint');
+    const rh1 = document.getElementById('r_rate1Hint');
+    const rh2 = document.getElementById('r_rate2Hint');
+    if(rh)   rh.textContent   = m2==='continuous' ? '≈ '+mcg(remiState.rate)+' µg/kg/min'   : '';
+    if(rhBI) rhBI.textContent = m2==='bolusinf'   ? '≈ '+mcg(remiState.rateBI)+' µg/kg/min' : '';
+    if(rh1)  rh1.textContent  = m2==='ratechange' ? '≈ '+mcg(remiState.rate1)+' µg/kg/min'  : '';
+    if(rh2)  rh2.textContent  = m2==='ratechange' ? '≈ '+mcg(remiState.rate2)+' µg/kg/min'  : '';
+  })();
+  triggerCombined();
+}
+
+function remiSetSex(s) { setPatient('sex', s); }
+function remiSl(key,val) {
+  remiState[key]=val;
+  const map={rate:'r_inpRate',bolus:'r_inpBolus',bolusRate:'r_inpBRate',rateBI:'r_inpRateBI',rate1:'r_inpRate1',rate2:'r_inpRate2',switchT:'r_inpSwitchT'};
+  if (['age','wt','ht'].includes(key)) { setPatient(key, val); return; }
+  const el=document.getElementById(map[key]);if(el)el.value=val;
+  remiUpdate();
+}
+function remiNum(key,el,mn,mx) {
+  let val=parseFloat(el.value);if(isNaN(val))return;
+  val=Math.min(mx,Math.max(mn,val));
+  if (['age','wt','ht'].includes(key)) { setPatient(key, val); return; }
+  remiState[key]=val;
+  const slMap={rate:'r_slRate',bolus:'r_slBolus',bolusRate:'r_slBRate',rateBI:'r_slRateBI',rate1:'r_slRate1',rate2:'r_slRate2',switchT:'r_slSwitchT'};
+  const sl=document.getElementById(slMap[key]);if(sl)sl.value=val;
+  remiUpdate();
+}
+function remiSetMode(m) {
+  remiState.mode=m;
+  ['r_btnCont','r_btnBolInf','r_btnRC'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(m==='continuous'?'r_btnCont':m==='bolusinf'?'r_btnBolInf':'r_btnRC').classList.add('active');
+  document.getElementById('r_contCtrl').style.display=m==='continuous'?'':'none';
+  document.getElementById('r_bolInfCtrl').style.display=m==='bolusinf'?'':'none';
+  document.getElementById('r_rcCtrl').style.display=m==='ratechange'?'':'none';
+  remiUpdate();
+}
+function remiSetConc(c,btn) {
+  remiState.concMcgMl=c;
+  document.querySelectorAll('#r_concRow .conc-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  remiUpdate();
+}
+function remiSetTR(min,btn) {
+  remiState.timeRange=min;
+  document.querySelectorAll('#r_trRow .tr-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  remiUpdate();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  REMIMAZOLAM PK ENGINE
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+function eleveldParams(sex, age, wt, opioids) {
+  const Fs=wt/70;
+  const V1=4.31*Fs, V2=12.3*Fs;
+  const V3=18.6*Fs*Math.exp(7.31/1000*(age-35))*(sex==='F'?Math.exp(28.7/100):1);
+  const CL=1.12*Math.pow(Fs,0.75)*(sex==='F'?Math.exp(16.3/100):1)*(opioids?Math.exp(-13.9/100):1);
+  const Q2=1.45*Math.pow(V2/12.3,0.75), Q3=0.298*Math.pow(V3/18.6,0.75);
+  const ke0=0.145*Math.exp(-10.6/1000*(age-35));
+  return {V1,V2,V3,CL,Q2,Q3,ke0,k10:CL/V1,k12:Q2/V1,k21:Q2/V2,k13:Q3/V1,k31:Q3/V3};
+}
+
+function zhouParams(sex, age, wt) {
+  const Fs=Math.pow(wt/70,0.75), Fv=wt/70;
+  const CL=(sex==='F'?1.14:1.03)*Fs;
+  const V1=2.92*Fv, V2=9.81*Fv, V3=19.1*Fv;
+  const Q2=1.16*Fs, Q3=0.38*Fs;
+  const ke0=0.134;
+  return {V1,V2,V3,CL,Q2,Q3,ke0,k10:CL/V1,k12:Q2/V1,k21:Q2/V2,k13:Q3/V1,k31:Q3/V3};
+}
+
+function remaGetEigen(p) {
+  const {V1,k10,k12,k21,k13,k31}=p;
+  const a2=k10+k12+k21+k13+k31, a1=k10*k21+k31*(k10+k12)+k21*k13, a0=k10*k21*k31;
+  const [l1,l2,l3]=cubicRoots(a2,a1,a0);
+  return {l1,l2,l3,
+    C1:(k21-l1)*(k31-l1)/(V1*(l1-l2)*(l1-l3)),
+    C2:(k21-l2)*(k31-l2)/(V1*(l2-l1)*(l2-l3)),
+    C3:(k21-l3)*(k31-l3)/(V1*(l3-l1)*(l3-l2))
+  };
+}
+
+function remaCpSeg(t, R0, DUR, l1,l2,l3, C1,C2,C3) {
+  const tI=Math.min(t,DUR), tD=Math.max(t-DUR,0);
+  return R0*1000*(
+    C1/l1*(1-Math.exp(-l1*tI))*Math.exp(-l1*tD)+
+    C2/l2*(1-Math.exp(-l2*tI))*Math.exp(-l2*tD)+
+    C3/l3*(1-Math.exp(-l3*tI))*Math.exp(-l3*tD)
+  );
+}
+
+function remaSimulate(p, mode, concMgMl, mLperHr, bolusMg, bolusRateMlHr, rateBI, rate1, rate2, switchT, nPts, maxMin) {
+  const {ke0}=p;
+  const {l1,l2,l3,C1,C2,C3}=remaGetEigen(p);
+  const sumCiLi=C1/l1+C2/l2+C3/l3;
+  const dt=maxMin/nPts;
+  const R0_c=mLperHr*concMgMl/60;
+  const R0_bi=rateBI*concMgMl/60;
+  const vol_b=bolusMg/concMgMl;
+  const DUR_b=(vol_b/bolusRateMlHr)*60;
+  const R0_b=bolusMg/DUR_b;
+  const R0_1=rate1*concMgMl/60, R0_2=rate2*concMgMl/60;
+  const DUR_s2=Math.max(0,maxMin-switchT);
+  const Css_c=R0_c*sumCiLi*1000, Css_bi=R0_bi*sumCiLi*1000, Css_rc=R0_2*sumCiLi*1000;
+  const times=[],Cp_arr=[],Ce_arr=[];
+  let Ce=0, prevCp=0;
+  for (let i=0;i<=nPts;i++){
+    const t=i*dt; let Cp=0;
+    if(mode==='continuous') Cp=remaCpSeg(t,R0_c,maxMin,l1,l2,l3,C1,C2,C3);
+    else if(mode==='bolusinf') Cp=remaCpSeg(t,R0_b,DUR_b,l1,l2,l3,C1,C2,C3)+remaCpSeg(t,R0_bi,maxMin,l1,l2,l3,C1,C2,C3);
+    else { Cp=remaCpSeg(t,R0_1,switchT,l1,l2,l3,C1,C2,C3); if(t>switchT) Cp+=remaCpSeg(t-switchT,R0_2,DUR_s2,l1,l2,l3,C1,C2,C3); }
+    if(i>0) Ce+=ke0*(prevCp-Ce)*dt;
+    Ce=Math.max(0,Ce);
+    times.push(+t.toFixed(4));
+    Cp_arr.push(+Math.max(0,Cp).toFixed(3));
+    Ce_arr.push(+Ce.toFixed(3));
+    prevCp=Cp;
+  }
+  const Css=mode==='continuous'?Css_c:mode==='bolusinf'?Css_bi:Css_rc;
+  return {times,Cp:Cp_arr,Ce:Ce_arr,Css};
+}
+
+// Rema State (sex/age/wt now come from shared 'patient' object)
+const remaState = {
+  opioids:false,
+  mode:'continuous', concMgMl:2, rate:12,
+  bolus:5, bolusRate:1200, rateBI:12,
+  rate1:18, rate2:9, switchT:30, timeRange:60,
+  combinedModel:'eleveld'
+};
+
+const remaCtx = document.getElementById('m_chart').getContext('2d');
+const remaChart = new Chart(remaCtx, {
+  type:'line', data:{labels:[],datasets:[]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:120},
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#1e2235',borderColor:'#262c45',borderWidth:1,
+        titleColor:'#dde2f0',bodyColor:'#7a85a3',padding:9,
+        filter:item=>!['TH','TL'].includes(item.dataset.label),
+        callbacks:{
+          title:items=>`t = ${(+items[0].label).toFixed(1)} min`,
+          label:ctx=>ctx.dataset.yAxisID==='y2'
+            ?`${ctx.dataset.label}: BIS ${ctx.parsed.y.toFixed(0)}`
+            :`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)} ng/mL`,
+        }
+      }
+    },
+    scales:{
+      x:{type:'linear',title:{display:true,text:'Time (min)',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3',maxTicksLimit:12},grid:{color:'rgba(38,44,69,.5)'}},
+      y:{title:{display:true,text:'Concentration (ng/mL)',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3'},grid:{color:'rgba(38,44,69,.5)'},min:0},
+      y2:{type:'linear',position:'right',title:{display:true,text:'Predicted BIS',color:'rgba(200,220,255,.35)',font:{size:10}},ticks:{color:'rgba(200,220,255,.35)',stepSize:20},grid:{drawOnChartArea:false},min:0,max:100}
+    }
+  }
+});
+
+function remaUpdate() {
+  const {sex,age,wt}=patient;
+  const {opioids,mode,concMgMl,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,timeRange}=remaState;
+  const N=600;
+  const pE=eleveldParams(sex,age,wt,opioids), pZ=zhouParams(sex,age,wt);
+  const simE=remaSimulate(pE,mode,concMgMl,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,N,timeRange);
+  const simZ=remaSimulate(pZ,mode,concMgMl,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,N,timeRange);
+  const tL=parseFloat(document.getElementById('m_targLow').value)||0;
+  const tH=parseFloat(document.getElementById('m_targHigh').value)||0;
+
+  // BIS prediction
+  const E0=93.7, Emax=56.7, KCe50age=-16.4/1000;
+  const Ce50_BIS=982*Math.exp(KCe50age*(age-35));
+  function bisPred(ce){if(ce<=0)return E0;return Math.max(0,Math.min(100,E0-Emax*ce/(Ce50_BIS+ce)));}
+  const bisArrE=simE.Ce.map(ce=>+bisPred(ce).toFixed(1));
+  const bisArrZ=simZ.Ce.map(ce=>+bisPred(ce).toFixed(1));
+
+  remaChart.data.labels=simE.times;
+  remaChart.data.datasets=[
+    {label:'TH',data:simE.times.map(()=>tH),borderColor:'transparent',backgroundColor:'rgba(52,211,153,.1)',fill:'+1',pointRadius:0,tension:0,order:10},
+    {label:'TL',data:simE.times.map(()=>tL),borderColor:'rgba(52,211,153,.45)',backgroundColor:'transparent',fill:false,pointRadius:0,borderDash:[3,4],borderWidth:1.2,tension:0,order:10},
+    {label:'Eleveld Cp',data:simE.Cp,borderColor:'#22d3ee',backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:0,order:1},
+    {label:'Eleveld Ce',data:simE.Ce,borderColor:'#22d3ee',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:2},
+    {label:'Zhou Cp',data:simZ.Cp,borderColor:'#fb923c',backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:0,order:3},
+    {label:'Zhou Ce',data:simZ.Ce,borderColor:'#fb923c',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:4},
+    {label:'BIS(Eleveld)',data:bisArrE,borderColor:'rgba(34,211,238,.5)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[2,3],pointRadius:0,tension:0,yAxisID:'y2',order:8},
+    {label:'BIS(Zhou)',data:bisArrZ,borderColor:'rgba(251,146,60,.5)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[2,3],pointRadius:0,tension:0,yAxisID:'y2',order:9},
+  ];
+  remaChart.update();
+
+  const fmt=v=>v==null?'—':v.toFixed(0)+' ng/mL';
+  const idx5=Math.min(Math.round(5/(timeRange/N)),N);
+  document.getElementById('m_eKe0').textContent=pE.ke0.toFixed(4)+' /min';
+  document.getElementById('m_eCp5').textContent=fmt(simE.Cp[idx5]);
+  document.getElementById('m_eCe5').textContent=fmt(simE.Ce[idx5]);
+  document.getElementById('m_ePeak').textContent=fmt(Math.max(...simE.Cp));
+  document.getElementById('m_eCss').textContent=simE.Css!=null?fmt(simE.Css):'—';
+  document.getElementById('m_zKe0').textContent=pZ.ke0.toFixed(4)+' /min';
+  document.getElementById('m_zCp5').textContent=fmt(simZ.Cp[idx5]);
+  document.getElementById('m_zCe5').textContent=fmt(simZ.Ce[idx5]);
+  document.getElementById('m_zPeak').textContent=fmt(Math.max(...simZ.Cp));
+  document.getElementById('m_zCss').textContent=simZ.Css!=null?fmt(simZ.Css):'—';
+
+  // BIS stats
+  const ceE5=simE.Ce[idx5], ceZ5=simZ.Ce[idx5];
+  const bisE=bisPred(ceE5), bisZ=bisPred(ceZ5);
+  document.getElementById('m_bisEstE').textContent=`BIS ${bisE.toFixed(0)}  (Ce=${ceE5.toFixed(0)} ng/mL)`;
+  document.getElementById('m_bisEstZ').textContent=`BIS ${bisZ.toFixed(0)}  (Ce=${ceZ5.toFixed(0)} ng/mL)`;
+  function ceForBIS(target){const diff=E0-target;if(diff<=0||diff>=Emax)return null;return Ce50_BIS*diff/(Emax-diff);}
+  const ce60=ceForBIS(60), ce40=ceForBIS(40);
+  document.getElementById('m_bisCe60').textContent=ce60?`${ce60.toFixed(0)} ng/mL`:'—';
+  document.getElementById('m_bisCe40').textContent=(ce40&&ce40<9999)?`${ce40.toFixed(0)} ng/mL`:'>5000 ng/mL';
+
+  drawBisChart(Ce50_BIS, ceE5, ceZ5);
+  // mg/kg/hr rate hints — Remimazolam (selected concentration mg/mL)
+  (function(){
+    const c=remaState.concMgMl, m2=remaState.mode;
+    const mgkghr = r => (r*c/patient.wt).toFixed(2);
+    const mh  = document.getElementById('m_rateHint');
+    const mhBI= document.getElementById('m_rateBIHint');
+    const mh1 = document.getElementById('m_rate1Hint');
+    const mh2 = document.getElementById('m_rate2Hint');
+    if(mh)   mh.textContent   = m2==='continuous' ? '≈ '+mgkghr(remaState.rate)+' mg/kg/hr'   : '';
+    if(mhBI) mhBI.textContent = m2==='bolusinf'   ? '≈ '+mgkghr(remaState.rateBI)+' mg/kg/hr' : '';
+    if(mh1)  mh1.textContent  = m2==='ratechange' ? '≈ '+mgkghr(remaState.rate1)+' mg/kg/hr'  : '';
+    if(mh2)  mh2.textContent  = m2==='ratechange' ? '≈ '+mgkghr(remaState.rate2)+' mg/kg/hr'  : '';
+  })();
+  triggerCombined();
+}
+
+function remaSetSex(s){ setPatient('sex', s); }
+const remaSlNum={rate:['m_slRate','m_inpRate'],bolus:['m_slBolus','m_inpBolus'],bolusRate:['m_slBRate','m_inpBRate'],rateBI:['m_slRateBI','m_inpRateBI'],rate1:['m_slRate1','m_inpRate1'],rate2:['m_slRate2','m_inpRate2'],switchT:['m_slSwitchT','m_inpSwitchT']};
+function remaSl(key,val){
+  if(['age','wt'].includes(key)){ setPatient(key,val); return; }
+  remaState[key]=val;
+  const inp=document.getElementById(remaSlNum[key]?remaSlNum[key][1]:null);
+  if(inp)inp.value=val;
+  remaUpdate();
+}
+function remaNum(key,el,mn,mx){
+  let val=parseFloat(el.value);if(isNaN(val))return;
+  val=Math.min(mx,Math.max(mn,val));
+  if(['age','wt'].includes(key)){ setPatient(key,val); return; }
+  remaState[key]=val;
+  const pair=remaSlNum[key];
+  if(pair){ const sl=document.getElementById(pair[0]);if(sl)sl.value=val; }
+  remaUpdate();
+}
+function remaSetMode(m){
+  remaState.mode=m;
+  ['m_btnCont','m_btnBolInf','m_btnRC'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(m==='continuous'?'m_btnCont':m==='bolusinf'?'m_btnBolInf':'m_btnRC').classList.add('active');
+  document.getElementById('m_contCtrl').style.display=m==='continuous'?'':'none';
+  document.getElementById('m_bolInfCtrl').style.display=m==='bolusinf'?'':'none';
+  document.getElementById('m_rcCtrl').style.display=m==='ratechange'?'':'none';
+  remaUpdate();
+}
+function remaSetConc(c,btn){remaState.concMgMl=c;document.querySelectorAll('#m_concRow .conc-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');remaUpdate();}
+function remaSetTR(min,btn){remaState.timeRange=min;document.querySelectorAll('#m_trRow .tr-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');remaUpdate();}
+function remaSelectModel(m){remaState.combinedModel=m;document.getElementById('m_selEleveld').classList.toggle('active',m==='eleveld');document.getElementById('m_selZhou').classList.toggle('active',m==='zhou');}
+
+// ── Mini BIS-Ce Chart (Canvas 2D) ──
+function drawBisChart(Ce50_BIS, ceE_ngml, ceZ_ngml) {
+  const canvas=document.getElementById('m_bisChart');
+  if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  const g=canvas.getContext('2d'); g.scale(dpr,dpr);
+  const PAD={top:6,right:14,bottom:22,left:30};
+  const cw=W-PAD.left-PAD.right, ch=H-PAD.top-PAD.bottom;
+  const xMax=3000;
+  const xP=ce=>PAD.left+(ce/xMax)*cw;
+  const yP=bis=>PAD.top+(1-bis/100)*ch;
+  const E0=93.7, Emax=56.7;
+  const bisFn=ce=>ce<=0?E0:Math.max(0,Math.min(100,E0-Emax*ce/(Ce50_BIS+ce)));
+  const zones=[{hi:100,lo:80,color:'rgba(248,113,113,.15)',label:'Awake'},{hi:80,lo:60,color:'rgba(251,191,36,.13)',label:'Light'},{hi:60,lo:40,color:'rgba(52,211,153,.12)',label:'Adequate'},{hi:40,lo:0,color:'rgba(34,211,238,.10)',label:'Deep'}];
+  for(const z of zones){g.fillStyle=z.color;g.fillRect(PAD.left,yP(z.hi),cw,yP(z.lo)-yP(z.hi));g.fillStyle='rgba(160,170,190,.5)';g.font='7px sans-serif';g.textAlign='right';g.fillText(z.label,PAD.left+cw-2,yP((z.hi+z.lo)/2)+3);}
+  for(const[bis,col]of[[60,'rgba(52,211,153,.5)'],[40,'rgba(248,113,113,.5)']]) {g.strokeStyle=col;g.lineWidth=0.8;g.setLineDash([4,3]);g.beginPath();g.moveTo(PAD.left,yP(bis));g.lineTo(PAD.left+cw,yP(bis));g.stroke();g.setLineDash([]);g.fillStyle=col;g.font='7px sans-serif';g.textAlign='left';g.fillText(bis,PAD.left+2,yP(bis)-2);}
+  g.strokeStyle='rgba(180,190,220,.75)';g.lineWidth=1.8;g.setLineDash([]);g.beginPath();
+  for(let ce=0;ce<=xMax;ce+=15){const fn=ce===0?g.moveTo.bind(g):g.lineTo.bind(g);fn(xP(ce),yP(bisFn(ce)));}g.stroke();
+  function drawMarker(ce_val,color,ly_off){if(ce_val==null||ce_val<0||ce_val>xMax)return;const bv=bisFn(ce_val),x=xP(ce_val),y=yP(bv);g.strokeStyle=color;g.lineWidth=1.1;g.setLineDash([3,3]);g.beginPath();g.moveTo(x,PAD.top);g.lineTo(x,PAD.top+ch);g.stroke();g.setLineDash([]);g.fillStyle=color;g.beginPath();g.arc(x,y,3.5,0,Math.PI*2);g.fill();g.font='bold 8px sans-serif';g.textAlign='center';const ly=Math.max(PAD.top+9,Math.min(PAD.top+ch-3,y+ly_off));g.fillText(`BIS ${bv.toFixed(0)}`,x,ly);}
+  drawMarker(ceE_ngml,'#22d3ee',-6);drawMarker(ceZ_ngml,'#fb923c',12);
+  g.strokeStyle='rgba(100,115,150,.45)';g.lineWidth=0.7;g.setLineDash([]);g.beginPath();g.moveTo(PAD.left,PAD.top);g.lineTo(PAD.left,PAD.top+ch);g.lineTo(PAD.left+cw,PAD.top+ch);g.stroke();
+  g.fillStyle='rgba(120,130,165,.8)';g.font='7px sans-serif';g.textAlign='center';
+  for(const ce of[0,500,1000,1500,2000,2500,3000]){const x=xP(ce);g.strokeStyle='rgba(100,115,150,.3)';g.beginPath();g.moveTo(x,PAD.top+ch);g.lineTo(x,PAD.top+ch+3);g.stroke();g.fillText(ce===0?'0':(ce/1000)+'k',x,PAD.top+ch+11);}
+  g.textAlign='right';for(const bis of[0,20,40,60,80,100]){const y=yP(bis);g.strokeStyle='rgba(100,115,150,.25)';g.beginPath();g.moveTo(PAD.left-3,y);g.lineTo(PAD.left,y);g.stroke();g.fillStyle='rgba(120,130,165,.8)';g.fillText(bis,PAD.left-4,y+3);}
+  g.fillStyle='rgba(120,130,165,.65)';g.textAlign='center';g.font='7.5px sans-serif';g.fillText('Ce (ng/mL)',PAD.left+cw/2,H-1);g.save();g.translate(7,PAD.top+ch/2);g.rotate(-Math.PI/2);g.fillText('BIS',0,0);g.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  COMBINED VIEW
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+let combTimeRange = 60;
+let combPropChart, combRemiChart, combRemaChart;
+let combLinkedX = null;  // shared crosshair x position (data time value)
+
+// ── Custom crosshair plugin: draws vertical line + dot at linked time ──
+const crosshairPlugin = {
+  id: 'linkedCrosshair',
+  afterDraw(chart) {
+    if (combLinkedX === null) return;
+    const xScale = chart.scales.x;
+    const yScale = chart.scales.y;
+    if (!xScale || !yScale) return;
+    const x = xScale.getPixelForValue(combLinkedX);
+    if (x < xScale.left || x > xScale.right) return;
+    const ctx = chart.ctx;
+    // Vertical dashed line
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.moveTo(x, yScale.top);
+    ctx.lineTo(x, yScale.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Dots at Cp and Ce intersections (datasets index 2=Cp, 3=Ce after TH/TL)
+    chart.data.datasets.forEach((ds, idx) => {
+      if (['TH','TL'].includes(ds.label)) return;
+      // find nearest data point
+      const pts = ds.data;
+      if (!pts || pts.length === 0) return;
+      // binary search for closest t
+      const labels = chart.data.labels;
+      let lo=0, hi=labels.length-1;
+      while (lo < hi) {
+        const mid = (lo+hi)>>1;
+        if (labels[mid] < combLinkedX) lo=mid+1; else hi=mid;
+      }
+      const val = pts[lo];
+      if (val == null) return;
+      const cy = yScale.getPixelForValue(val);
+      ctx.beginPath();
+      ctx.arc(x, cy, 3.5, 0, Math.PI*2);
+      ctx.fillStyle = ds.borderColor || 'white';
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+};
+Chart.register(crosshairPlugin);
+
+// ── Linked mousemove across combined charts ──
+function attachCombLinked() {
+  const area = document.getElementById('panelCombined');
+  const canvases = ['comb_propChart','comb_remiChart','comb_remaChart'].map(id=>document.getElementById(id));
+
+  canvases.forEach(canvas => {
+    canvas.addEventListener('mousemove', e => {
+      const chart = [combPropChart, combRemiChart, combRemaChart]
+        .find(c => c && c.canvas === canvas);
+      if (!chart) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const xScale = chart.scales.x;
+      if (!xScale) return;
+      combLinkedX = xScale.getValueForPixel(mouseX);
+      // Redraw all charts to show crosshair
+      [combPropChart, combRemiChart, combRemaChart].forEach(c => c && c.draw());
+      // Update linked bar
+      updateLinkedBar();
+    });
+    canvas.addEventListener('mouseleave', () => {
+      combLinkedX = null;
+      [combPropChart, combRemiChart, combRemaChart].forEach(c => c && c.draw());
+      document.getElementById('comb_linkedBar').style.display = 'none';
+    });
+  });
+}
+
+// ── Update the linked concentration bar at the bottom ──
+function updateLinkedBar() {
+  if (combLinkedX === null) return;
+  const bar = document.getElementById('comb_linkedBar');
+  bar.style.display = 'flex';
+  document.getElementById('comb_linkedTime').textContent = `t = ${combLinkedX.toFixed(1)} min`;
+
+  function readAt(chart, cpIdx, ceIdx) {
+    if (!chart || !chart.data.labels) return [null,null];
+    const labels = chart.data.labels;
+    let lo=0, hi=labels.length-1;
+    while (lo < hi) { const m=(lo+hi)>>1; if(labels[m]<combLinkedX) lo=m+1; else hi=m; }
+    const cp = chart.data.datasets[cpIdx]?.data[lo];
+    const ce = chart.data.datasets[ceIdx]?.data[lo];
+    return [cp, ce];
+  }
+
+  // Propofol: datasets [TH=0, TL=1, Cp=2, Ce=3]
+  const [pCp, pCe] = readAt(combPropChart, 2, 3);
+  document.getElementById('comb_ltPropCp').textContent = pCp!=null ? pCp.toFixed(2)+' μg/mL' : '—';
+  document.getElementById('comb_ltPropCe').textContent = pCe!=null ? pCe.toFixed(2)+' μg/mL' : '—';
+
+  // Remifentanil: datasets [TH=0, TL=1, Cp=2, Ce=3]
+  const [rCp, rCe] = readAt(combRemiChart, 2, 3);
+  document.getElementById('comb_ltRemiCp').textContent = rCp!=null ? rCp.toFixed(2)+' ng/mL' : '—';
+  document.getElementById('comb_ltRemiCe').textContent = rCe!=null ? rCe.toFixed(2)+' ng/mL' : '—';
+
+  // Remimazolam: datasets [TH=0, TL=1, Cp=2, Ce=3]
+  const [mCp, mCe] = readAt(combRemaChart, 2, 3);
+  const remaColor = remaState.combinedModel==='eleveld' ? 'var(--rema-e)' : 'var(--rema-z)';
+  document.getElementById('comb_ltRemaSpan').style.color = remaColor==='var(--rema-e)' ? '#22d3ee' : '#fb923c';
+  document.getElementById('comb_ltRemaCp').textContent = mCp!=null ? mCp.toFixed(0)+' ng/mL' : '—';
+  document.getElementById('comb_ltRemaCe').textContent = mCe!=null ? mCe.toFixed(0)+' ng/mL' : '—';
+}
+
+function makeCombChart(canvasId, color, unit) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  return new Chart(ctx, {
+    type:'line', data:{labels:[],datasets:[]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      animation:{duration:100},
+      interaction:{mode:'nearest',intersect:false},  // disable built-in tooltip
+      events:['mousemove','mouseout'],               // keep events for plugin
+      plugins:{
+        legend:{display:false},
+        tooltip:{enabled:false},  // disable Chart.js tooltip — we use our linked bar
+        linkedCrosshair:{}        // our custom plugin
+      },
+      scales:{
+        x:{type:'linear',display:true,ticks:{color:'#7a85a3',maxTicksLimit:10,font:{size:9}},grid:{color:'rgba(38,44,69,.4)'}},
+        y:{ticks:{color:'#7a85a3',font:{size:9}},grid:{color:'rgba(38,44,69,.4)'},min:0,
+           title:{display:true,text:unit,color:'#7a85a3',font:{size:9}}}
+      }
+    }
+  });
+}
+
+function initCombCharts() {
+  combPropChart = makeCombChart('comb_propChart','#4f8ef7','μg/mL');
+  combRemiChart = makeCombChart('comb_remiChart','#a78bfa','ng/mL');
+  combRemaChart = makeCombChart('comb_remaChart','#22d3ee','ng/mL');
+  attachCombLinked();
+}
+
+// ── Helper: build target-band datasets for a chart ──
+function targetDatasets(times, lo, hi) {
+  return [
+    {label:'TH',data:times.map(()=>hi),
+     borderColor:'transparent',backgroundColor:'rgba(52,211,153,.10)',
+     fill:'+1',pointRadius:0,tension:0,order:20},
+    {label:'TL',data:times.map(()=>lo),
+     borderColor:'rgba(52,211,153,.4)',backgroundColor:'transparent',
+     fill:false,pointRadius:0,borderDash:[3,4],borderWidth:1,tension:0,order:20},
+  ];
+}
+
+// ── Helper: describe dosing mode badge label ──
+function modeBadgeLabel(mode) {
+  return mode==='continuous'?'Continuous':mode==='bolus'?'Bolus':mode==='bolusinf'?'Bolus+Inf':'Rate Change';
+}
+
+// ── Helper: build a one-line dose summary string ──
+function propDoseSummary(state) {
+  const m=state.mode;
+  const mcg = r => (r*10*1000/patient.wt/60).toFixed(1);
+  const hint = r => '<span style="color:var(--yellow);font-size:10px;"> \u2248'+mcg(r)+'\u00b5g/kg/min</span>';
+  if(m==='continuous') return state.rate+' cc/hr'+hint(state.rate);
+  if(m==='bolus')      return state.bolus+'mg @ '+state.bolusRate+'cc/hr';
+  if(m==='bolusinf')   return state.bolus+'mg + '+(state.rate||60)+'cc/hr'+hint(state.rate||60);
+  return state.rate1+'\u2192'+state.rate2+'cc/hr @ '+state.switchT+'min';
+}
+function remiDoseSummary(state) {
+  const m=state.mode, c=state.concMcgMl;
+  const mcg = r => (r*c/patient.wt/60).toFixed(2);
+  const hint = r => '<span style="color:var(--yellow);font-size:10px;"> \u2248'+mcg(r)+'\u00b5g/kg/min</span>';
+  if(m==='continuous') return state.rate+'cc/hr ('+c+'mcg/mL)'+hint(state.rate);
+  if(m==='bolusinf')   return state.bolus+'mcg + '+state.rateBI+'cc/hr'+hint(state.rateBI);
+  return state.rate1+'\u2192'+state.rate2+'cc/hr @ '+state.switchT+'min'
+    +'<span style="color:var(--yellow);font-size:10px;"> '+mcg(state.rate1)+'\u2192'+mcg(state.rate2)+'\u00b5g/kg/min</span>';
+}
+function remaDoseSummary(state) {
+  const m=state.mode, c=state.concMgMl;
+  const mgkghr = r => (r*c/patient.wt).toFixed(2);
+  const hint = r => '<span style="color:var(--yellow);font-size:10px;"> \u2248'+mgkghr(r)+' mg/kg/hr</span>';
+  if(m==='continuous') return state.rate+'mL/hr ('+c+'mg/mL)'+hint(state.rate);
+  if(m==='bolusinf')   return state.bolus+'mg + '+state.rateBI+'mL/hr'+hint(state.rateBI);
+  return state.rate1+'\u2192'+state.rate2+'mL/hr @ '+state.switchT+'min'
+    +'<span style="color:var(--yellow);font-size:10px;"> '+mgkghr(state.rate1)+'\u2192'+mgkghr(state.rate2)+' mg/kg/hr</span>';
+}
+
+function combUpdate() {
+  if (!combPropChart) initCombCharts();
+  const N=400, maxMin=combTimeRange;
+
+  // ─ Patient info header ─
+  document.getElementById('comb_sex').textContent  = patient.sex==='M' ? 'Male' : 'Female';
+  document.getElementById('comb_age').textContent  = patient.age;
+  document.getElementById('comb_wt').textContent   = patient.wt;
+  document.getElementById('comb_ht').textContent   = patient.ht;
+
+  // ─ Model info ─
+  const propModel = propState.combinedModel==='schnider' ? 'Schnider' : 'Mod. Marsh';
+  const remaModel = remaState.combinedModel==='eleveld'  ? 'Eleveld'  : 'Zhou';
+  document.getElementById('comb_modelInfo').innerHTML =
+    `Propofol: <b>${propModel}</b> &nbsp;|&nbsp; Remifentanil: <b>Minto</b> &nbsp;|&nbsp; Remimazolam: <b>${remaModel}</b>`;
+
+  // ─ Read target Ce values from each tab ─
+  const pTL = parseFloat(document.getElementById('p_targLow').value)||0;
+  const pTH = parseFloat(document.getElementById('p_targHigh').value)||0;
+  const rTL = parseFloat(document.getElementById('r_targLow').value)||0;
+  const rTH = parseFloat(document.getElementById('r_targHigh').value)||0;
+  const mTL = parseFloat(document.getElementById('m_targLow').value)||0;
+  const mTH = parseFloat(document.getElementById('m_targHigh').value)||0;
+
+  const idx5 = Math.min(Math.round(5/(maxMin/N)), N);
+
+  // ── PROPOFOL ──
+  const pParams = propState.combinedModel==='schnider'
+    ? schniderParams(patient.sex,patient.age,patient.wt,patient.ht)
+    : marshParams(patient.wt);
+  const pSim = propSimulate(pParams,propState.mode,propState.rate,propState.bolus,propState.bolusRate,N,maxMin);
+  const propColor = propState.combinedModel==='schnider' ? '#4f8ef7' : '#f97316';
+  combPropChart.data.labels = pSim.times;
+  combPropChart.data.datasets = [
+    ...targetDatasets(pSim.times, pTL, pTH),
+    {label:'Cp',data:pSim.Cp,borderColor:propColor,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0,order:1},
+    {label:'Ce',data:pSim.Ce,borderColor:propColor,backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,3],pointRadius:0,tension:0,order:2},
+  ];
+  combPropChart.update();
+  // Dosing badges
+  document.getElementById('comb_propModeBadge').textContent   = modeBadgeLabel(propState.mode);
+  document.getElementById('comb_propDoseSummary').innerHTML   = propDoseSummary(propState);
+  document.getElementById('comb_propTarget').textContent      = `Ce ${pTL}–${pTH} μg/mL`;
+  document.getElementById('comb_propStats').innerHTML =
+    `Cp@5min: <b>${(pSim.Cp[idx5]||0).toFixed(2)}</b> | Ce@5min: <b>${(pSim.Ce[idx5]||0).toFixed(2)}</b> | Css: <b>${pSim.Css!=null?pSim.Css.toFixed(2):'—'}</b> μg/mL`;
+
+  // ── REMIFENTANIL ──
+  const rp = mintoParams(patient.sex,patient.age,patient.wt,patient.ht);
+  const rSim = remiSimulate(rp,remiState.mode,remiState.rate,remiState.bolus,remiState.bolusRate,
+    remiState.rateBI,remiState.rate1,remiState.rate2,remiState.switchT,remiState.concMcgMl,N,maxMin);
+  combRemiChart.data.labels = rSim.times;
+  combRemiChart.data.datasets = [
+    ...targetDatasets(rSim.times, rTL, rTH),
+    {label:'Cp',data:rSim.Cp,borderColor:'#a78bfa',backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0,order:1},
+    {label:'Ce',data:rSim.Ce,borderColor:'#a78bfa',backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,3],pointRadius:0,tension:0,order:2},
+  ];
+  combRemiChart.update();
+  document.getElementById('comb_remiModeBadge').textContent   = modeBadgeLabel(remiState.mode);
+  document.getElementById('comb_remiDoseSummary').innerHTML   = remiDoseSummary(remiState);
+  document.getElementById('comb_remiTarget').textContent      = `Ce ${rTL}–${rTH} ng/mL`;
+  document.getElementById('comb_remiStats').innerHTML =
+    `Cp@5min: <b>${(rSim.Cp[idx5]||0).toFixed(2)}</b> | Ce@5min: <b>${(rSim.Ce[idx5]||0).toFixed(2)}</b> | Css: <b>${rSim.Css!=null?rSim.Css.toFixed(2):'—'}</b> ng/mL`;
+
+  // ── REMIMAZOLAM ──
+  const mp = remaState.combinedModel==='eleveld'
+    ? eleveldParams(patient.sex,patient.age,patient.wt,remaState.opioids)
+    : zhouParams(patient.sex,patient.age,patient.wt);
+  const mSim = remaSimulate(mp,remaState.mode,remaState.concMgMl,remaState.rate,remaState.bolus,
+    remaState.bolusRate,remaState.rateBI,remaState.rate1,remaState.rate2,remaState.switchT,N,maxMin);
+  const remaColor = remaState.combinedModel==='eleveld' ? '#22d3ee' : '#fb923c';
+  combRemaChart.data.labels = mSim.times;
+  combRemaChart.data.datasets = [
+    ...targetDatasets(mSim.times, mTL, mTH),
+    {label:'Cp',data:mSim.Cp,borderColor:remaColor,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0,order:1},
+    {label:'Ce',data:mSim.Ce,borderColor:remaColor,backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,3],pointRadius:0,tension:0,order:2},
+  ];
+  combRemaChart.update();
+  document.getElementById('comb_remaModeBadge').textContent   = modeBadgeLabel(remaState.mode);
+  document.getElementById('comb_remaDoseSummary').innerHTML   = remaDoseSummary(remaState);
+  document.getElementById('comb_remaTarget').textContent      = `Ce ${mTL}–${mTH} ng/mL`;
+  document.getElementById('comb_remaStats').innerHTML =
+    `Cp@5min: <b>${(mSim.Cp[idx5]||0).toFixed(0)}</b> | Ce@5min: <b>${(mSim.Ce[idx5]||0).toFixed(0)}</b> | Css: <b>${mSim.Css!=null?mSim.Css.toFixed(0):'—'}</b> ng/mL`;
+
+  // Sync rema drug name color
+  document.querySelector('#panelCombined .mini-chart-wrap:nth-child(3) .drug-name').style.color = remaColor;
+}
+
+function combSetTR(min,btn) {
+  combTimeRange=min;
+  document.querySelectorAll('#comb_trRow .tr-btn').forEach(b=>{
+    b.classList.remove('active');
+    b.style.background='';b.style.color='';b.style.borderColor='rgba(52,211,153,.3)';
+  });
+  btn.classList.add('active');
+  btn.style.background='rgba(52,211,153,.15)';btn.style.color='var(--green)';btn.style.borderColor='var(--green)';
+  combUpdate();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+// Sync all patient UIs to initial values, then run all charts
+syncPatientUI();
+propUpdate();
+remiUpdate();
+remaUpdate();
+</script>
+<script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script></body>
+</html>
