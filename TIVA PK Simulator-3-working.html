@@ -58,50 +58,6 @@ body {
   font-size: 13px; min-height: 100vh; overflow: hidden;
   display: flex; flex-direction: column;
 }
-/* ── 모바일 반응형 ── */
-@media (max-width: 700px) {
-  body {
-    overflow-y: auto;   /* 세로 스크롤 허용 */
-    overflow-x: hidden;
-  }
-  .content {
-    overflow-y: auto;
-    overflow: visible;
-  }
-  .tab-panel.active {
-    position: relative; /* absolute 해제 */
-    display: flex;
-    flex-direction: column;
-    height: auto;
-  }
-  .layout {
-    grid-template-columns: 1fr;  /* 사이드바 전체 너비로 */
-    height: auto;
-  }
-  .sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    overflow-y: visible;
-    max-height: none;
-  }
-  .main {
-    overflow: visible;
-  }
-  .chart-area {
-    height: 260px; /* 차트 고정 높이 */
-    min-height: 260px;
-  }
-  .tab-bar {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-  }
-  .combined-charts {
-    overflow-y: auto;
-  }
-  .mini-chart-body {
-    height: 140px;
-  }
-}
 
 /* ═══ HEADER NAV ═══ */
 header {
@@ -368,6 +324,50 @@ footer {
 }
 footer a { color: var(--text-dim); text-decoration: none; }
 footer a:hover { color: var(--text); }
+/* ── 모바일 반응형 ── */
+@media (max-width: 700px) {
+  body {
+    overflow-y: auto;   /* 세로 스크롤 허용 */
+    overflow-x: hidden;
+  }
+  .content {
+    overflow-y: auto;
+    overflow: visible;
+  }
+  .tab-panel.active {
+    position: relative; /* absolute 해제 */
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+  .layout {
+    grid-template-columns: 1fr;  /* 사이드바 전체 너비로 */
+    height: auto;
+  }
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow-y: visible;
+    max-height: none;
+  }
+  .main {
+    overflow: visible;
+  }
+  .chart-area {
+    height: 260px; /* 차트 고정 높이 */
+    min-height: 260px;
+  }
+  .tab-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  .combined-charts {
+    overflow-y: auto;
+  }
+  .mini-chart-body {
+    height: 140px;
+  }
+}
 </style>
 </head>
 <body>
