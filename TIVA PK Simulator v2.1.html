@@ -1,0 +1,2720 @@
+<!--
+/**
+ * TIVA PK Simulator
+ * Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+ * (Dr. Joosuk Oh, Dept. of Anesthesiology & Pain Medicine,
+ *  Inje University Busan Paik Hospital)
+ * All rights reserved.
+ */
+-->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TIVA PK Simulator</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+/**
+ * TIVA PK Simulator — Redesigned Styles (v2, UX-focused)
+ * Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+ * Note: Class names/IDs preserved for JS compatibility. Layout, tokens, and typography upgraded.
+ */
+:root {
+  --bg: #0b0e17;
+  --bg-grad: radial-gradient(ellipse at top, #131827 0%, #0b0e17 60%);
+  --surface: #141826;
+  --surface2: #1a1f30;
+  --surface3: #222844;
+  --border: #283050;
+  --border-soft: rgba(120,140,190,.12);
+  --text: #e6ebf5;
+  --text-dim: #8691ad;
+  --text-mute: #5a6482;
+  --green: #34d399;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-card: 0 1px 0 rgba(255,255,255,.03) inset, 0 6px 18px -8px rgba(0,0,0,.5);
+
+  --prop-s: #5b9bff;
+  --prop-m: #ff8a3c;
+  --remi-p: #b99dff;
+  --rema-e: #3fd8ef;
+  --rema-z: #ff9a4a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+html, body { height: 100%; }
+body {
+  background: var(--bg); background-image: var(--bg-grad);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px; font-feature-settings: 'tnum' 1, 'cv11' 1;
+  min-height: 100vh; overflow: hidden;
+  display: flex; flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══ HEADER ═══ */
+header {
+  background: linear-gradient(180deg, rgba(26,31,48,.95), rgba(20,24,38,.95));
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  flex-shrink: 0; z-index: 10;
+}
+.header-top {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 20px; height: 52px;
+}
+.header-top img { width: 30px; height: 26px; border-radius: 6px; object-fit: cover; }
+.logo {
+  width: 30px; height: 26px; border-radius: 7px; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, var(--prop-s), var(--remi-p), var(--rema-e));
+}
+header .title {
+  font-size: 15px; font-weight: 700; letter-spacing: -.01em;
+  white-space: nowrap;
+}
+
+header .credit {
+  margin-left: auto; font-size: 10.5px; color: var(--text-mute);
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* Tab bar — segmented pill */
+.header-tabs {
+  display: flex; gap: 4px; padding: 8px 20px 10px;
+  background: transparent;
+  border-top: 1px solid var(--border-soft);
+}
+.tab-btn {
+  flex: 0 0 auto;
+  padding: 8px 16px; border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface2); color: var(--text-dim);
+  cursor: pointer; font-size: 12px; font-weight: 600; letter-spacing: .01em;
+  transition: background .15s, color .15s, border-color .15s, transform .1s;
+  white-space: nowrap;
+}
+.tab-btn:hover { background: var(--surface3); color: var(--text); }
+.tab-btn:active { transform: translateY(1px); }
+.tab-btn.active { background: rgba(91,155,255,.14); color: var(--prop-s); border-color: rgba(91,155,255,.45); }
+.tab-btn.active-remi { background: rgba(185,157,255,.14); color: var(--remi-p); border-color: rgba(185,157,255,.45); }
+.tab-btn.active-rema { background: rgba(63,216,239,.14); color: var(--rema-e); border-color: rgba(63,216,239,.45); }
+.tab-btn.combined-btn { color: var(--green); border-color: rgba(52,211,153,.35); }
+.tab-btn.combined-btn:hover { background: rgba(52,211,153,.10); }
+.tab-btn.active-combined { background: rgba(52,211,153,.16); color: var(--green); border-color: rgba(52,211,153,.55); }
+
+/* ═══ CONTENT ═══ */
+.content { flex: 1; overflow: hidden; position: relative; }
+.tab-panel { display: none; position: absolute; inset: 0; }
+.tab-panel.active { display: flex; }
+
+/* ═══ LAYOUT: sidebar + main ═══ */
+.layout { display: grid; grid-template-columns: 340px 1fr; width: 100%; height: 100%; }
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  background: var(--surface); border-right: 1px solid var(--border);
+  overflow-y: auto; padding: 16px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.sidebar > div:not(.divider) {
+  background: var(--surface2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-card);
+}
+.divider { display: none; }
+
+.sec-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--text-mute); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.sec-title::before {
+  content: ''; width: 3px; height: 10px; border-radius: 2px;
+  background: currentColor; opacity: .55;
+}
+
+/* SEX — segmented */
+.sex-row {
+  display: flex; gap: 0;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 3px;
+}
+.sex-btn {
+  flex: 1; padding: 8px 10px; border-radius: 7px;
+  border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer;
+  font-size: 12.5px; font-weight: 600; transition: .15s;
+}
+.sex-btn:hover { color: var(--text); }
+
+/* SLIDER GROUP */
+.slider-group { display: flex; flex-direction: column; gap: 12px; }
+.slider-row { display: flex; flex-direction: column; gap: 6px; }
+.slider-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.slider-name { font-size: 12.5px; font-weight: 600; flex: 1; color: var(--text); }
+.num-input {
+  width: 72px; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 7px; padding: 5px 8px; color: var(--prop-s);
+  font-size: 13px; font-weight: 700; text-align: right; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  font-variant-numeric: tabular-nums;
+}
+.num-input:focus { border-color: var(--prop-s); box-shadow: 0 0 0 3px rgba(91,155,255,.18); }
+.num-input::-webkit-inner-spin-button { opacity: .4; }
+.unit-label { font-size: 11px; color: var(--text-mute); white-space: nowrap; font-weight: 500; }
+.rate-hint {
+  font-size: 11px; color: var(--yellow);
+  text-align: right; margin-top: 2px; min-height: 15px; letter-spacing: .01em;
+  font-variant-numeric: tabular-nums; opacity: .9;
+}
+
+/* Range sliders — clean style */
+input[type=range] {
+  width: 100%; height: 4px; background: var(--border);
+  border-radius: 999px; outline: none; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  accent-color: var(--prop-s);
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--prop-s);
+  cursor: grab; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  transition: transform .1s;
+}
+input[type=range]::-webkit-slider-thumb:active { transform: scale(1.15); cursor: grabbing; }
+input[type=range]::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; border: 3px solid var(--prop-s);
+  cursor: grab; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+}
+
+/* MODE BUTTONS — segmented */
+.mode-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 3px;
+}
+.mode-btn {
+  padding: 8px 6px; border-radius: 7px; border: none;
+  background: transparent; color: var(--text-dim); cursor: pointer;
+  font-size: 11.5px; font-weight: 600; transition: .15s;
+  text-align: center; line-height: 1.25;
+}
+.mode-btn small { display: block; font-size: 9.5px; opacity: .75; margin-top: 1px; font-weight: 500; }
+.mode-btn:hover { color: var(--text); }
+
+/* Phase label */
+.phase-label {
+  font-size: 10.5px; font-weight: 600; color: var(--text-dim);
+  margin: 6px 0 4px;
+  padding: 4px 8px; background: rgba(91,155,255,.07);
+  border-left: 2px solid var(--prop-s); border-radius: 0 6px 6px 0;
+  letter-spacing: .02em;
+}
+
+/* TARGET */
+.target-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.target-input {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 10px; color: var(--text);
+  font-size: 13px; font-weight: 600; width: 100%; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  font-variant-numeric: tabular-nums;
+}
+.target-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(52,211,153,.15); }
+.dose-label { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.dose-name { font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: .05em; }
+
+/* TIME RANGE — chip style */
+.time-range-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+}
+.tr-btn {
+  padding: 7px 4px; border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-dim); cursor: pointer;
+  font-size: 11.5px; font-weight: 600;
+  text-align: center; transition: .15s;
+  font-variant-numeric: tabular-nums;
+}
+.tr-btn:hover { color: var(--text); border-color: var(--text-mute); }
+
+/* CONC BTNs — segmented */
+.conc-row {
+  display: flex; gap: 0;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 3px;
+}
+.conc-btn {
+  flex: 1; padding: 7px 8px; border-radius: 7px;
+  border: none; background: transparent;
+  color: var(--text-dim); cursor: pointer;
+  font-size: 11.5px; font-weight: 600; transition: .15s; text-align: center;
+}
+.conc-btn small { font-size: 9.5px; opacity: .7; display: block; margin-top: 1px; font-weight: 500; }
+.conc-btn:hover { color: var(--text); }
+
+/* STAT CARDS */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 9px; padding: 10px 11px;
+}
+.stat-model { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px; }
+.stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.stat-row:last-child { margin-bottom: 0; }
+.stat-label { font-size: 10.5px; color: var(--text-dim); }
+.stat-value { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* MAIN */
+.main { display: flex; flex-direction: column; background: transparent; overflow: hidden; }
+.chart-area {
+  flex: 1; padding: 18px 22px 10px; min-height: 0;
+  background: var(--surface);
+  margin: 14px 18px 0; border-radius: var(--radius);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-card);
+}
+.chart-area canvas { width: 100% !important; height: 100% !important; }
+
+/* LEGEND */
+.legend-bar {
+  padding: 10px 20px 14px;
+  display: flex; gap: 14px 18px; flex-wrap: wrap; justify-content: center;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 600;
+}
+
+/* TOGGLE */
+.toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.toggle-label { font-size: 12.5px; font-weight: 600; flex: 1; }
+.toggle-switch { position: relative; width: 38px; height: 22px; cursor: pointer; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0; background: var(--border); border-radius: 999px; transition: .2s;
+}
+.toggle-track::before {
+  content: ''; position: absolute; width: 16px; height: 16px;
+  left: 3px; top: 3px; background: #fff; border-radius: 50%;
+  transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.3);
+}
+.toggle-switch input:checked + .toggle-track { background: var(--rema-e); }
+.toggle-switch input:checked + .toggle-track::before { transform: translateX(16px); }
+
+/* ═══ Drug-colored active state ═══ */
+#panelProp .sex-btn.active,
+#panelProp .conc-btn.active,
+#panelProp .mode-btn.active {
+  background: rgba(91,155,255,.16); color: var(--prop-s);
+  box-shadow: 0 0 0 1px rgba(91,155,255,.35);
+}
+#panelProp .tr-btn.active { background: rgba(91,155,255,.16); color: var(--prop-s); border-color: rgba(91,155,255,.55); }
+#panelProp input[type=range] { accent-color: var(--prop-s); }
+#panelProp input[type=range]::-webkit-slider-thumb { border-color: var(--prop-s); }
+#panelProp input[type=range]::-moz-range-thumb { border-color: var(--prop-s); }
+#panelProp .num-input { color: var(--prop-s); }
+#panelProp .num-input:focus { border-color: var(--prop-s); box-shadow: 0 0 0 3px rgba(91,155,255,.18); }
+
+#panelRemi .sex-btn.active,
+#panelRemi .conc-btn.active,
+#panelRemi .mode-btn.active {
+  background: rgba(185,157,255,.16); color: var(--remi-p);
+  box-shadow: 0 0 0 1px rgba(185,157,255,.35);
+}
+#panelRemi .tr-btn.active { background: rgba(185,157,255,.16); color: var(--remi-p); border-color: rgba(185,157,255,.55); }
+#panelRemi input[type=range] { accent-color: var(--remi-p); }
+#panelRemi input[type=range]::-webkit-slider-thumb { border-color: var(--remi-p); }
+#panelRemi input[type=range]::-moz-range-thumb { border-color: var(--remi-p); }
+#panelRemi .num-input { color: var(--remi-p); }
+#panelRemi .num-input:focus { border-color: var(--remi-p); box-shadow: 0 0 0 3px rgba(185,157,255,.18); }
+#panelRemi .phase-label { background: rgba(185,157,255,.08); border-left-color: var(--remi-p); }
+
+#panelRema .sex-btn.active,
+#panelRema .conc-btn.active,
+#panelRema .mode-btn.active {
+  background: rgba(63,216,239,.14); color: var(--rema-e);
+  box-shadow: 0 0 0 1px rgba(63,216,239,.35);
+}
+#panelRema .tr-btn.active { background: rgba(63,216,239,.14); color: var(--rema-e); border-color: rgba(63,216,239,.55); }
+#panelRema input[type=range] { accent-color: var(--rema-e); }
+#panelRema input[type=range]::-webkit-slider-thumb { border-color: var(--rema-e); }
+#panelRema input[type=range]::-moz-range-thumb { border-color: var(--rema-e); }
+#panelRema .num-input { color: var(--rema-e); }
+#panelRema .num-input:focus { border-color: var(--rema-e); box-shadow: 0 0 0 3px rgba(63,216,239,.18); }
+#panelRema .phase-label { background: rgba(63,216,239,.07); border-left-color: var(--rema-e); }
+
+/* MODEL RADIO */
+.model-sel { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.model-sel-label { font-size: 10.5px; color: var(--text-dim); font-weight: 600; margin-right: 2px; }
+.model-radio {
+  padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text-dim); cursor: pointer;
+  font-size: 11px; font-weight: 700; transition: .15s;
+}
+.model-radio:hover { color: var(--text); }
+.model-radio.active { background: rgba(52,211,153,.14); color: var(--green); border-color: rgba(52,211,153,.5); }
+
+/* BIS NOTE */
+.bis-note {
+  background: rgba(63,216,239,.05);
+  border: 1px solid rgba(63,216,239,.22);
+  border-radius: 10px; padding: 10px 11px;
+}
+.bis-note-title {
+  font-size: 9.5px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--rema-e); margin-bottom: 6px;
+}
+.bis-ref-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+.bis-ref-label { font-size: 10.5px; color: var(--text-dim); }
+.bis-ref-val { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ═══ COMBINED VIEW ═══ */
+#panelCombined { flex-direction: column; }
+.combined-header {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 12px 22px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.combined-header .model-info { font-size: 12px; color: var(--text-dim); }
+.combined-header .model-info b { color: var(--text); font-weight: 700; }
+.combined-header .patient-info {
+  font-size: 11px; color: var(--text-dim); margin-left: auto;
+  display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+  padding: 6px 12px; background: var(--bg); border-radius: 8px;
+  border: 1px solid var(--border-soft);
+}
+.combined-header .patient-info b { color: var(--text); font-weight: 700; }
+
+.combined-charts { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 10px 18px; gap: 8px; }
+.mini-chart-wrap {
+  flex: 1; min-height: 0; display: flex; flex-direction: column;
+  background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.mini-chart-header {
+  padding: 8px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-soft); flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+}
+.mini-chart-header .drug-name { font-size: 13px; font-weight: 700; flex-shrink: 0; letter-spacing: -.01em; }
+
+.mode-badge {
+  font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  color: var(--text-dim); white-space: nowrap; flex-shrink: 0;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+
+.dose-summary { font-size: 10.5px; color: var(--text-dim); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.dose-summary b { color: var(--text); font-weight: 700; }
+
+.target-badge {
+  font-size: 9.5px; font-weight: 700; padding: 2px 9px; border-radius: 999px;
+  background: rgba(52,211,153,.10); border: 1px solid rgba(52,211,153,.32);
+  color: var(--green); white-space: nowrap; flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.mini-chart-header .mini-stats {
+  font-size: 10.5px; color: var(--text-dim); margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+.mini-chart-header .mini-stats b { font-weight: 700; color: var(--text); }
+.mini-chart-body { flex: 1; min-height: 0; padding: 6px 10px 4px; }
+.mini-chart-body canvas { width: 100% !important; height: 100% !important; }
+
+.combined-time-row {
+  padding: 10px 22px; display: flex; gap: 10px; align-items: center;
+  border-top: 1px solid var(--border); background: var(--surface);
+  flex-shrink: 0;
+}
+.combined-time-row .sec-title { margin-bottom: 0; margin-right: 4px; }
+.combined-time-row .time-range-row { flex: 1; grid-template-columns: repeat(6, 1fr); }
+
+/* ═══ FOOTER ═══ */
+footer {
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 8px 20px; display: flex; align-items: center; justify-content: space-between;
+  font-size: 10.5px; color: var(--text-mute); flex-shrink: 0;
+}
+footer a { color: var(--text-mute); text-decoration: none; transition: color .15s; }
+footer a:hover { color: var(--text-dim); }
+
+/* ═══ MOBILE RESPONSIVE ═══ */
+@media (max-width: 720px) {
+  html, body {
+    overflow: visible !important;
+    overflow-x: hidden;
+    min-height: unset;
+    height: auto;
+    font-size: 12.5px;
+  }
+  .content { overflow: visible !important; position: static !important; flex: unset; height: auto; }
+  .tab-panel { position: static !important; inset: unset !important; height: auto !important; }
+  .tab-panel.active { display: flex !important; flex-direction: column !important; height: auto !important; }
+
+  .layout {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    display: flex; flex-direction: column;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    overflow-y: visible !important;
+    max-height: none !important;
+    height: auto; padding: 12px; gap: 12px;
+    order: 2;
+  }
+  .sidebar > div:not(.divider) { padding: 11px 12px; }
+
+  .main { overflow: visible !important; height: auto; order: 1; }
+  .chart-area {
+    height: 280px !important; min-height: 280px !important;
+    flex: unset !important; padding: 10px 8px 4px !important;
+    margin: 10px 10px 0; border-radius: 10px;
+  }
+
+  /* Header */
+  .header-top { padding: 0 12px; height: 44px; gap: 8px; }
+  .header-top img, .header-top .logo { width: 26px; height: 22px; font-size: 10px; border-radius: 5px; }
+  header .title { font-size: 13px; }
+  header .title::after { font-size: 10px; margin-left: 4px; }
+  header .credit { font-size: 8.5px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Tab bar: 2×2 grid */
+  .header-tabs {
+    padding: 6px 10px 8px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr; gap: 6px;
+  }
+  .tab-btn { padding: 8px 6px; font-size: 11px; min-height: 36px; }
+
+  .sec-title { font-size: 9.5px; margin-bottom: 8px; }
+  .sex-btn { padding: 8px 6px; font-size: 12px; min-height: 36px; }
+
+  .slider-group { gap: 10px; }
+  .slider-row { gap: 4px; }
+  .slider-name { font-size: 11.5px; }
+  .num-input { width: 64px; font-size: 12px; padding: 5px 6px; min-height: 30px; }
+  .unit-label { font-size: 10px; }
+  .rate-hint { font-size: 10px; }
+
+  input[type=range] { height: 6px; }
+  input[type=range]::-webkit-slider-thumb { width: 18px; height: 18px; }
+
+  .mode-btn { padding: 7px 3px; font-size: 10.5px; min-height: 38px; }
+  .mode-btn small { font-size: 9px; }
+  .phase-label { font-size: 10px; padding: 3px 7px; }
+
+  .conc-btn { padding: 7px 6px; font-size: 10.5px; min-height: 36px; }
+  .conc-btn small { font-size: 9px; }
+
+  .target-row { gap: 8px; }
+  .target-input { padding: 7px 9px; font-size: 12.5px; min-height: 34px; }
+  .dose-name { font-size: 10px; }
+
+  .time-range-row {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px;
+  }
+  .tr-btn { padding: 7px 3px; font-size: 10.5px; min-height: 34px; }
+
+  .stat-grid { gap: 8px; }
+  .stat-card { padding: 9px 10px; }
+  .stat-model { font-size: 9px; }
+  .stat-label { font-size: 10px; }
+  .stat-value { font-size: 11px; }
+
+  .bis-note { padding: 8px 10px; }
+  .bis-note-title { font-size: 9px; }
+  .bis-ref-label { font-size: 10px; }
+  .bis-ref-val { font-size: 10.5px; }
+
+  .model-sel { gap: 5px; }
+  .model-sel-label { font-size: 9.5px; }
+  .model-radio { padding: 5px 10px; font-size: 10px; min-height: 28px; }
+
+  .toggle-label { font-size: 11.5px; }
+
+  .legend-bar { padding: 8px 12px 10px; gap: 8px 14px; justify-content: flex-start; }
+  .legend-item { font-size: 10px; gap: 5px; }
+  .legend-item svg { width: 22px; height: 9px; }
+
+  #panelCombined { height: auto !important; overflow: visible !important; }
+  .combined-header {
+    padding: 10px 12px; gap: 6px 10px;
+    flex-direction: column; align-items: stretch;
+  }
+  .combined-header .model-info { font-size: 10.5px; line-height: 1.45; }
+  .combined-header .patient-info {
+    font-size: 10.5px; margin-left: 0; gap: 10px;
+    justify-content: flex-start;
+  }
+
+  .combined-charts {
+    overflow: visible !important; height: auto !important; flex: unset !important;
+    padding: 8px 10px; gap: 8px;
+  }
+  .mini-chart-wrap { height: auto !important; min-height: unset !important; border-radius: 10px; }
+  .mini-chart-header { padding: 8px 10px; gap: 6px 8px; }
+  .mini-chart-header .drug-name { font-size: 12px; }
+  .mode-badge { font-size: 8.5px; padding: 1px 7px; }
+  .dose-summary { font-size: 9.5px; width: 100%; order: 10; }
+  .target-badge { font-size: 9px; padding: 1px 7px; }
+  .mini-chart-header .mini-stats {
+    font-size: 9.5px; width: 100%; order: 11; margin-left: 0;
+    padding-top: 4px; border-top: 1px solid var(--border-soft);
+  }
+  .mini-chart-body { height: 160px !important; min-height: 160px !important; padding: 4px 6px 2px; }
+
+  #comb_linkedBar {
+    padding: 6px 12px !important; font-size: 10px !important;
+    gap: 6px 12px !important; flex-wrap: wrap !important;
+  }
+  .combined-time-row { padding: 8px 10px; gap: 6px; flex-wrap: wrap; }
+  .combined-time-row .time-range-row {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px; flex: 1;
+  }
+
+  footer {
+    padding: 8px 12px; font-size: 9.5px;
+    flex-wrap: wrap; gap: 4px;
+    justify-content: center; text-align: center;
+  }
+}
+
+/* Hide the old plain "TIVA PK Simulator" text so ::after handles styling cleanly */
+header .title { text-indent: 0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  HEADER + TAB NAV                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<header>
+  <div class="header-top">
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAACeqADAAQAAAABAAACPgAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgCPgJ6AwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAQEBAQEBAgEBAgICAgICAwICAgIDBAMDAwMDBAQEBAQEBAQEBAQEBAQEBAUFBQUFBQYGBgYGBwcHBwcHBwcHB//bAEMBAQEBAgICAwICAwcFBAUHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHB//dAAQAKP/aAAwDAQACEQMRAD8A/u4ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDL1t2j0m4dCQRExBHUcV/Hj8av2hfjlpPxb8SabpvizXoYINZuo4Yo7yQKiiQ4AGeAK/sM13/kDXP/AFxb+VfxIfHr/ktPij/sOXf/AKMav2fwdw1OrXxCqQUtFur9T/Nn9o3nmNwOV5PPBYidJupNNwlKLa5etmrmp/w0r8f/APocPEP/AIGy/wCNH/DSvx//AOhw8Q/+Bsv+NeIUV+9f2Vhf+fMf/AV/kf5N/wCv+ff9DKv/AODZ/wDyR7f/AMNK/H//AKHDxD/4Gy/40f8ADSvx/wD+hw8Q/wDgbL/jXiFFH9lYX/nzH/wFf5B/r/n3/Qyr/wDg2f8A8ke3/wDDSvx//wChw8Q/+Bsv+NH/AA0r8f8A/ocPEP8A4Gy/414hRR/ZWF/58x/8BX+Qf6/59/0Mq/8A4Nn/APJHt/8Aw0r8f/8AocPEP/gbL/jR/wANK/H/AP6HDxB/4Gy/414hRR/ZWF/58x/8BX+Qf6/59/0Mq/8A4Nn/APJHt/8Aw0r8f/8AocPEP/gbL/jR/wANK/H/AP6HDxD/AOBsv+NeIUUf2Vhf+fMf/AV/kH+v+ff9DKv/AODZ/wDyR7f/AMNK/H//AKHDxD/4Gy/40f8ADSvx/wD+hw8Q/wDgbL/jXiFFH9lYX/nzH/wFf5B/r/n3/Qyr/wDg2f8A8ke3/wDDSvx//wChw8Qf+Bsv+NH/AA0r8f8A/ocPEP8A4Gy/414hRR/ZWF/58x/8BX+Qf6/59/0Mq/8A4Nn/APJHt/8Aw0r8f/8AocPEP/gbL/jR/wANK/H/AP6HDxD/AOBsv+NeIUUf2Vhf+fMf/AV/kH+v+ff9DKv/AODZ/wDyR7f/AMNK/H//AKHDxD/4Gy/416J4a/bb/aL8Mhfs2vXNwV73kksufrmQV8mUVlVyTBzVpUI/cjuwHijxJhZ+0oZpWUv+vk3+bZ+qfgT/AIK0/tEeHnS28QDTbu1BGRHajzSP955K+7vhj/wWF+HGuOmn+ONHvLGTgPeSSwpF9do3Gv5vqK+ZzDw5ynEX/c8r7x0P2/g/6Z/iBlEor+0XWgvs1Up3+b1XyP7XPhn+1L8Dvi1HGfBmv2VzI4z5Sscg9xkgA4NfQEcsUy74WVh6qQR+lfwe6T4j17Qp0uNHvLm2ZGDL5MjIMg56Aiv0K+A//BS342fCmeKw8QzHV9OQgfZ5Tswo9SAWPfvX5nnfg/WppzwNTmXZ6P79j+3fC/8AaL5Zi5Qw/E+EdCT09pTvKHq4v3kvS5/V5RXxF+zn+3b8HPj9YxQW14lhqZA821uf3KBumEaQqX5z0HSvttHSRBJGQykZDKcgj2NfkOOy+vhqjpV4OMl0Z/odwvxdlmdYSGOyrExrUpaqUWmv+AOooorjPogooooAKKKKACiiigAqNz2pzbu1REHvWkI9QEooorQAoopr/drGW4EROeTVcsTUrfdqu2ccVIDWfsKiZsdaWoWBzk0ABdjShyOtMooAmDqaYzZ4FNwaCCOtAvUSlBI6UlLgnpQOxIr561Mr44NVgjVMM45oEiwD6UuW96rjPan/ALygZLknrSVH+8o/eUAf/9D+7ikJAFLUBOTmgaQ7e1NJJ5ppIHJpnmDt/n9KAJQSOlSB/X/P6VAHB4p1AixRUAJHSl3tQBNkDrTS6ioaKAJfMH+f/wBVJ5n+f8io6TK0AS+Z/n/Io8z/AD/kVFkUtAEnmf5/yKPM/wA/5FR0UASeZ/n/ACKcHBqGigCxRUKttqagAooooAKKKKAMnXf+QNc/9cW/lX8SHx6/5LT4o/7Dl3/6Mav7b9d/5A1z/wBcW/lX8SHx6/5LT4o/7Dl3/wCjGr9t8Fv4+J/wr8z/ADF/aX/8inJv+vs//SDySiiiv6DP8gQooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA09G1nU/D+pw6xo8z29zA2+KaPhlPqK/aX9jv/gp/q/h24t/BPxqke5tCVhi1BmzIucKC7NgAAnnA6CvxHpQSpDKcEcgivBz7hvC5jS9niYX7PqvRn6z4TeNOfcG46OMyfEOMb+9B6wn6r9dz+73wr4s8P+NdEg8ReGbqK8s7hBJFPCdysp6EGuir+Tv9iX9ujxR+z94ih8O+KJ5bvw/PIEkWVixhHcgsSQoAwFUV/Ur4H8b+H/iF4btvE/hqeO4trmJZFZCDgkAkH3GcV/LXFvCNfKq3LPWD+GXf/gn+7v0f/pCZTx5ln1jCvkxMLe1pN6xfdd4vo/kdfRRRXyR/QQUUUUAFFFFABQRniiigCIoR0puG96norRVAK9FTkA1Ey4qZO4FYjBwahKHtVthkVDUgViuetMMZ7f5/WrlIVBoAomM+lKIz9Kt+Wvv/AJ/GjYv+f/10AVfLPf8Az+tBjPt/n8at7FoKA0AU/L9hSiM/5/8A11a8sf5//XS7FoAqeWe/+f1pwQf5/wD11Z2LS7VFAEFLhvep6KAIMN70uxqmooA//9H+7c9DUFTt901BQPoROecUynN97mm0CCplORUNSoMCgB9FFFABSHOOKWigCAknrSVKy55FN8tv8/8A66AGUU/Y3+f/ANdHln/P/wCugBlLkjpT/L/z/k0oQf5//XQAISetPoAxxRQAVMn3aiAJOBU444oAKKKKACiiigDJ13/kDXP/AFxb+VfxIfHr/ktPij/sOXf/AKMav7b9d/5A1z/1xb+VfxIfHr/ktPij/sOXf/oxq/bfBb+Pif8ACvzP8xf2l/8AyKcm/wCvs/8A0g8kooor+gz/ACBCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAK/Vj/gnR+2bqXwe8VRfDnxhcvJod9IEj81ifIdmJJXpncxAOTX5T1LBNLbTpcQkq8bh0YdQynIP4GvIzzJqOPw08NWWj/B9z9F8LPEvMeE86oZzls7Sg/eXSUesX3T/wCCf3n6ff2mqWUWoWMiyQyoHjdDkEH0NXK/IP8A4JeftYf8LL8Hf8Km8WT7tU0xAlm0h+eWGNQzseSW+ZsZOK/Xyv48zzJ6uBxU8NVWsX966M/6NPDDxDwPFOSYXO8vleFVarrGX2ovzT/zCiiivJPvwooooAKKKKACiiigApj4xT6hY5NOwDagOM8VI54xUJIApALSFgKiLE1GXA4oHYnMg/z/APqoDg/5/wDrVV3tQHPf/P6UAXMikLqKr71pC4/z/wDqoHYsBx/n/wDVTtymqnmf5/yKUOO/+f0oFYt5B6UVXpwdhQImoqLzG/z/APqo8xv8/wD6qAJaKh3tRvagD//S/u4qAjBxU9IQCKB3KzLupmxv8/8A66sFD/n/APXTSCOtAWIgnr/n9akpQpNShAOaAsNVO5p+1aWigQwoO3+f1phUipqKAK9FWKTC0AQUVPgUtMCvRViikBCFY04R+v8An9akooAQADpS0UUAFFFFABRRRQBk67/yBrn/AK4t/Kv4kPj1/wAlp8Uf9hy7/wDRjV/bfrv/ACBrn/ri38q/iQ+PX/JafFH/AGHLv/0Y1ftvgt/HxP8AhX5n+Yv7S/8A5FOTf9fZ/wDpB5JRRRX9Bn+QIUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB7h+zz8WdU+DXxT0zxjp8rxRxXCLdBc/NCWUsMD1AxX9nPw58a2HxD8E6d4w01lMd/ax3GFOdpdQcH0Iz3r+Fav6XP8Agkr8cZPGfw5u/hrqswku9LLXQDHLCJnCIv0wOK/F/F7IFUoQx8FrHR+j2/E/0u/Z3eLUsJmmI4UxM/3ddOdO/ScfiS9VrbybP2Eooor+dz/YoKKKKACiiigAoooyB1oAKr092zwKZVdAIX+9UD5zVh+tRMu6pGiBs44qCrFNKg0B5ENFPKH/AD/+ulCev+f1oCxHRU2xaTYv+f8A9dAaEVFSeX/n/JpRGO/+f1oCwxSw6VKM45pQAOlFAgooooAKKXDe9GG96AP/0/7uKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAydd/5A1z/wBcW/lX8SHx6/5LT4o/7Dl3/wCjGr+2/Xf+QNc/9cW/lX8SHx6/5LT4o/7Dl3/6Mav23wW/j4n/AAr8z/MX9pf/AMinJv8Ar7P/ANIPJKKKK/oM/wAgQooooAKKKKACiiigAor9Cv2H/wBi7QP2sE1I6zq99phsZ/KX7Ikbbh5YfJ3g+tfoh/w5X8B/9Ddrf/fm3/8Aia+MzTj3LMHXlh8RUamt9Gz+lOBPol8b8SZXRzjKcJGdCpflbqQi3Z2ejd1qfzy0V/Q1/wAOV/Af/Q3a3/35t/8A4mj/AIcr+A/+hu1v/vzb/wDxNef/AMRRyb/n6/8AwF/5H1//ABIl4kf9AEP/AAbT/wDkj+eWiv6Gv+HK/gP/AKG7W/8Avzb/APxNH/DlfwH/ANDdrf8A35t//iaP+Io5N/z9f/gL/wAg/wCJEvEj/oAh/wCDaf8A8kfzy0V/Q1/w5X8B/wDQ3a3/AN+bf/4mj/hyv4D/AOhu1v8A782//wATR/xFHJv+fr/8Bf8AkH/EiXiR/wBAEP8AwbT/APkj+eWiv6GW/wCCK/gXadvi3W89sxW//wATXxR+0H/wS/8Ai78JbWXXfCR/tjTYwSCGD3JA6/u44+O3eu3A+IeU4ioqcK1m+6a/M+b4p+h14g5RhJ43E5bzQjq/ZyjNpd7RbZ+XtFXtR02/0i8fT9SieGaM7XjkG1gfoao19rGSauj+ZKtKVOThNWa0ae6YUUUUzMKKKKACiiigAr7/AP8Agm78VX+G/wC0hpWnyMUt9bnjsrls4ASMSSc/iK+AK6/wD4ivPCfjLTvEOnnE1rdK8Zzjk/L1+hry87wCxWDrYeX2otfPp+J974XcWVMi4iy7NqTs6NWEn/hvaS+cW0f3WwypPEs0ZyrqGU+xGRTywFcF8NvEEPiXwJpWrWzbhJYwbm/2hGuf1rtq/iapBxk4vof9OeDxMa1KFWLupJP70SGT0/z+lN3NTaTIqDoH7zQXJ9aZlaWgAyT1opMgdaQuoqlcB1FR+Z/n/IphYnrUgKxyaYSB1prNjgVESO9AyUsh61GcZ4pm9ab5g7f5/SgbJKKhMh78UBz9aBWJqKZ5g7/5/Sml/T/P6UAS0VCHP1p3mf5/yKBElFR+Z/n/ACKXev8An/8AVQBIMd6kDKOnFQb1o3rQBY3rS7lqtvWjetAH/9T+7iomcngUrnnFRk4GaBhS5I6VCXP+f/1Um9qAdyfc1ODmoA/r/n9KkBzzQFyYMDTqr0uTQCJiQOtNLjt/n9KiooEShx3/AM/pRvX/AD/+qoqKAJt60uVqCigCfcopu9f8/wD6qiooAl3r/n/9VO3KagooAn3KKb5i/wCf/wBVRUUATb1pQwNQUUAWKKr0UAUNeYf2Nc/9cW/lX8SHx65+NHig/wDUbu//AEYa/to13/kDXP8A1xb+VfxL/Hn/AJLR4o/7Dd3/AOjDX7b4Lfx8T/hX5n+Yn7S//kVZL/19n/6QeS0UUV/QZ/kEFFFFABRRRQAUUUUAfvR/wRj+54h/6/T/AOiEr9+K/Af/AIIx/c8Q/wDX6f8A0QlfvxX8leJP/I4r/L8j/oQ+hb/ybjKvSf8A6Wwooor4Q/qgKKKKACiiigAqOWKOeJoZlDIw2sp6EGpKKBNX0Z+Dn/BUf9j7QdN8Nt8bfAVosMkc8cV9bQgKGaZwNwAwAFUEnNfgFX9kn7ckccn7OmsLIoYZQ4IzyA9fxt1/TvhNmtXEYCVOq78jsn5Pof4dftA+A8vyjizD4vAU1D6zT5pxSsuaLs5Jd2nr6BRRRX6mfwaFFFFABRRRQAVLBJ5U6S/3XDfkaiooaKjJppo/sc/YW8Rt4q/Zn8P6yzbt6SJn/cbH9K+vK+AP+CZbMf2RvDoJ/wCe3/oZr7+PSv4o4ipKGPxEFspy/M/6cfCHHTxXCuUYip8U6FJv1cERsxPFMoorxj9FCiiigAooooAKjdj90VJUDdTTsAxmx0qEnHJpz/eqB85pDuBc/wCf/wBVRs+OtDZxxUFAIf5h7f5/SlEnr/n9KjooET+YPWkMg+v+fpUNFA9CTzP8/wCRSiQd/wDP6VFRQBZDHrmnBz/n/wDVVUE9qlG7vQIm8z/P+RR5n+f8io6KAH+Y3+f/ANVHmN/n/wDVTKKAP//V/uyf71Rv92ppPWoyMjFBRXopxQikw3vQKwlPTOaQI1SqMDFAhaKKKACoSxJqamFAef8AP86AIqduYUpjP+f/ANdKE55/z+tAD1JIyaWiigBGJAyKiLsamphQHpQAiMScVJTVXbTqAEOe1RFm6VNTGXPI/wA/rQBHuY08Oe/+f0puxqNjUAPLYNIXPb/P6Unlt/n/APXR5bf5/wD10AZWuuTo9yP+mLfy+lfxN/Hn/ktHij/sN3f/AKMNf2x66pGj3J/6Yt/Kv4nPjz/yWjxR/wBhu7/9GGv23wW/j4n/AAr8z/MT9pf/AMinJv8Ar7P/ANIPJaKKK/oM/wAggooooAKKKKACiiigD96P+CMf3PEP/X6f/RCV+/FfgP8A8EY/ueIf+v0/+iEr9+K/krxJ/wCRxX+X5H/Qh9C3/k3GVek//S2FFFFfCH9UBRRRQAUUUUAFFFFAHyN+3D/ybrrP1X/0F6/jYr+yf9uH/k3XWfqv/oL1/GxX9F+DP+6V/wDEvyP8bv2lP/JQZV/16n/6Ugooor9lP82AooooAKKKKACiiigD+tf/AIJlf8mj+Hf+23/oZr9Aa+AP+CZa/wDGIvh1h6Tf+hmvv+v4s4n/AORjif8AHL82f9M3gf8A8kdkn/YNR/8ASIkTIeoplWKK8I/UivRViigCvRU+Fo2rVaWAgqNl7irBj9P8/rTCpHWpAqMuahI7GrrLnkVFQMpmP0/z+tMKHuKvbVNNKDt/n9aAKBjH0/z9aBGPrVwowoCMaB6lXZ7UbParnl/5/wAmkKEdP8/rQL5lPyx6UeXjtVwIT1pfL/z/AJNA9e5V2H0pdjf5/wD11a8sdv8AP60eWP8AP/66CSt5Z7/5/Wjy/wDP+TVrYtG1RQBV8sd/8/rS+Wvv/n8atYWjC0Af/9b+7ZxkcVDVimMgPIoGRUU7Y1GxqAsNop/lt/n/APXR5Z/z/wDroCwwDPFP2N/n/wDXUgAApaAuQ7GptWKKAK9Lhvep6KAIdrGl2N/n/wDXUtFAiEowptWKKAIMGlCMamooAhKMKbViigCvRU+FowtAyCip8LRhaBGFrv8AyBrn/ri38q/iX+PP/JaPFH/Ybu//AEYa/tu15VOjXP8A1xb+VfxJfHrj40eKB/1G7v8A9GGv23wW/j4n/CvzP8xP2mH/ACKcl/6+z/8ASDySiiiv6DP8ggooooAKKKKACiiigD96P+CMf3PEP/X6f/RCV+/FfgP/AMEY/ueIf+v0/wDohK/fiv5K8Sf+RxX+X5H/AEIfQt/5NxlXpP8A9LYUUUV8If1QFFFFABRRRQAUUUUAfI37cP8AybrrP1X/ANBev42K/sn/AG4f+TddZ+q/+gvX8bFf0X4M/wC6V/8AEvyP8bv2lP8AyUGVf9ep/wDpSCiiiv2U/wA2AooooAKKKKACiiigD+t3/gmR/wAmi+Hf+23/AKGa/QEqDX5/f8EyP+TRfDv/AG2/9DNfoHX8WcT/APIxxP8Ajl+bP+mbwQ/5I7JP+waj/wCkRI/L/wA/5NJ5Z7f5/WpaK8I/UiHY1Jtap6KB3IMN70bSKnooBleipWUYyKioAgYYOKaQD1p7/eqJzxigERnGeKSimM+OBQG4+ioCSetAYigCeio/M/z/AJFIXJoCxLRUG5hTg5/z/wDqoC3mS0UA5GaKAHDb70hx2zSUUAFFFFAXP//X/u4ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDJ13/kDXP/AFxb+VfxIfHr/ktPij/sOXf/AKMav7b9d/5A1z/1xb+VfxIfHr/ktPij/sOXf/oxq/bfBb+Pif8ACvzP8xf2l/8AyKcm/wCvs/8A0g8kooor+gz/ACBCiiigAooooAKKKKAP3o/4Ix/c8Q/9fp/9EJX78V+A/wDwRj+54h/6/T/6ISv34r+SvEn/AJHFf5fkf9CH0Lf+TcZV6T/9LYUUUV8If1QFFFFABRRRQAUUUUAfI37cP/Juus/Vf/QXr+Niv7lvi38MtL+Lvgi68DazPLb291jfLAAXGARxnjvX5kf8Ob/gd/0H9b/79Qf/ABFfr/h1xpgssw9WniW7yaasrn+dv0yfo18Tcb5tgcXkkIOFKnKMuaajq2non6H80FFf0v8A/Dm/4Hf9B/W/+/UH/wARR/w5v+B3/Qf1v/v1B/8AEV+if8RZynvL/wABZ/HH/FP3xB/59Uv/AAbE/mgor+l//hzf8Dv+g/rf/fqD/wCIo/4c3/A7/oP63/36g/8AiKP+Is5T3l/4Cw/4p++IP/Pql/4NifzQUV/S/wD8Ob/gd/0H9b/79Qf/ABFH/Dm/4Hf9B/W/+/UH/wARR/xFnKe8v/AWH/FP3xB/59Uv/BsT+aCiv6X/APhzf8Dv+g/rf/fqD/4ij/hzf8Dv+g/rf/fqD/4ij/iLOU95f+AsP+KfviD/AM+qX/g2J79/wTI/5NF8O/8Abb/0M1+gdeMfAT4K6F8APhtZ/DTw5c3F3a2RcxzXIVXO9t2CFwOK9nr+cM7xUK+Mr1qfwyk2vRs/2g8MshxGV8O5bluLSVWjRpwlZ3XNGKTs+uqCiiivLPuQooooAKKKKACoDwcVPULDDUAV3+9UL5zVlxxmoqAK9QEEHmrZT0/z+tRkdjQNFeipti0BFFAaENFWMAdKMA9aA0K9FT7VoAA6UBoMQMKkopQCelAWEop+xqXy/wDP+TQFiOipPL/z/k0eX/n/ACaBH//Q/u4qJnJ4FK55xUZOBmgewUVEXP8An/8AVSb2oC7J9zU7e1QB/X/P6VIDnmgOYmDA06q9Lk0BoTEgdaaXHb/P6VFRQDJQ47/5/Sl3rUNFAibetLlagooAn3KKbvX/AD/+qoqKAJfMX3/z+FHmL/n/APVUVFAE29aN61DRQBNvWjcpqGigCfIPSlqvRQBQ15lGjXP/AFxb+VfxI/Hr/ktPij/sN3f/AKMNf2z67/yBrn/ri38q/iX+PP8AyWjxR/2G7v8A9GGv23wW/j4n/CvzP8xP2l//ACKcl/6+z/8ASDyWiiiv6DP8ggooooAKKKKACiiigD96P+CMf3PEP/X6f/RCV+/FfgP/AMEY/ueIf+v0/wDohK/fiv5K8Sf+RxX+X5H/AEIfQt/5NxlXpP8A9LYUUUV8If1QFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFRydqeSAMmoScnNACVXqZjgVDQAUhAPWlJA60wuO3+f0oACqjrSKqmmEknJoBwaCrk21RTWVQM0eYO/+f0pjNuoFdjlVTT9q1CCQcineYf8AP/6qAJMAdKWmeYO/+f0pQymgGOooooEFFFFAH//R/uyf71Rv92ppPWoyMjFA2V6KcUIpMN70CEp6ZzSBGqVRgYoAWiiigAqEsSamphQHn/P86AIqduYVFPLBaxma5kSNB1aQhQPxJxXzN8WP2vfgZ8HY3HirWbcTJwsUR8wMfTK5A5rpwuDq15KFGDk+yVzxs84iwGWUJYnMMRClTW8pyUV97PqNSSMmlr8K/il/wWH0u1mfTvh3o8j4zsvS6Oh/4CwBr4G8ef8ABTH9pjxnM8a39pb2x+4kduEcD3ZGFfe5b4XZrXScoKC/vP8ARH8pcZ/To4CymUqdHESxE1palG6/8CfL96uf1lSSJEpeQgAdSazDrOnf89o/zr+KbxF+0P8AGfxNKZr/AMRatGSckW13PEPyWSuU/wCFrfFH/oZdf/8ABhcf/Ha+npeC9dr38Sk/8L/zPwvHftMMqhUccPktSUe7qRX4cr/M/uC/tnTv+e6fnSjWdO/57p+dfw+f8LW+KP8A0Muv/wDgwuP/AI7R/wALW+KP/Qy6/wD+DC4/+O1p/wAQWq/9BS/8Bf8Amcf/ABU0wX/Qin/4Nj/8gf3C/wBs6d086P8AOj+2dOH/AC2j/Ov4ev8Aha3xR/6GXX//AAYXH/x2j/ha3xR/6GXX/wDwYXH/AMdo/wCILVf+gpf+Av8AzH/xU0wP/Qin/wCDY/8AyB/cL/bOnf8APaP86uxXMU6CSIhlPQg//Wr+G3/ha3xR/wChl1//AMGFx/8AHa/rA/4J96hqesfsr+FtQ1W4nup5LBWknuXaWRiWbksxLE/U18nxf4fzynDxryrKV3a1rdG+5/QH0d/pd4bxAzavldHLZUHTp+05nNSv7yjayiu59rGT0/z+lJvb/P8A+qjY3+f/ANdJsavzo/sVmVrjn+x7n/ri38q/ic+PP/JaPFH/AGG7v/0Ya/ti11SNHuf+uLfyr+J348/8lo8Uf9hu7/8ARhr9t8Fv4+J/wr8z/MX9pf8A8inJv+vs/wD0g8looor+gz/IEKKKKACiiigAooooA/ej/gjH9zxD/wBfp/8ARCV+/FfgP/wRj+54h/6/T/6ISv34r+SvEn/kcV/l+R/0IfQt/wCTcZV6T/8AS2FFFFfCH9UBRRRQAUUUUAFFFFABRX5ff8FE/wBrT4mfsxvobfD97dVv4JZJxPCsuSrqoxu6cGvy4/4e5ftKf89dP/8AAOL/ABr7jJvD7MMdh44mglyvu+x/MPiN9LjhDhbNquS5tOoq9OzfLC695XVnzL8j+oiiv5d/+HuX7Sn/AD10/wD8A4v8aP8Ah7l+0p/z10//AMA4v8a9T/iE2bdo/f8A8A+G/wCJ/PD7/n7W/wDBa/8Akz+oiiv5d/8Ah7l+0p/z10//AMA4v8aP+HuX7Sn/AD10/wD8A4v8aP8AiE2bdo/f/wAAP+J/PD7/AJ+1v/Ba/wDkz+oiiv5d/wDh7l+0p/z10/8A8A4v8aP+HuX7Sn/PXT//AADi/wAaP+ITZt2j9/8AwA/4n88Pv+ftb/wWv/kz+oiiv5d/+HuX7Sn/AD10/wD8A4v8aP8Ah7l+0p/z10//AMA4v8aP+ITZt2j9/wDwA/4n88Pv+ftb/wAFr/5M/qIor+Xf/h7l+0p/z10//wAA4v8AGj/h7l+0p/z10/8A8A4v8aP+ITZt2j9//AD/AIn88Pv+ftb/AMFr/wCTP6iKK/l3/wCHuX7Sn/PXT/8AwDi/xo/4e5ftKf8APXT/APwDi/xo/wCITZt2j9//AAA/4n88Pv8An7W/8Fr/AOTP6iKK/l3/AOHuX7Sn/PXT/wDwDi/xo/4e5ftKf89dP/8AAOL/ABo/4hNm3aP3/wDAD/ifzw+/5+1v/Ba/+TP6iKK/l3/4e5ftKf8APXT/APwDi/xo/wCHuX7Sn/PXT/8AwDi/xo/4hNm3aP3/APAD/ifzw+/5+1v/AAWv/kz+oNzzimV/L4f+Ct/7SfeSw/8AAOL/ABo/4e3/ALSf/PSw/wDAOL/Gj/iE2bdo/f8A8AX/ABP74ff8/K3/AILX/wAmf0+scmonbHAr+YX/AIe2ftI/89LD/wAA4v8AGmH/AIK0/tIk582w/wDAOL/Gj/iE2bdo/f8A8Af/ABP54ff8/a3/AILX/wAmf08VGX9P8/pX8xX/AA9o/aR/562H/gHF/jTf+Hs37R//AD0sP/AOP/4qj/iE2bdo/f8A8AP+J/PD7/n7W/8ABa/+SP6dd7UB2FfzFf8AD2b9o/8A56WH/gHH/wDFUf8AD2b9o/8A56WH/gHH/wDFUf8AEJs27R+//gB/xP54ff8AP2t/4LX/AMmf07+Z/n/IpC5/z/8Aqr+Yn/h7N+0f/wA9LD/wDj/+Ko/4ezftH/8APSw/8A4//iqP+ITZt2j9/wDwA/4n88Pv+ftb/wAFr/5M/p13tS+Yf8//AKq/mJ/4ezftH/8APSw/8A4//iqP+Hs37R//AD0sP/AOP/4qj/iE2bdo/f8A8AP+J/PD7/n7W/8ABa/+TP6egwNLX8y+i/8ABVr9ozUdYtNPklsNs9zFC3+hx9HcKe/vX9HHgTV73XvCljq98QZbi3WRyBgZI9O1fNcQ8JYvLFB4q3vXtZ32P2rwg+kBw9xu8SsilN+x5ebmjy/Fe1tX2Owooor5g/bQooooA//S/u2cZHFQ1YpjIDyKBkVFO2NRsagLDaKf5bf5/wD10eWf8/8A66AsMAzxT9jf5/8A11IAAKpalqVjpFlJqOpSpDDEpeSRzgACmk3oiZzjFOTei7k5UqCx6Dkmvj/9oX9tH4Q/s/6fKNYvEu79VISztsSkOOzhW3KK/Of9tb/gpwthJc/Dv4IyJIwLQ3GpqQyHsdhBV1OCR06ivwf8TeKvEPjHVH1nxLdzXlzISWlnYsxz7nmv17hHwtq4pRxGOfJDour/AMj/ADv+kN9OzAZFOrlPDEVXxMdJVH/Dg/L+Zry0Pv8A/aE/4KT/ABq+L1zPp3hu4fQ9MYlPItH3CROgJEiEgkc9a/PHUdY1TV52udTuJZ3c7mMjE5P06Vm0V++ZXkmFwUOTDU1Ffj83uf5K8deJ+f8AEuJli86xs60n0b91eUYr3UvRBRRRXqnwQUUUUAFFFFABRRRQAV/Xp/wTp/5NM8J/9g5P/Qnr+Quv6+f+Ccv/ACaX4U/7B6f+hNX5D4yf8i+l/j/Rn+iX7Nz/AJK3MP8AsHf/AKcgfb9FT4FGFr+bT/aYwtd/5A1z/wBcW/lX8S/x5/5LR4o/7Dd3/wCjDX9t+vKv9jXP/XFv5V/Ej8euPjT4oH/Ubu//AEYa/bfBb+Pif8K/M/zE/aYf8inJf+vs/wD0g8kooor+gz/IIKKKKACiiigAooooA/ej/gjH9zxD/wBfp/8ARCV+/FfgP/wRj+54h/6/T/6ISv34r+SvEn/kcV/l+R/0IfQt/wCTcZV6T/8AS2FFFFfCH9UBRRRQAUUUUAFFFFAH4M/8Fo/u+Fv+vWf/ANHJX4C1+/X/AAWj+74W/wCvWf8A9HJX4C1/WHhj/wAiej6v8z/AX6dH/Jx8f/hp/wDpCCiiiv0A/kEKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAN/wp/wAjRpv/AGELf/0Ytf20/Cz/AJJ/pX/Xon8q/iW8Kf8AI0ab/wBhC3/9GLX9t/wqA/4V9pX/AF6J/Kvwrxp2w3/b36H+rX7M3fPP+4X/ALed1S4J6VPgdaK/BD/V4gw3vRhvep6KAP/T/u4ooooAKKKKACiikZlRS7HAAySewFAFHVNUsNFsJdT1OVIYIUMkkjkKFUdTk8V/N9/wUA/4KBar4/1S6+FfwwneDS4GaG7u4yVMxGVZVPUAMoIYEg5r2/8A4KbftqvZNP8ABH4eXWHG6LVZoW5BBw0ZxngqwOCK/AJ3aRi7kkk5JPrX734acCR5Y5hjI6/ZT/N/of5Q/TX+lZVhVq8IcOVrW0r1IvX/AK9xfT+8/kOlllnkMszM7McszHJJ9zUdFFfuqR/lNKTbuwooooEFFFFABRRRQAUUUUAFFFFABX9fP/BOX/k0vwp/2D0/9Cav5Bq/r5/4Jy/8ml+FP+wen/oTV+Q+Mn/Ivpf4/wBGf6Jfs3P+StzD/sHf/pyB9z0UUV/Np/tMZOu/8ga5/wCuLfyr+JD49f8AJafFH/Ycu/8A0Y1f2367/wAga5/64t/Kv4kPj1/yWnxR/wBhy7/9GNX7b4Lfx8T/AIV+Z/mL+0v/AORTk3/X2f8A6QeSUUUV/QZ/kCFFFFABRRRQAUUUUAfvR/wRj+54h/6/T/6ISv34r8B/+CMf3PEP/X6f/RCV+/FfyV4k/wDI4r/L8j/oQ+hb/wAm4yr0n/6Wwooor4Q/qgKKKKACiiigAooooA/Bn/gtH93wt/16z/8Ao5K/AWv36/4LR/d8Lf8AXrP/AOjkr8Ba/rDwx/5E9H1f5n+Av06P+Tj4/wDw0/8A0hBRRRX6AfyCFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAG/4U/5GjTf+whb/APoxa/tw+FX/ACT3Sv8Ar0T+VfxH+FP+Ro03/sIW/wD6MWv7bfhU/wDxb/Sgf+fRP5V+E+NO2G/7e/Q/1a/Zm755/wBwv/bz0SikBzS1+Cn+rwUUUUAf/9T+7iomcngUrnnFRk4GaB7BRURc/wCf/wBVJvagLsn3NXxt+2z+0bafs/fCK81KCRTqV5E0FpDxuIf5WIz3UNmvsF51iQySkBVGSScf0r+UT/go9+0DN8YfjPPoumzF9L0s+XbgNwJBlJBj/eX1r7TgPh3+0cfGEvgjrL07fM/mj6VnjJ/qbwpXxVGVsTW/d0u/M1rL/t1a+tj4E8ReINU8U61ca/rUrzXN1J5ksjkksenJJJ6D1rEoor+uoQUUoxWiP+eTE4mpWqSrVZNyk223u29W2FFFFUYBRRRQAUUUUAFFFFABRRRQAUUUUAFf18/8E5f+TS/Cn/YPT/0Jq/kGr+vf/gnM2P2TPCY/6hyf+hNX5D4yf8i+l/j/AEZ/ol+zc/5K3MP+wd/+nIH3TRRRX82n+0xk67/yBrn/AK4t/Kv4kPj1/wAlp8Uf9hy7/wDRjV/bfrv/ACBrn/ri38q/iQ+PX/JafFH/AGHLv/0Y1ftvgt/HxP8AhX5n+Yv7S/8A5FOTf9fZ/wDpB5JRRRX9Bn+QIUUUUAFFFFABRRRQB+9H/BGP7niH/r9P/ohK/fivwH/4Ix/c8Q/9fp/9EJX78V/JXiT/AMjiv8vyP+hD6Fv/ACbjKvSf/pbCiiivhD+qAooooAKKKKACiiigD8Gf+C0f3fC3/XrP/wCjkr8Ba/fr/gtH93wt/wBes/8A6OSvwFr+sPDH/kT0fV/mf4C/To/5OPj/APDT/wDSEFFFFfoB/IIUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAb/hT/kaNN/7CFv8A+jFr+2r4Vgn4f6Vj/n0T+VfxK+FP+Ro03/sIW/8A6MWv7cPhV/yT3Sv+vSP+VfhPjTthv+3v0P8AVr9mbvnn/cL/ANvO8CMOelS896KK/BT/AFeCiiigD//V/uyf71Rv92ppPWoyMjFA2V6KcUIpMN70CPlT9sz4tJ8H/gJrniCGTy7ySylSwOcEzKA3Hrx71/HVrGoy6xq11q0+d91cSXD5/vSMWP6mv3g/4LD/ABQlSDSfhfby7SrrfyKp6rIjoQfyr8Dq/pzwmyhUMveIa96o7/JbH+H37QXxCnmfF0MohL91hIJW/vy1l8+gUUUV+qH8EBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABX9en/BOn/k0zwn/wBg5P8A0J6/kLr+vT/gnT/yaZ4T/wCwcn/oT1+Q+Mn/ACL6X+P9Gf6Jfs3P+StzD/sHf/pyB91IcinU1BgU6v5tP9pjJ13/AJA1z/1xb+VfxIfHr/ktPij/ALDl3/6Mav7b9d/5A1z/ANcW/lX8SHx6/wCS0+KP+w5d/wDoxq/bfBb+Pif8K/M/zF/aX/8AIpyb/r7P/wBIPJKKKK/oM/yBCiiigAooooAKKKKAP3o/4Ix/c8Q/9fp/9EJX78V+A/8AwRj+54h/6/T/AOiEr9+K/krxJ/5HFf5fkf8AQh9C3/k3GVek/wD0thRRRXwh/VAUUUUAFFFFABRRRQB+DP8AwWj+74W/69Z//RyV+Atfv1/wWj+74W/69Z//AEclfgLX9YeGP/Ino+r/ADP8Bfp0f8nHx/8Ahp/+kIKKKK/QD+QQooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA3/Cn/I0ab/2ELf/ANGLX9uvwrjA+HulZP8Ay5x/y+tfxFeFP+Ro03/sIW//AKMWv7efhZ/yT7Sv+vOP+Qr8J8adsN/29+h/q1+zN3zz/uF/7ed9sWl2qKWivwU/1eEwtGFp+1jRsagD/9b+7ZxkcVDVimMgPIoGRUU7Y1YPim8bS/DV/qWceRaSy59Nqk1UY3aRnWqKEJTeyV/uP5P/APgo/wCOm8a/tHagjvvOml9P65wI3OBXwHXsf7Qesv4g+NPiTWHYt9o1SWXJOfvYrxyv7W4ewioYGhSXSK/K5/zJeMOfzzTinNcdPedaf3KTivwSCiiivYPzcKKKKACiiigAqWCGW5mS3gUs8jBEUdSzHAH4moq/UP8A4Jo/stw/Gn4jHxl4nhZ9I0hsuhGA0uBJEc9CNy4IxzXk53m9LA4WeKq7RX3voj9A8LvDrG8VZ5hckwC9+q7N9Ix+1J+SWpW/Z2/4Jm/FT4w6TF4o18rpmnzKHjWbMcrKedy5BBFfWo/4I4Rf9Bh/+/g/+N1+89lZWmnWsdjYxpFDEoSOOMBVUDsAOAKtV/NOO8Ts1q1HOFTlXRI/234X+g9wFgMFTw+Jwft6iXvTk3dvr6Lsj8Dv+HN8X/QYk/7+D/43R/w5vi/6DEn/AH8H/wAbr98MA9aMCuP/AIiLm/8Az/Z9D/xJv4d/9CqP3s/A/wD4c3xf9BiT/v4P/jdL/wAOboj01iT/AL+D/wCIr98KKP8AiIub/wDP9h/xJv4d/wDQqj97PwP/AOHNsf8A0F5P+/g/+Ir9ef2cPg+fgb8JtK+G7Tef/ZsAgEhOcgEkc8evpXu9FeTm/FWOx1NUsVU5op3+Z994e+AvC3CuLnjcjwSpVJx5W03rG6dvvSCiiivnT9iKOp2z3mnzWsWN0kZUZ6ZNfzpfEv8A4JOfHzxl8QNZ8VWOo6LHDqGoz3cSOz7gkjkgHjriv6O6K+i4f4nxeWSnLCtJy0d1c/H/ABd8Dcg43o4fD59TlKNFuUeWbhq1Z3tvofzG/wDDnf8AaH/6Cmh/99P/AIUf8Od/2h/+gpof/fT/AOFf05UV9R/xFfOP54/+Ao/C/wDiQPw5/wCger/4OmfzG/8ADnf9of8A6Cmh/wDfT/4Uf8Od/wBof/oKaH/30/8AhX9OVFH/ABFfOP54/wDgKD/iQPw5/wCger/4OmfzG/8ADnf9of8A6Cmh/wDfT/4Uf8Od/wBof/oKaH/30/8AhX9OVFH/ABFfOP54/wDgKD/iQPw5/wCger/4OmfzG/8ADnf9of8A6Cmh/wDfT/4Uf8Od/wBof/oKaH/30/8AhX9OVFH/ABFfOP54/wDgKD/iQPw5/wCger/4Omfl/wD8E+/2OfiN+y4dVXxxc2NwL2fzYjZknA8tUwcj1FfqBRRXw+b5rWxteWJrv3nvbQ/qDw+4Cy7hnKaOS5VFqhSvyqTcnq7vV6vVhRRRXmn2gUUUUAFFFFABRRRQB+RH/BUH9n34kfHJ/D0fgGyluxa28yztGhbaTIrDOPUCvyC/4d3ftI/9Ae5/78tX9elFfoOR+I2Ny/DRwtGK5VffzP5F8U/obcNcW51WzzMq1RVaiimouySirI/kL/4d3ftI/wDQHuf+/LUf8O7v2kf+gPc/9+Wr+vSivX/4i/mX8kfuPzz/AIp2cF/8/wCt/wCBH8hf/Du79pH/AKA9z/35aj/h3d+0j/0B7n/vy1f16UUf8RfzL+SP3B/xTs4L/wCf9b/wI/kL/wCHd37SP/QHuf8Avy1H/Du79pH/AKA9z/35av69KKP+Iv5l/JH7g/4p2cF/8/63/gR/IX/w7u/aR/6A9z/35aj/AId3ftI/9Ae5/wC/LV/XpRR/xF/Mv5I/cH/FOzgv/n/W/wDAj+Qv/h3d+0j/ANAe5/78tR/w7u/aR/6A9z/35av69KKP+Iv5l/JH7g/4p2cF/wDP+t/4EfyF/wDDu79pH/oD3P8A35aj/h3d+0j/ANAe5/78tX9elFH/ABF/Mv5I/cH/ABTs4L/5/wBb/wACP5C/+Hd37SP/AEB7n/vy1H/Du79pH/oD3P8A35av69KKP+Iv5l/JH7g/4p2cF/8AP+t/4EfyF/8ADu79pH/oD3P/AH5aj/h3d+0j/wBAe5/78tX9elFH/EX8y/kj9wf8U7OC/wDn/W/8CP5C/wDh3d+0j/0B7n/vy1H/AA7u/aR/6A9z/wB+Wr+vSij/AIi/mX8kfuD/AIp2cF/8/wCt/wCBH8hf/Du79pH/AKA9z/35avN/in+yF8ZPg/4Xbxf400+a2s1mSAyPGyje+cDJ+lf2eV+Z3/BV3/k1qT/sM2v/ALNXrZF4pY/E4yjh5xjaUkmfA+KX0EuE8l4czHNsLWqupQpTnG8tLxV1fyP5UKKKK/oI/wAggooooAKKKKACiiigDf8ACn/I0ab/ANhC3/8ARi1/b98KlB+Hukn/AKc4/wCVfxA+FP8AkaNN/wCwhb/+jFr+3/4U/wDJPNJ/684/5V+E+NO2G/7e/Q/1Z/Znb55/3C/9uPQdq0tFFfgp/q+FFFFAH//X/u4ooooAK86+LsjRfCzxDKhwV0a7IPuImr0WvN/jF/ySnxH/ANgW8/8ARTVvhf4kPVfmeXnb/wBixH+CX/pLP4i/F88lz4mvZ5jlmnYsT3Nc3W94o/5GC7/67GsGv7jw38OPoj/luzuTeMxDf88vzYUUUVseYFFFFABRRRQAV/VR/wAErdI0+x/Zztb+2jVZboK07jqxUsBn8K/lXr+rr/glx/ybPpv+4P5mvyrxeb/syP8AiX5M/v39nVTi+NcQ2tVQlby96J+k1FFFfzIf7dhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABX5nf8FXf+TWpP+wza/wDs1fpjX5nf8FXf+TWpP+wza/8As1fRcJf8jPDf41+Z+PfSC/5IjO/+wep/6SfyoUUUV/Zx/wA1AUUUUAFFFFABRRRQBv8AhT/kaNN/7CFv/wCjFr+3/wCFP/JPNJ/684/5V/EB4U/5GjTf+whb/wDoxa/t/wDhT/yTzSf+vOP+VfhPjTthv+3v0P8AVr9mbvnn/cL/ANvPQqKKK/BT/V4KKKKAP//Q/u4qJnJ4FK55xUZOBmgYV5x8YP8AklXiL/sDXf8A6KavQi5/z/8Aqrzf4wO3/CqvEX/YGu//AEU1b4X+LD1X5nl5439SxH+CX/pLP4kvFH/IwXf/AF2NYNb3ij/kYLv/AK7GsGv7jw/8OPoj/lszn/fK/wDjl+bCiiitjzQooooAKKKKACv6uf8AglwR/wAM0aaP9gfzNfyjV/Vp/wAEu/8Ak2nTf9wfzNflHi//AMi2H+Jfkz/QD9nR/wAlnif+vEv/AEqJ+llFQhiKUuT0/wA/pX8zH+3BLRUG40ZI6UAT0VBuNG5qAJ6Kh3HGKbQBYoqvkjpTtxxigCaioASOlG5jQBPRUGTnNSK2eDQA+iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACvzO/wCCrv8Aya1J/wBhm1/9mr9Ma/M7/gq7/wAmtSf9hm1/9mr6LhL/AJGeG/xr8z8e+kF/yRGd/wDYPU/9JP5UKKKK/s4/5qAooooAKKKKACiiigDf8Kf8jRpv/YQt/wD0Ytf2/wDwp/5J5pP/AF5x/wAq/iA8Kf8AI0ab/wBhC3/9GLX9v/wp/wCSeaT/ANecf8q/CfGnbDf9vfof6tfszd88/wC4X/t56FRRRX4Kf6vBRRRQB//R/uyf71Rv92ppPWoyMjFA2V684+MH/JKvEX/YGu//AEU1eklCK83+MAb/AIVV4i6/8ga7/wDRTVvhf4sPVfmeVnn+5Yj/AAS/9JZ/En4o/wCRgu/+uxrBre8Uf8jBd/8AXY1g1/ceH/hx9Ef8tuc/75X/AMcvzYUUUVseaFFFFABRRRQAV/Vp/wAEu/8Ak2nTf9wfzNfyl1/Vp/wS7/5Np03/AHB/M1+UeL//ACLYf4l+TP8AQD9nR/yWmJ/68S/9KifpJRRRX8zH+3AUUUc0AFFHPeigAooooAKKKKACkDA0jDNN2HPX/P51SSAkoooqQJ1ORmlpqDAp1ABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFfmd/wVd/5Nak/7DNr/AOzV+mNfmd/wVd/5Nak/7DNr/wCzV9Fwl/yM8N/jX5n499IL/kiM7/7B6n/pJ/KhRRRX9nH/ADUBRRRQAUUUUAFFFFAG/wCFP+Ro03/sIW//AKMWv7f/AIU/8k80n/rzj/lX8QHhT/kaNN/7CFv/AOjFr+3/AOFP/JPNJ/684/5V+E+NO2G/7e/Q/wBWv2Zu+ef9wv8A289Cooor8FP9XgooooA//9L+7ZxkcVDVimMgPIoGRV5x8YP+SVeIv+wNd/8Aopq9J2NXnHxhQ/8ACqvEf/YFu/8A0U1b4X+LD1X5nl54v9ixH+CX/pLP4ivFH/IwXf8A12NYNb3ij/kYLv8A67GsGv7jw/8ADj6I/wCWzOf98r/45fmwooorY80KKKKACiiigAr+rX/gl0D/AMM06b/uD+Zr+Uqv6uv+CXH/ACbPpv8AuD+Zr8p8X/8AkWw/xL8mf6Afs6P+S0xP/XiX/pUT9INjUuw1LRX8yn+3BBgg4ow3vU9FAEGG96NpNT0UAQ7Go2NU1FAEOxqTDe9T0UAQYb3ow3vU9FAEIUmpFUAc06igAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAr8zv+Crv/JrUn/YZtf/AGav0xr8V/8Agr/8YtMsPh3ZfCS2kja6vZ49QZQQSohkKkHuODX1PBOGnVzXDRgtpJ/Jbn4V9JjOcPgeBM6q4mfKnRnFecpKyS829D+ceiiiv7HP+bwKKKKACiiigAooooA3/Cn/ACNGm/8AYQt//Ri1/b/8Kf8Aknmk/wDXnH/Kv4j/AADp8+p+NdKs7cFmbULc4HoJFJ/Sv7iPA+mjSPCOnaeDny7SIfmoNfg/jTNf7NHr736H+sP7M7DT5M8q2929JX8/fOqooor8HP8AVcKKKKAP/9P+7iiiigArzf4xf8kp8R/9gW8/9FNXpFeb/GL/AJJT4j/7At5/6Kat8L/Fh6r8zy88/wByxH+CX/pLP4hfFH/IwXf/AF2NYNb3ij/kYLv/AK7GsGv7jw/8OPoj/ltzn/fK/wDjl+bCiiitjzQooooAKKKKACv6L/8Agn3+1P8AB74X/Aaw8N+LtRW3uo0G6MlR3Pq1fzoUV83xPw3TzTDrD1ZOKTvoftfgX42YzgTNambYGhGrOUHC0m0rNp309D+xj/hu/wDZ0/6C6/mn/wAVR/w3f+zp/wBBdfzT/wCKr+OeivgP+INYP/n/AC+5H9b/APFSbiL/AKFdL/wKX+R/Yx/w3f8As6f9BdfzT/4qj/hu/wDZ0/6C6/mn/wAVX8c9FH/EGsH/AM/5fcg/4qTcRf8AQrpf+BS/yP7GP+G7/wBnT/oLr+af/FUf8N3/ALOn/QXX80/+Kr+Oeij/AIg1g/8An/L7kH/FSbiL/oV0v/Apf5H9jH/Dd/7On/QXX80/+Ko/4bv/AGdP+guv5p/8VX8c9FH/ABBrB/8AP+X3IP8AipNxF/0K6X/gUv8AI/sY/wCG7/2dP+guv5p/8VR/w3f+zp/0F1/NP/iq/jnoo/4g1g/+f8vuQf8AFSbiL/oV0v8AwKX+R/Yx/wAN3/s6f9BdfzT/AOKo/wCG7/2dP+guv5p/8VX8c9FH/EGsH/z/AJfcg/4qTcRf9Cul/wCBS/yP7GP+G7/2dP8AoLr+af8AxVH/AA3f+zp/0F1/NP8A4qv456KP+INYP/n/AC+5B/xUm4i/6FdL/wACl/kf2Mf8N3/s6f8AQXX80/8AiqP+G7/2dP8AoLr+af8AxVfxz0Uf8Qawf/P+X3IP+Kk3EX/Qrpf+BS/yP7GP+G7/ANnT/oLr+af/ABVH/Dd/7On/AEF1/NP/AIqv456KP+INYP8A5/y+5B/xUm4i/wChXS/8Cl/kf2Mf8N3/ALOn/QXX80/+Ko/4bv8A2dP+guv5p/8AFV/HPRR/xBrB/wDP+X3IP+Kk3EX/AEK6X/gUv8j+3v4V/Hn4c/GQTnwLeC6+zNslxg4OM9ie1ey1+C3/AARf/wCQZ4l/7CI/9EJX701+KcV5PDAY6phabuo21fof6a+A3iLieK+FsFn2LpqE6ybcY7K0muvoFFFFfOn7CFFFFABRRRQAUUUUAcb4x+IPg7wBZrf+MNQtrCJiAr3MixgknHViO9ea/wDDT/wH/wChn0j/AMCY/wD4uvz3/wCCwX/JFbb/AK+Lf/0etfzR1+ucHeG9HM8EsVOs4u7Vkk9j/Pj6Rv00Mw4H4klkWHyyFaKpxnzSnKL96+llF7WP7ZP+Gn/gP/0M+kf+BMf/AMXR/wANP/Af/oZ9I/8AAmP/AOLr+Juivqf+ILYf/oJl9y/zPwf/AIqY5t/0JKf/AINl/wDIH9sn/DT/AMB/+hn0j/wJj/8Ai6P+Gn/gP/0M+kf+BMf/AMXX8TdFH/EFsP8A9BMvuX+Yf8VMc2/6ElP/AMGy/wDkD+2T/hp/4D/9DPpH/gTH/wDF0f8ADT/wH/6GfSP/AAJj/wDi6/iboo/4gth/+gmX3L/MP+KmObf9CSn/AODZf/IH9sn/AA0/8B/+hn0j/wACY/8A4ulX9p74EMQo8TaRknA/0mP/AOLr+Jqr+lf8hS2/6+I//QhUy8GMOk39Zl9y/wAzWj+0tzac4w/sSnq0v4sv/kD+8eyvbXUbSO+snWSKVQ6OhyGB5BBq1Xmfwd/5Jpo3/XhB/wCi1r0yvwGtDlnKPY/1uy/EutQp1mrOUU/vVwqvc3dtZRefdyLGgOCznAqxXxT/AMFANZ1bQf2btR1HRbia1nW8tws0DFGAIfuK3y/Ce3r06KduZpfeeVxbn6yrLMVmUocyowlO3flV7H1v/wAJV4b/AOf62/7+Cj/hKvDf/P8AW3/fwV/E5/wv340f9DNq/wD3/aj/AIX78aP+hm1f/v8AtX7F/wAQXrf9BC+5n+cn/FS3Kv8AoT1f/Ao/5n9sf/CVeG/+f62/7+Cj/hKvDf8Az/W3/fwV/E5/wv340f8AQzav/wB/2o/4X78aP+hm1f8A7/tR/wAQXrf9BC+5h/xUtyr/AKE9X/wKP+Z/bH/wlXhv/n+tv+/go/4Srw3/AM/1t/38FfxOf8L9+NH/AEM2r/8Af9qP+F+/Gj/oZtX/AO/7Uf8AEF63/QQvuYf8VLcq/wChPV/8Cj/mf1u/Hv8Aaw+FfwQ8J3Or6lqVtPdLG3k2sDrJIXxxlQwbGSK/kv8Aj78afEnx3+JF/wCOvEMhP2idnt4c5WJCFBCk84JXPPrXm/iLxf4n8Wzi68S31zeyDo9w5Y/rXOV+i8G8CUcq5qjlzVHpfsvI/jj6SX0rsy4+9ng4UvYYOD5lC93KXeb8ui26hRRRX3p/JQUUUUAFFFFABRRRQB9Rfsa+Ez41/aH8P6Bt3ebOWx/uDd/Sv7NLGLyLKGD+5EifkAK/mS/4JH/Do+KPjZdeLmj3DQ44p1YjgebvQ1/TvX8y+LuOVTMo0V9iK+96/wCR/uF+zy4Xlg+C6mPmtcRVk1/hj7q/FSCiiivyk/vYKKKKAP/U/u4qJnJ4FK55xUZOBmgYV5x8YP8AklXiL/sDXf8A6KavQi5/z/8Aqrzf4wO3/CqvEX/YGu//AEU1b4X+LD1X5nlZ5/uWI/wS/wDSWfxJeKP+Rgu/+uxrBre8Uf8AIwXf/XY1g1/ceH/hx9Ef8tuc/wC+V/8AHL82FFFFbHmhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB++//BF//kGeJf8AsIj/ANEJX701+C3/AARf/wCQZ4l/7CI/9EJX701/JPiT/wAjiv8AL8kf9Cn0Mf8Ak3GU+kv/AEuQUUUV8Kf1IFFFFABRRRQAUUUUAfj3/wAFgv8Akitt/wBfFv8A+j1r+aOv6XP+CwX/ACRW2/6+Lf8A9HrX80df1L4T/wDIoX+KX6H+Ef7QH/k4M/8ArxT/ADmFFFFfpZ/EYUUUUAFFFFABV/Sv+Qpbf9fEf/oQqhV/Sv8AkKW3/XxH/wChCoqfCzpwf8an6r8z+4X4O/8AJNNG/wCvCD/0WtemV5n8Hf8Akmmjf9eEH/ota9Mr+GsX/Fn6s/6msi/3LD/4I/kgr4W/4KL/APJsOp/9ftv/ACevumvhb/gov/ybDqf/AF+2/wDJ69Hh3/fqH+JfmfHeL/8AyS2bf9eKn/pLP5CKKKK/tc/5jQooooAKKKKACiiigAooooAKKKKACiiigAoor1r4H/DW/wDi18TdJ8EWUbut7dpDMy/wK2Rk+2axxOIjSpyqzdlFXfyPUyTJ6+YYyjgcLHmqVZKMV5ydkf0Yf8Eovg/L4F+B7eMdTi8u91WeaFxjkxRybozzzyGr9Vq4j4ceEbPwL4H0zwtZxrGtnZQwuF6F1RVY/UkV29fxXnuZSxmMq4mX2m2f9MvhZwVS4d4ewGS0dqNOMX5u2r9W7sKKKK8k+/CiiigD/9X+7J/vVG/3amk9ajIyMUDZXrzj4wf8kq8Rf9ga7/8ARTV6SUIrzf4wBv8AhVXiLr/yBrv/ANFNW+F/iw9V+Z5Wef7liP8ABL/0ln8Sfij/AJGC7/67GsGt7xR/yMF3/wBdjWDX9x4f+HH0R/y25z/vlf8Axy/NhRRRWx5oUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAfvv/wAEX/8AkGeJf+wiP/RCV+9Nfgt/wRf/AOQZ4l/7CI/9EJX701/JPiT/AMjiv8vyR/0KfQx/5NxlPpL/ANLkFFFFfCn9SBRRRQAUUUUAFFFFAH49/wDBYL/kitt/18W//o9a/mjr+lz/AILBf8kVtv8Ar4t//R61/NHX9S+E/wDyKF/il+h/hH+0B/5ODP8A68U/zmFFFFfpZ/EYUUUUAFFFFABV/Sv+Qpbf9fEf/oQqhV/Sv+Qpbf8AXxH/AOhCoqfCzpwf8an6r8z+4X4O/wDJNNG/68IP/Ra16ZXmfwd/5Jpo3/XhB/6LWvTK/hrF/wAWfqz/AKmsi/3LD/4I/kgr4W/4KL/8mw6n/wBftv8Ayevumvhb/gov/wAmw6n/ANftv/J69Hh3/fqH+JfmfHeL/wDyS2bf9eKn/pLP5CKKKK/tc/5jQooooAKKKKACiiigAooooAKKKKACiiigBQCTgV++3/BJf9ml4Un+NniS3Kl1EVisg+8rAOki54GOR0zX5Wfsnfs7+If2hfifZaBp0TmzhnSa8nx8gWNlYqSQR8y5GO9f2FfD/wAC6D8NvCNj4L8NxLFZ2EC28KqMfKvTua/G/FbipUaP9n0Ze/L4vJdvmf6T/QE8B6mYZk+L8xpfuKGlK6+Kp/MvKK692dlRRRX85n+yIUUUUAFFFFAH/9b+7ZxkcVDVimMgPIoGRV5x8YP+SVeIv+wNd/8Aopq9J2NXnHxhQ/8ACqvEf/YFu/8A0U1b4X+LD1X5nl54v9ixH+CX/pLP4ivFH/IwXf8A12NYNb3ij/kYLv8A67GsGv7jw/8ADj6I/wCWzOf98r/45fmwooorY80KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP33/AOCL/wDyDPEv/YRH/ohK/emvwW/4Iv8A/IM8S/8AYRH/AKISv3pr+SfEn/kcV/l+SP8AoU+hj/ybjKfSX/pcgooor4U/qQKKKKACiiigAooooA/Hv/gsF/yRW2/6+Lf/ANHrX80df0uf8Fgv+SK23/Xxb/8Ao9a/mjr+pfCf/kUL/FL9D/CP9oD/AMnBn/14p/nMKKKK/Sz+IwooooAKKKKACr+lf8hS2/6+I/8A0IVQq/pX/IUtv+viP/0IVFT4WdOD/jU/Vfmf3C/B3/kmmjf9eEH/AKLWvTK8z+Dv/JNNG/68IP8A0WtemV/DWL/iz9Wf9TWRf7lh/wDBH8kFfC3/AAUX/wCTYdT/AOv23/k9fdNfC3/BRf8A5Nh1P/r9t/5PXo8O/wC/UP8AEvzPjvF//kls2/68VP8A0ln8hFFFFf2uf8xoUUUUAFFFFABRRRQAUUUUAFFFFABXovwu+GHiv4teL7Twf4StZbm5upRGBGM4zk+o9K2fg58FPHPxs8VweGPB9nNMZHAknCsI0GQDl8FQec4Jr+pv9jz9jDwh+zb4aju7mKO41yeMfablwD5fQ7V6gENn5h1r4TjPjahldJxi+aq9l282f1d9Gr6L+ZccY6OIrxdPAQa56lrc1vsw7t7X6HVfshfsueHP2bvh9BpkEaPqdxGr3txjnJGcZPORnBr69oor+VMbjamIqyrVpXlLVs/3t4Z4bwWT4CjluX01CjTSjFLol/WoUUUVynuhRRRQAUUUUAf/1/7uKKKKACvN/jF/ySnxH/2Bbz/0U1ekV5v8Yv8AklPiP/sC3n/opq3wv8WHqvzPLzz/AHLEf4Jf+ks/iF8Uf8jBd/8AXY1g1veKP+Rgu/8Arsawa/uPD/w4+iP+W3Of98r/AOOX5sKKKK2PNCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD99/8Agi//AMgzxL/2ER/6ISv3pr8Fv+CL/wDyDPEv/YRH/ohK/emv5J8Sf+RxX+X5I/6FPoY/8m4yn0l/6XIKKKK+FP6kCiiigAooooAKKKKAPx7/AOCwX/JFbb/r4t//AEetfzR1/S5/wWC/5Irbf9fFv/6PWv5o6/qXwn/5FC/xS/Q/wj/aA/8AJwZ/9eKf5zCiiiv0s/iMKKKKACiiigAq/pX/ACFLb/r4j/8AQhVCr+lf8hS2/wCviP8A9CFRU+FnTg/41P1X5n9wvwd/5Jpo3/XhB/6LWvTK8z+Dv/JNNG/68IP/AEWtemV/DWL/AIs/Vn/U1kX+5Yf/AAR/JBXwt/wUX/5Nh1P/AK/bf+T19018Lf8ABRf/AJNh1P8A6/bf+T16PDv+/UP8S/M+O8X/APkls2/68VP/AEln8hFFFFf2uf8AMaFFFFABRRRQAUUUoBY7VBJPQCgaQlFdZoPgbxd4lvI7DRdOu5pJThNsTbT/AMCxivvn4M/8Ex/j18S5orrxBB/Ytk7KwuJ08wMvfhXDCvJzHPsHhI82IqqPz1+7c/QuC/CbiPiGqqOT5fUqvuo2ivWTsl82fnBb2811MtvbqXdzhVHUmv0Z/Zg/4J2fFT41X0Gr+JraXStI3Bne4XY7rnqhIKtkc/Q1+2H7PX/BOL4L/BVItT1WAatqiYLzSkvbsR1xFIGxz71+g1lYWWm2y2enxRwxIMJHEoVQPYDgV+M8TeLjknSy6Nv7z/RH+k/gj+z0hRnTzDjKspta+xg/d/7fl19Fp6nhHwD/AGbPhr+z14cj0XwTZRRzFALm92BZZmxjL7eCccdOlfQVFFfiWJxNStN1Ksm5Pds/06ybJcJl2Gp4PA0Y06UFaMYqyS9AooorA9QKKKKACiiigAooooA//9D+7iomcngUrnnFRk4GaBhWdq+lWOu6VcaNqaCS3uoXt54z/Ejjaw/EGrhc/wCf/wBVJvamm07ompTUouMldPdHxXP/AME8P2SrmdrifwlYs7ncxYuST/31UX/Dur9kT/oULD/x/wD+Kr7bD+v+f0qQHPNewuIsf/0Ez/8AAn/mfnMvB/hNtt5Nh7/9eaf/AMifEg/4J0fshEf8ihYf+P8A/wAVS/8ADub9kP8A6FCw/wDH/wD4uvtsEjpTg5/z/wDqp/6x5h/0Ez/8Cf8AmL/iDvCX/Qmw3/gmn/8AInxF/wAO5/2Qv+hQsP8Ax/8A+Lpp/wCCdP7II/5lGw/8f/8Aiq+3DRR/rHmH/QTP/wACf+Yf8Qd4S/6E2G/8E0//AJE+Ix/wTp/ZBP8AzKNh/wCP/wDxVH/Duj9kH/oUbD/x/wD+Kr7coo/1jzD/AKCZ/wDgT/zD/iDvCX/Qmw3/AIJp/wDyJ8Sf8O6P2Qf+hRsP/H//AIql/wCHc37If/QoWH/j/wD8XX21TgxFH+seYf8AQTP/AMCf+Yf8Qd4S/wChNhv/AATT/wDkT4j/AOHc37If/QoWH/j/AP8AF0f8O5v2Q/8AoULD/wAf/wDi6+3/ADB3/wA/pR5g7f5/Sj/WPMP+gmf/AIE/8w/4g7wl/wBCbDf+Caf/AMifEH/Dub9kP/oULD/x/wD+Lo/4dzfsh/8AQoWH/j//AMXX26XP+f8A9VJvaj/WPMP+gmf/AIE/8w/4g7wl/wBCbDf+Caf/AMifEf8Aw7m/ZD/6FCw/8f8A/i6P+Hc37If/AEKFh/4//wDF19t7moy3vR/rHmH/AEEz/wDAn/mH/EHeEv8AoTYb/wAE0/8A5E+JP+Hc37If/QoWH/j/AP8AF0f8O5v2Q/8AoULD/wAf/wDi6+28t70Zb3o/1jzD/oJn/wCBP/MP+IO8Jf8AQmw3/gmn/wDInxJ/w7m/ZD/6FCw/8f8A/i6P+Hc37If/AEKFh/4//wDF19t7mFG5qP8AWPMP+gmf/gT/AMw/4g7wl/0JsN/4Jp//ACJ8Sf8ADub9kP8A6FCw/wDH/wD4uj/h3N+yH/0KFh/4/wD/ABdfbeW96NzCj/WPMP8AoJn/AOBP/MP+IO8Jf9CbDf8Agmn/APInxJ/w7m/ZD/6FCw/8f/8Ai6P+Hc37If8A0KFh/wCP/wDxdfbu9v8AP/6qXzD3/wA/pR/rHmH/AEEz/wDAn/mH/EHeEv8AoTYb/wAE0/8A5E+If+Hc37If/QoWH/j/AP8AF0f8O5v2Q/8AoULD/wAf/wDi6+4A4NOo/wBY8w/6CZ/+BP8AzD/iDvCX/Qmw3/gmn/8AInw7/wAO5v2Q/wDoULD/AMf/APi6P+Hc37If/QoWH/j/AP8AF19xUUf6x5h/0Ez/APAn/mH/ABB3hL/oTYb/AME0/wD5E+Hf+Hc37If/AEKFh/4//wDF0f8ADub9kP8A6FCw/wDH/wD4uvuKij/WPMP+gmf/AIE/8w/4g7wl/wBCbDf+Caf/AMieHfCD9nP4RfAlbhPhhpEGlrdP5k6wlsM23bk5J7DFe40UV5eIxNSrN1KsnKT6vVn2+U5PhMBQjhcFRjSpR2jBKMV6JJJBRRRWJ6IUUUUAFFFFABRRRQB+Pf8AwWC/5Irbf9fFv/6PWv5o6/pc/wCCwX/JFbb/AK+Lf/0etfzR1/UvhP8A8ihf4pfof4R/tAf+Tgz/AOvFP85hRRRX6WfxGFFFFABRRRQAVf0r/kKW3/XxH/6EKoVf0r/kKW3/AF8R/wDoQqKnws6cH/Gp+q/M/uF+Dv8AyTTRv+vCD/0WtemV5n8Hf+SaaN/14Qf+i1r0yv4axf8AFn6s/wCprIv9yw/+CP5IK8F/aS+Dz/HT4W3Xw9juGtTcTxy+coBI2bv73HeveqKWGxE6VSNWD1Tui84ymhj8JWwWKjzU6kXGS7pqzR+A3/DmJf8AoY73/vmH/Cj/AIcxL/0Md7/3zD/hX780V9r/AMRLzj/n/wDgv8j+aP8AiSzw5/6Fa/8AA5//ACR+A3/DmJf+hjvf++Yf8KP+HMS/9DHe/wDfMP8AhX780Uf8RLzj/n/+C/yD/iSzw5/6Fa/8Dn/8kfgN/wAOYl/6GO9/75h/wo/4cxL/ANDHe/8AfMP+FfvzRR/xEvOP+f8A+C/yD/iSzw5/6Fa/8Dn/APJH4ceHP+CL3g2OdbjXvFOp4XrEIIXVvr0NfU/gf/gl/wDs3eFnSXWLBNWZOQ08flkn1+Vq/SCivNxnG+a11apiJfLT8j7Hh36MfAeVtSwmTUrrrJOf/pba/A8t8FfBb4YfD2AW3hPR7S1QDAAQN092zXp8cUcKhIlVVHQKMD9KfRXzNWtOb5pybfmftmCy/D4aCpYenGEVsopJfcgooorM7AooooAKKKKACiiigAooooAKKKKAP//R/uyf71Rv92ppPWoyMjFBRXopxQikw3vQKwlPTOaQI1SqMDFAhaKKKACoSxNTVGU/z/k0wI6KdsajY1IB6ZxT6i2N/n/9dS0WAKKKKAAnHNN3LjNKRnimFD2oAPM/z/kUeZ/n/Ipu1hSYb3oAf5h7f5/SnK2eKjCNS7G/z/8AroAlopoDetKAR1OaAFooooAKKKKACpUORioqkQd6AJKKKKACiiigAooooAKKKKACiiigAooooAKKKKAPx7/4LBf8kVtv+vi3/wDR61/NHX9Ln/BYL/kitt/18W//AKPWv5o6/qXwn/5FC/xS/Q/wj/aA/wDJwZ/9eKf5zCiiiv0s/iMKKKKACiiigAq/pX/IUtv+viP/ANCFUKv6V/yFLb/r4j/9CFRU+FnTg/41P1X5n9wvwd/5Jpo3/XhB/wCi1r0yvM/g7/yTTRv+vCD/ANFrXplfw1i/4s/Vn/U1kX+5Yf8AwR/JBRRRXOeqFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//9L+7ZxkcVDVimMgPIoGRUU7Y1O8v/P+TQDRHRUgj9f8/rS7F/z/AProEMCk0/y19/8AP408DHFFAEfl/wCf8mmlGFTUUAQ7WNG1hU1FAEG1qdsapaKAI/L/AM/5NIUI6f5/WpaKAIMGkqxRgHrQBXoqfC0YWgCCip8LS4A6UAQYJ6UYb3qeigDw39o7UL7SfgR4s1PTJpLe4g0O5khmiYq6OqHDKRyCK/kB/wCGl/2gB/zOHiD/AMDJP8a/r4/ag/5N58Zf9gC7/wDQDX8S9fvfg7g6NWhiXVgpWkt0n0fc/wAmf2jvEeYYHNslWCxVSkpUql+Sco3tONr8rVz3H/hpj9oH/ocPEH/gXJ/jR/w0x+0D/wBDh4g/8C5P8a8Oor9l/snC/wDPmP8A4Cv8j/N3/iIWf/8AQzr/APg2p/8AJHuP/DTH7QP/AEOHiD/wLk/xpf8Ahpn9oL/ocfEH/gXJ/wDFV4bRR/ZOF/58x/8AAV/kH/EQs/8A+hnX/wDBtT/5I9y/4aZ/aC/6HHxB/wCBcn/xVH/DTP7QX/Q4+IP/AALk/wDiq8Noo/snC/8APmP/AICv8hf8RBz/AP6GVf8A8G1P/kj3L/hpn9oL/ocfEH/gXJ/8VR/w0z+0F/0OPiD/AMC5P/iq8Noo/snC/wDPmP8A4Cv8g/4iDn//AEMq/wD4Nqf/ACR/WX/wTQ8W+J/GXwFTVvFd/dajcs0OZ7uRpH5Qk8sT1NforX5kf8Eq/wDk3WP/AHoP/QDX6b1/IHFcFHMsRGKsuZn/AEW+AuIqVeDcnq1ZOUnRi227tvu29WFFFFfPH64FFFFABRRRQAUUUUAfj3/wWC/5Irbf9fFv/wCj1r+aOv6XP+CwX/JFbb/r4t//AEetfzR1/UvhP/yKF/il+h/hH+0B/wCTgz/68U/zmFFFFfpZ/EYUUUUAFFFFABV/Sv8AkKW3/XxH/wChCqFX9K/5Clt/18R/+hCoqfCzpwf8an6r8z+4X4O/8k00b/rwg/8ARa16ZXmfwd/5Jpo3/XhB/wCi1r0yv4axf8Wfqz/qayL/AHLD/wCCP5IKKKK5z1QooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/T/u4ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDwj9p//k3nxl/2ALv/ANANfxLV/bT+0/8A8m8+Mv8AsAXf/oBr+Jav6E8Fv93xX+KP5M/yB/aZf8jbI/8Ar1V/9LiFFFFfth/mKFFFFABRRRQAUUUUAf1U/wDBKv8A5N1j/wB6D/0A1+m9fmR/wSr/AOTdY/8Aeg/9ANfpvX8ZcX/8jPE/4mf9K30ff+SJyb/rzAKKKK+cP2IKKKKACiiigAooooA/Hv8A4LBf8kVtv+vi3/8AR61/NHX9Ln/BYL/kitt/18W//o9a/mjr+pfCf/kUL/FL9D/CP9oD/wAnBn/14p/nMKKKK/Sz+IwooooAKKKKACr+lf8AIUtv+viP/wBCFUKv6V/yFLb/AK+I/wD0IVFT4WdOD/jU/Vfmf3C/B3/kmmjf9eEH/ota9MrzP4O/8k00b/rwg/8ARa16ZX8NYv8Aiz9Wf9TWRf7lh/8ABH8kFFFFc56oUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUwCiiikAUUUUAFFFFABRRRQB//9T+7iomcngUrnnFRk4GaB7C7j0pKiLn/P8A+qk3tQIn3NT/ADD/AJ//AFVXD+v+f0qQHPNAEwYNTqgBIORT/M/z/kUASUmRURYmm0AWMg9KKr0uTQBPRUG5hQST1oAmyKWq9FAFiioMmjLe9AE9FQZb3oyT1oAnoqAMRUqtuoAdRRRQB4R+0/8A8m8+Mv8AsAXf/oBr+Jav7af2n/8Ak3nxl/2ALv8A9ANfxLV/Qngt/u+K/wAUfyZ/kD+0y/5G2R/9eqv/AKXEKKKK/bD/ADFCiiigAooooAKKKKAP6qf+CVf/ACbrH/vQf+gGv03r8yP+CVf/ACbrH/vQf+gGv03r+MuL/wDkZ4n/ABM/6Vvo+/8AJE5N/wBeYBRRRXzh+xBRRRQAUUUUAFFFFAH49/8ABYL/AJIrbf8AXxb/APo9a/mjr+lz/gsF/wAkVtv+vi3/APR61/NHX9S+E/8AyKF/il+h/hH+0B/5ODP/AK8U/wA5hRRRX6WfxGFFFFABRRRQAVf0r/kKW3/XxH/6EKoVf0r/AJClt/18R/8AoQqKnws6cH/Gp+q/M/uF+Dv/ACTTRv8Arwg/9FrXpleZ/B3/AJJpo3/XhB/6LWvTK/hrF/xZ+rP+prIv9yw/+CP5IKKKK5z1QooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAP/9X+7J/vVG/3amk7VGRkYoGyvRTihFJhvegQlSJmm7GqUDAxQAtFFKFJoASmOSOlPIxxSMMjFAEO5qXe1L5bf5//AF0eW3+f/wBdAB5jf5//AFUm5jS+W3+f/wBdJsagBMmjJo2tS7GzigA3tS+Y3+f/ANVHln/P/wCujyz2/wA/rQAb2/z/APqpfM/z/kUmxqPLb/P/AOugCRSSOaUHHNA4GKAM8UAWByM0Ug4GKWgDw/8AaWge6+APi+2j5Z9CulAHqUNfxM3trJY3clnL96JyjfUGv7pfiFop8ReCNU0JRk3VlJBj13DFfxKfFzSv7D+J2vaPjH2bVLiHH+45FfvXgtiFbE0vR/of5P8A7TDJpOeS5h0SqQ++0v0PO6KKK/dj/KcKKKKACiiigAooooA/pw/4JH+P9B1z4M3nha3lUXdhcQwvEThm2xZJAPJAyORxX64V/FL+zj+0P4w/Z28dQ+K/DMrCPO25gyQroxXdnHJyFxiv6c/2ev29Pgx8bdIgF1qFvpepMgD2t04QvJ3CDJJGc4r+Y/EXg7E0MXUxdOLlTm73XR+Z/uP9Dj6R2S5rw9hOH8bXjSxmHjycsnZTitnFvy0aPueisRPEugyIJI7uEqwyCD1FO/4SHQ/+fqL86/LeR9j+6liqX86+9f5mzRWN/wAJDof/AD9RfnR/wkOh/wDP1F+dHI+wfWaX86+9f5mzRWN/wkOh/wDP1F+dH/CQ6H/z9RfnRyPsH1ml/OvvX+Zs0Vjf8JDof/P1F+dH/CQ6H/z9RfnRyPsH1ml/OvvX+Z+Sn/BYL/kitt/18W//AKPWv5o6/pN/4K86pp178GLeO0mSRvtEHCnP/Lda/myr+pPChWylf4n+h/hR9P8AmpeIE3F3/cU/zmFFFFfpR/EoUUUUAFFFFABV/Sv+Qpbf9fEf/oQqhV/Sv+Qpbf8AXxH/AOhCoqfCzpwf8an6r8z+4X4O/wDJNNG/68IP/Ra16ZXmfwd/5Jpo3/XhB/6LWvTK/hrF/wAWfqz/AKmsi/3LD/4I/kgooornPVCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//W/u2cZHFQ1YpjIDyKBkVFSeX/AJ/yabsNAWG0U/yz/n/9dOCDv/n9aBEajJqekAwMUtACFQetRlD/AJ//AF1LRQBBhveja1T0UAQ7Go2sKmooAgwR1pME9KsUUAQYb3ow3vU9FAEGG96MN71PRQBCFY1Iq4p1FABRRRQAEZ4NfyEf8FEfhxL8Of2lNUs/KKR3sSajuxwWuHlY8+uK/r3r8O/+Cwvwdm1Pw3pXxR0mINJDOyag+PuwQxYXnn+Ju+K/R/C7NVhs0jCT0muX59D+Nfp0cBTzrgWtiKMb1MLJVVbfl2l+DT9Efzx0UUV/VJ/giFFFFABRRRQAUUUUAFXtP1PUdKuBd6XPNbSqcrJA7IwP1Ug1RopNJqzNKVWUJKcG01s1oz0ZfjB8WEUKniXXQAMAC+n/APi6d/wuL4tf9DNr3/gdP/8AHK83orl+oUP+fcfuX+R7f+teaf8AQZU/8Dl/mekf8Li+LX/Qza9/4HT/APxyj/hcXxa/6GbXv/A6f/45Xm9FH1Ch/wA+4/cv8g/1rzT/AKDKn/gcv8z0j/hcXxa/6GbXv/A6f/45R/wuL4tf9DNr3/gdP/8AHK83oo+oUP8An3H7l/kH+teaf9BlT/wOX+Z6R/wuL4tf9DNr3/gdP/8AHKP+FxfFr/oZte/8Dp//AI5Xm9FH1Ch/z7j9y/yD/WvNP+gyp/4HL/M6zXPHnjfxNb/ZPEer6nfxAgiO8uZJl4ORw7Eda5OiiuinSjBWgrLyPKxmOr4iftMRUc5d5Nt/ewoooqzlCiiigAooooAKv6V/yFLb/r4j/wDQhVCr+lf8hS2/6+I//QhUVPhZ04P+NT9V+Z/cL8Hf+SaaN/14Qf8Aota9MrzP4O/8k00b/rwg/wDRa16ZX8NYv+LP1Z/1NZF/uWH/AMEfyQUUUVznqhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf//X/u4ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigArxP8AaG+F1h8YPhJrHge9VSbq0ZY3YZKkYbj0zjFe2UhAYFTyDwRW2HrypVI1IOzTuvkefm2WUcbha2DxEeaFSLjJd1JWZ/Cj4/8ACeo+CPF9/wCGdUiaGW2uZE2P127jtP4iuOr9tP8Agq9+zHN4f8RJ8afDFuWtrwgaj5S/ckZlRBge2STX4l1/ZXDGdwzDBU8THdqz8n1P+bXx08MMTwjxNjMnrp8qk5Qf80JO8X+j80FFFFfQH5CFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVf0r/kKW3/AF8R/wDoQqhV/Sv+Qpbf9fEf/oQqKnws6cH/ABqfqvzP7hfg7/yTTRv+vCD/ANFrXpleZ/B3/kmmjf8AXhB/6LWvTK/hrF/xZ+rP+prIv9yw/wDgj+SCiiiuc9UKKKKACiiigAooooCwUUUUAFFFFABRRRRYAooooAKKKKLAFFFFOwBRRRSsAUUUU7MD/9D+7ikLAUE4GagJzzQMk8z/AD/kUGT/AD/kVCWApvmf5/yKAuThz3p4YGqwcf5//VT6BXLFFRK2OtOLj/P/AOqgB9JuUVCWJpKALAOaKr0uTQBPRUO5hRvagCaiodzGky3vQBPRUGW96Mt70AT0VBuYUbmNAE9FQZJ60lAFiiodzCneYe/+f0oAkoqIue3+f0ppJPWgDgPit8OtA+K3gW+8E+IYY54LuFggkGQsu0hHHupORX8ef7Tf7P8A4g/Z8+JF54U1SN/s3msbKZhjfFnAOeAc89K/tKr42/bF/ZT8O/tKeAJ7Dy0i1iCNnsLvHzCTGFDYwWUZzjNfoPAHGDyzEclV/upb+XmfyN9LX6OtPjfJ/rGCilj6Cbpv+ZdYN+fTzP48KK9F+KHwv8WfCXxbdeEfF1tJbz28rKrMpCuoJCsDyPmAzjPFedV/VVCvCrBVKbvF7NH+B+aZXiMFiKmExdNwqQbUotWaa3TQUUUVqcAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFX9K/wCQpbf9fEf/AKEKoVf0r/kKW3/XxH/6EKip8LOnB/xqfqvzP7hfg7/yTTRv+vCD/wBFrXpleZ/B3/kmmjf9eEH/AKLWvTK/hrF/xZ+rP+prIv8AcsP/AII/kgooornPVCiiigBVxnmp8g9Kr0UAWKKr0UAWKKr0UD0LFFV6KA0LFFV6KBFiiq9FAFiiq9FAFiiq9FAFiiq9FMCxRVeijQD/0f7tXPFQscDNTP0qB87eKAIaKKKACnKSDim0oGTxQBPRRRQA1iQOKiyT1qVhkYqIqRQAlLkjpSUUAO3tS+Y3+f8A9VNw3vS7GoAXzG/z/wDqo3t/n/8AVR5bf5//AF0eW3+f/wBdACb2o3tRsajY1ABvaje1G1hSYNABk0ZNJS4b3p2AkRieDT6Yikcmn0gCkY4GaWigCHcxoDNUuAetGBQB8T/tbfsbeCf2k/DMjSRJa6xFGWtbyNRu3AcA54GcYzX8tvxr+AXxD+BXia48PeM7KWIQylEuVVmhfGORJtVTknHFf211498YfgR8Pfjj4ffQvHFlFPlCkVwVBkjzn7pIOME5r9G4M8Qa+WtUavvUu3Ven+R/G/0k/oi5XxtCWYYFqhj0vjt7s/Ka/KW5/ERRX6xftQ/8EwviT8NLm48SfDOKTV9LG5/IgUvLGBk5dmKqOw+tflZqWmX+j3smnanE0M8TFZI36qRxX9JZPn2Fx9P2mGqKXl1Xqj/FfxI8Jc/4TxksHneElTd9JWvCXnGWz/PyKFFFFewfm4UUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAVf0r/kKW3/AF8R/wDoQqhV/Sv+Qpbf9fEf/oQqKnws6cH/ABqfqvzP7hfg7/yTTRv+vCD/ANFrXpleZ/B3/kmmjf8AXhB/6LWvTK/hrF/xZ+rP+prIv9yw/wDgj+SCiiiuc9UKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//0v7tyMjFQkYOKnpCoPWgCqUHb/P603Y3+f8A9dWTH6f5/WmlSvWgCvsapFXbUgUt0p4Qd/8AP60ARhSak8sf5/8A10+igCIoe3+f1pu1qnooAr0VYooAgwT0pdjVNRQBF5bf5/8A10bG/wA//rqWigCHY1GxqmooAg2tRhvep6KAIMEdaMGp6KAIghNPCKKdRQAm1TTTGO3+f1p9FAEXlt/n/wDXR5bf5/8A11LRQAwIO/8An9afRRQBHLDFPGYZ1V0YYZXAIP1B4r5G+OP7E/wP+OVu8mu6ZFb3ZB8ue2/cqD6lUAzyAea+vaK68Hjq2HmqlCbjJdUzwuIeGMuzbDSwmZYeNWnLeM4qS/E/m9+M3/BIr4g6DJPf/C+7XVIzlkt22xBR6ZY5Nfmp4+/Zu+Mvw3ums/EmiXm9TtJtopJlH4qmK/ttrM1LRtK1i2az1O3imicYZHGQRX6XlPi3j6KUcRFVF9z+8/iXxB/Z9cJZpKdbKqs8JN9F78L/AOF2a+/5H8H95puo6e2y/t5oG9JkZD/48BVKv7QfGP7Gn7NfjhXfXPCWkyTOSfPaMswJ78tivl7xP/wSj/Z318OLAzaZuzj7HBF8v03Zr7zB+MWBkl7anKL+/wDU/lLiP9nFxTQnJ5djaNaPS7cX87q34n8r9Ff0kt/wRb+CjMW/4SnxEMnOBHBgf+O03/hy18FP+hq8R/8AfuD/AOJr1v8AiK+T/wA8v/AWfnz+gF4jf9A1L/wdA/m4or+kf/hy18FP+hq8R/8AfuD/AOJo/wCHLXwU/wChq8R/9+4P/iaP+Ir5P/PL/wABYf8AEgfiN/0DUv8AwdA/m4or+kf/AIctfBT/AKGrxH/37g/+Jo/4ctfBT/oavEf/AH7g/wDiaP8AiK+T/wA8v/AWH/EgfiN/0DUv/B0D+biiv6R/+HLXwU/6GrxH/wB+4P8A4mj/AIctfBT/AKGrxH/37g/+Jo/4ivk/88v/AAFh/wASB+I3/QNS/wDB0D+biiv6R/8Ahy18FP8AoavEf/fuD/4mj/hy18FP+hq8R/8AfuD/AOJo/wCIr5P/ADy/8BYf8SB+I3/QNS/8HQP5uKK/pH/4ctfBT/oavEf/AH7g/wDiaP8Ahy18FP8AoavEf/fuD/4mj/iK+T/zy/8AAWH/ABIH4jf9A1L/AMHQP5uKK/pH/wCHLXwU/wChq8R/9+4P/iaP+HLXwU/6GrxH/wB+4P8A4mj/AIivk/8APL/wFh/xIH4jf9A1L/wdA/m4or+kf/hy18FP+hq8R/8AfuD/AOJo/wCHLXwU/wChq8R/9+4P/iaP+Ir5P/PL/wABYf8AEgfiN/0DUv8AwdA/m4q/pX/IUtv+viP/ANCFf0cf8OWvgp/0NXiP/v3B/wDE1Nb/APBGD4LW86XCeKvEW5HDjMcHVTn+7Uz8Vcnaa55f+As2w/0BvEaFSMnhqVk0/wCNA/Uf4O/8k00b/rwg/wDRa16ZXP8AhXw9B4V8P2vh+1keWO0hSFZHwGYIoXJxxniugr+X8RNSnKS6s/3QyuhKlhqVKe8YpP1SQUUUVid4UUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH/2Q==" width="28" height="28" alt="부산백병원" style="display:block;border-radius:6px;object-fit:contain;background:#fff"/>
+    <span class="title">TIVA PK Simulator</span>
+    <span class="credit">© 부산백병원 마취통증의학과 오주석</span>
+  </div>
+  <div class="header-tabs">
+    <button class="tab-btn active" id="tabProp" onclick="switchTab('prop')">Propofol</button>
+    <button class="tab-btn" id="tabRemi" onclick="switchTab('remi')">Remifentanil</button>
+    <button class="tab-btn" id="tabRema" onclick="switchTab('rema')">Remimazolam</button>
+    <button class="tab-btn combined-btn" id="tabCombined" onclick="switchTab('combined')">Combined View ▶</button>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 1: PROPOFOL                                             -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="tab-panel active" id="panelProp">
+<div class="layout">
+  <div class="sidebar">
+    <div>
+      <div class="sec-title">Patient Covariates</div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:5px;">Sex</div>
+        <div class="sex-row">
+          <button class="sex-btn active" id="p_btnM" onclick="propSetSex('M')">♂ Male</button>
+          <button class="sex-btn" id="p_btnF" onclick="propSetSex('F')">♀ Female</button>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Age</span>
+            <input type="number" class="num-input" id="p_inpAge" value="50" min="18" max="80" step="1" oninput="propNum('age',this,18,80,false)" onchange="propNum('age',this,18,80,true)">
+            <span class="unit-label">yr</span>
+          </div>
+          <input type="range" id="p_slAge" min="18" max="80" value="50" oninput="propSl('age',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Weight</span>
+            <input type="number" class="num-input" id="p_inpWt" value="70" min="40" max="150" step="1" oninput="propNum('wt',this,40,150,false)" onchange="propNum('wt',this,40,150,true)">
+            <span class="unit-label">kg</span>
+          </div>
+          <input type="range" id="p_slWt" min="40" max="150" value="70" oninput="propSl('wt',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Height</span>
+            <input type="number" class="num-input" id="p_inpHt" value="170" min="140" max="210" step="1" oninput="propNum('ht',this,140,210,false)" onchange="propNum('ht',this,140,210,true)">
+            <span class="unit-label">cm</span>
+          </div>
+          <input type="range" id="p_slHt" min="140" max="210" value="170" oninput="propSl('ht',+this.value)">
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Propofol Concentration</div>
+      <div class="conc-row" id="p_concRow">
+        <button class="conc-btn active" onclick="propSetConc(10,this)">1% &nbsp;<small>(10 mg/mL)</small></button>
+        <button class="conc-btn"        onclick="propSetConc(20,this)">2% &nbsp;<small>(20 mg/mL)</small></button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Dosing Mode</div>
+      <div class="mode-row" style="margin-bottom:10px;">
+        <button class="mode-btn" id="p_btnCont" onclick="propSetMode('continuous')">Continuous<br><small>Infusion</small></button>
+        <button class="mode-btn active" id="p_btnBolus" onclick="propSetMode('bolus')">Bolus<br><small>IV Push</small></button>
+        <button class="mode-btn" id="p_btnBolInf" onclick="propSetMode('bolusinf')">Bolus +<br><small>Infusion</small></button>
+      </div>
+      <div id="p_contCtrl" style="display:none;">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Infusion Rate</span>
+            <input type="number" class="num-input" id="p_inpRate" value="60" min="10" max="300" step="5" oninput="propNum('rate',this,10,300,false)" onchange="propNum('rate',this,10,300,true)">
+            <span class="unit-label">cc/hr</span>
+          </div>
+          <input type="range" id="p_slRate" min="10" max="300" value="60" oninput="propSl('rate',+this.value)">
+          <div class="rate-hint" id="p_rateHint"></div>
+        </div>
+      </div>
+      <div id="p_bolusCtrl">
+        <div class="slider-group">
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="p_inpBolus" value="120" min="0" max="300" step="0.1" oninput="propNum('bolus',this,0,300,false)" onchange="propNum('bolus',this,0,300,true)">
+              <span class="unit-label">mg</span>
+            </div>
+            <input type="range" id="p_slBolus" min="0" max="300" step="0.1" value="120" oninput="propSl('bolus',+this.value)">
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="p_inpBRate" value="1200" min="800" max="1200" step="50" oninput="propNum('bolusRate',this,800,1200,false)" onchange="propNum('bolusRate',this,800,1200,true)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="p_slBRate" min="800" max="1200" step="50" value="1200" oninput="propSl('bolusRate',+this.value)">
+          </div>
+        </div>
+      </div>
+      <div id="p_bolInfCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="phase-label">① Bolus phase</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="p_inpBolus2" value="120" min="0" max="300" step="0.1" oninput="propNum('bolus',this,0,300,false)" onchange="propNum('bolus',this,0,300,true)">
+              <span class="unit-label">mg</span>
+            </div>
+            <input type="range" id="p_slBolus2" min="0" max="300" step="0.1" value="120" oninput="propSl('bolus',+this.value)">
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="p_inpBRate2" value="1200" min="800" max="1200" step="50" oninput="propNum('bolusRate',this,800,1200,false)" onchange="propNum('bolusRate',this,800,1200,true)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="p_slBRate2" min="800" max="1200" step="50" value="1200" oninput="propSl('bolusRate',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:4px;">② Maintenance infusion</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Infusion Rate</span>
+              <input type="number" class="num-input" id="p_inpRate2" value="60" min="10" max="300" step="5" oninput="propNum('rate',this,10,300,false)" onchange="propNum('rate',this,10,300,true)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="p_slRate2" min="10" max="300" value="60" oninput="propSl('rate',+this.value)">
+            <div class="rate-hint" id="p_rateHint2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Target Ce Band <span style="text-transform:none;">(μg/mL)</span></div>
+      <div class="target-row">
+        <div><div class="dose-label"><span class="dose-name">Lower</span></div>
+          <input type="number" class="target-input" id="p_targLow" value="2" min="0" max="15" step="0.5" oninput="propUpdate()"></div>
+        <div><div class="dose-label"><span class="dose-name">Upper</span></div>
+          <input type="number" class="target-input" id="p_targHigh" value="4" min="0" max="15" step="0.5" oninput="propUpdate()"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Time Range</div>
+      <div class="time-range-row" id="p_trRow">
+        <button class="tr-btn" onclick="propSetTR(15,this)">15 min</button>
+        <button class="tr-btn" onclick="propSetTR(30,this)">30 min</button>
+        <button class="tr-btn active" onclick="propSetTR(60,this)">1 hr</button>
+        <button class="tr-btn" onclick="propSetTR(180,this)">3 hr</button>
+        <button class="tr-btn" onclick="propSetTR(360,this)">6 hr</button>
+        <button class="tr-btn" onclick="propSetTR(720,this)">12 hr</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">BIS Correlation (Eleveld 2018)</div>
+      <div class="bis-note" style="background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.25);border-radius:8px;padding:8px 10px;">
+        <div class="bis-note-title" style="color:var(--prop-s)">Ce → Predicted BIS</div>
+        <canvas id="p_bisChart" width="270" height="130" style="width:100%;height:130px;display:block;margin-bottom:6px;"></canvas>
+        <div class="bis-ref-row"><span class="bis-ref-label" style="color:var(--prop-s)">Schnider Ce@5min</span><span class="bis-ref-val" id="p_bisEstS"></span></div>
+        <div class="bis-ref-row"><span class="bis-ref-label" style="color:var(--prop-m)">Marsh Ce@5min</span><span class="bis-ref-val" id="p_bisEstM"></span></div>
+        <div style="height:3px;"></div>
+        <div class="bis-ref-row" style="border-top:1px solid rgba(255,255,255,.06);padding-top:4px;">
+          <span class="bis-ref-label">BIS 60 threshold Ce</span>
+          <span class="bis-ref-val" style="color:var(--green);"><span id="p_bisCe60"></span></span>
+        </div>
+        <div class="bis-ref-row">
+          <span class="bis-ref-label">BIS 40 threshold Ce</span>
+          <span class="bis-ref-val" style="color:#f87171;"><span id="p_bisCe40"></span></span>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Key Values</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--prop-s);">Schnider</div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5 min</span><span class="stat-value" id="p_sS_cp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5 min</span><span class="stat-value" id="p_sS_ce5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="p_sS_peak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="p_sS_css">—</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--prop-m);">Marsh</div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5 min</span><span class="stat-value" id="p_sM_cp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5 min</span><span class="stat-value" id="p_sM_ce5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="p_sM_peak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="p_sM_css">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Combined View Model</div>
+      <div class="model-sel">
+        <span class="model-sel-label">Select:</span>
+        <button class="model-radio active" id="p_selSchnider" onclick="propSelectModel('schnider')">Schnider</button>
+        <button class="model-radio" id="p_selMarsh" onclick="propSelectModel('marsh')">Mod. Marsh</button>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="chart-area"><canvas id="p_chart"></canvas></div>
+    <div class="legend-bar">
+      <div class="legend-item" style="color:var(--prop-s);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#4f8ef7" stroke-width="2.5"/></svg>Schnider Cp</div>
+      <div class="legend-item" style="color:var(--prop-s);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#4f8ef7" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Schnider Ce</div>
+      <div class="legend-item" style="color:var(--prop-m);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#f97316" stroke-width="2.5"/></svg>Marsh Cp</div>
+      <div class="legend-item" style="color:var(--prop-m);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#f97316" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Marsh Ce</div>
+      <div class="legend-item" style="color:var(--green);"><svg width="28" height="10"><rect x="0" y="1" width="28" height="8" fill="rgba(52,211,153,.2)" stroke="#34d399" stroke-width="1"/></svg>Target Band</div>
+      <div class="legend-item" style="color:#4f8ef7;"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#4f8ef7" stroke-width="2" stroke-dasharray="6 3"/></svg>BIS(Schnider)</div>
+      <div class="legend-item" style="color:#f97316;"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#f97316" stroke-width="2" stroke-dasharray="6 3"/></svg>BIS(Marsh)</div>
+      <div class="legend-item" style="color:rgba(52,211,153,.7);font-size:10px;">— BIS 60</div>
+      <div class="legend-item" style="color:rgba(248,113,113,.7);font-size:10px;">— BIS 40</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 2: REMIFENTANIL                                         -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panelRemi">
+<div class="layout">
+  <div class="sidebar">
+    <div>
+      <div class="sec-title">Patient Covariates</div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:5px;">Sex</div>
+        <div class="sex-row">
+          <button class="sex-btn active" id="r_btnM" onclick="remiSetSex('M')">♂ Male</button>
+          <button class="sex-btn" id="r_btnF" onclick="remiSetSex('F')">♀ Female</button>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Age</span>
+            <input type="number" class="num-input" id="r_inpAge" value="40" min="18" max="80" step="1" oninput="remiNum('age',this,18,80,false)" onchange="remiNum('age',this,18,80,true)">
+            <span class="unit-label">yr</span>
+          </div>
+          <input type="range" id="r_slAge" min="18" max="80" value="40" oninput="remiSl('age',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Weight</span>
+            <input type="number" class="num-input" id="r_inpWt" value="70" min="40" max="150" step="1" oninput="remiNum('wt',this,40,150,false)" onchange="remiNum('wt',this,40,150,true)">
+            <span class="unit-label">kg</span>
+          </div>
+          <input type="range" id="r_slWt" min="40" max="150" value="70" oninput="remiSl('wt',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Height</span>
+            <input type="number" class="num-input" id="r_inpHt" value="170" min="140" max="210" step="1" oninput="remiNum('ht',this,140,210,false)" onchange="remiNum('ht',this,140,210,true)">
+            <span class="unit-label">cm</span>
+          </div>
+          <input type="range" id="r_slHt" min="140" max="210" value="170" oninput="remiSl('ht',+this.value)">
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Remifentanil Concentration</div>
+      <div class="conc-row" id="r_concRow">
+        <button class="conc-btn" onclick="remiSetConc(20,this)">20 mcg/mL</button>
+        <button class="conc-btn active" onclick="remiSetConc(50,this)">50 mcg/mL</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Dosing Mode</div>
+      <div class="mode-row" style="margin-bottom:10px;">
+        <button class="mode-btn" id="r_btnCont" onclick="remiSetMode('continuous')">Continuous<br><small>Infusion</small></button>
+        <button class="mode-btn" id="r_btnBolInf" onclick="remiSetMode('bolusinf')">Bolus +<br><small>Infusion</small></button>
+        <button class="mode-btn active" id="r_btnRC" onclick="remiSetMode('ratechange')">Rate<br><small>Change</small></button>
+      </div>
+      <div id="r_contCtrl" style="display:none;">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Infusion Rate</span>
+            <input type="number" class="num-input" id="r_inpRate" value="20" min="1" max="100" step="1" oninput="remiNum('rate',this,1,100,false)" onchange="remiNum('rate',this,1,100,true)">
+            <span class="unit-label">cc/hr</span>
+          </div>
+          <input type="range" id="r_slRate" min="1" max="100" value="20" oninput="remiSl('rate',+this.value)">
+          <div class="rate-hint" id="r_rateHint"></div>
+        </div>
+      </div>
+      <div id="r_bolInfCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="phase-label">① Bolus phase</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="r_inpBolus" value="25" min="0" max="200" step="1" oninput="remiNum('bolus',this,0,200,false)" onchange="remiNum('bolus',this,0,200,true)">
+              <span class="unit-label">mcg</span>
+            </div>
+            <input type="range" id="r_slBolus" min="0" max="200" step="1" value="25" oninput="remiSl('bolus',+this.value)">
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="r_inpBRate" value="1200" min="800" max="1200" step="50" oninput="remiNum('bolusRate',this,800,1200,false)" onchange="remiNum('bolusRate',this,800,1200,true)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="r_slBRate" min="800" max="1200" step="50" value="1200" oninput="remiSl('bolusRate',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:4px;">② Maintenance infusion</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Infusion Rate</span>
+              <input type="number" class="num-input" id="r_inpRateBI" value="20" min="1" max="100" step="1" oninput="remiNum('rateBI',this,1,100,false)" onchange="remiNum('rateBI',this,1,100,true)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="r_slRateBI" min="1" max="100" value="20" oninput="remiSl('rateBI',+this.value)">
+          <div class="rate-hint" id="r_rateBIHint"></div>
+          </div>
+        </div>
+      </div>
+      <div id="r_rcCtrl">
+        <div class="slider-group">
+          <div class="phase-label">① Initial infusion</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Initial Rate</span>
+              <input type="number" class="num-input" id="r_inpRate1" value="20" min="1" max="100" step="1" oninput="remiNum('rate1',this,1,100,false)" onchange="remiNum('rate1',this,1,100,true)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="r_slRate1" min="1" max="100" value="20" oninput="remiSl('rate1',+this.value)">
+          <div class="rate-hint" id="r_rate1Hint"></div>
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Duration</span>
+              <input type="number" class="num-input" id="r_inpSwitchT" value="30" min="1" max="300" step="1" oninput="remiNum('switchT',this,1,300,false)" onchange="remiNum('switchT',this,1,300,true)">
+              <span class="unit-label">min</span>
+            </div>
+            <input type="range" id="r_slSwitchT" min="1" max="300" value="30" oninput="remiSl('switchT',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:4px;">② New infusion rate</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">New Rate</span>
+              <input type="number" class="num-input" id="r_inpRate2" value="10" min="0" max="100" step="1" oninput="remiNum('rate2',this,0,100,false)" onchange="remiNum('rate2',this,0,100,true)">
+              <span class="unit-label">cc/hr</span>
+            </div>
+            <input type="range" id="r_slRate2" min="0" max="100" value="10" oninput="remiSl('rate2',+this.value)">
+          <div class="rate-hint" id="r_rate2Hint"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Target Ce Band <span style="text-transform:none;">(ng/mL)</span></div>
+      <div class="target-row">
+        <div><div class="dose-label"><span class="dose-name">Lower</span></div>
+          <input type="number" class="target-input" id="r_targLow" value="2" min="0" max="20" step="0.5" oninput="remiUpdate()"></div>
+        <div><div class="dose-label"><span class="dose-name">Upper</span></div>
+          <input type="number" class="target-input" id="r_targHigh" value="5" min="0" max="20" step="0.5" oninput="remiUpdate()"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Time Range</div>
+      <div class="time-range-row" id="r_trRow">
+        <button class="tr-btn" onclick="remiSetTR(15,this)">15 min</button>
+        <button class="tr-btn" onclick="remiSetTR(30,this)">30 min</button>
+        <button class="tr-btn active" onclick="remiSetTR(60,this)">1 hr</button>
+        <button class="tr-btn" onclick="remiSetTR(180,this)">3 hr</button>
+        <button class="tr-btn" onclick="remiSetTR(360,this)">6 hr</button>
+        <button class="tr-btn" onclick="remiSetTR(720,this)">12 hr</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Key Values</div>
+      <div class="stat-card">
+        <div class="stat-model" style="color:var(--remi-p);">Minto 1997</div>
+        <div class="stat-row"><span class="stat-label">LBM</span><span class="stat-value" id="r_sLBM">—</span></div>
+        <div class="stat-row"><span class="stat-label">ke0</span><span class="stat-value" id="r_sKe0">—</span></div>
+        <div class="stat-row"><span class="stat-label">Cp @ 5 min</span><span class="stat-value" id="r_sCp5">—</span></div>
+        <div class="stat-row"><span class="stat-label">Ce @ 5 min</span><span class="stat-value" id="r_sCe5">—</span></div>
+        <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="r_sPeak">—</span></div>
+        <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="r_sCss">—</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="chart-area"><canvas id="r_chart"></canvas></div>
+    <div class="legend-bar">
+      <div class="legend-item" style="color:var(--remi-p);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#a78bfa" stroke-width="2.5"/></svg>Cp (plasma)</div>
+      <div class="legend-item" style="color:var(--remi-p);"><svg width="28" height="10"><line x1="0" y1="5" x2="28" y2="5" stroke="#a78bfa" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Ce (effect-site)</div>
+      <div class="legend-item" style="color:var(--green);"><svg width="28" height="10"><rect x="0" y="1" width="28" height="8" fill="rgba(52,211,153,.2)" stroke="#34d399" stroke-width="1"/></svg>Target Band</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 3: REMIMAZOLAM                                          -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panelRema">
+<div class="layout">
+  <div class="sidebar">
+    <div>
+      <div class="sec-title">Patient Covariates</div>
+      <div style="margin-bottom:9px;">
+        <div style="font-size:12px;font-weight:600;margin-bottom:4px;">Sex</div>
+        <div class="sex-row">
+          <button class="sex-btn active" id="m_btnM" onclick="remaSetSex('M')">♂ Male</button>
+          <button class="sex-btn" id="m_btnF" onclick="remaSetSex('F')">♀ Female</button>
+        </div>
+      </div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Age</span>
+            <input type="number" class="num-input" id="m_inpAge" value="50" min="18" max="85" step="1" oninput="remaNum('age',this,18,85,false)" onchange="remaNum('age',this,18,85,true)">
+            <span class="unit-label">yr</span>
+          </div>
+          <input type="range" id="m_slAge" min="18" max="85" value="50" oninput="remaSl('age',+this.value)">
+        </div>
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Weight</span>
+            <input type="number" class="num-input" id="m_inpWt" value="70" min="30" max="160" step="1" oninput="remaNum('wt',this,30,160,false)" onchange="remaNum('wt',this,30,160,true)">
+            <span class="unit-label">kg</span>
+          </div>
+          <input type="range" id="m_slWt" min="30" max="160" value="70" oninput="remaSl('wt',+this.value)">
+        </div>
+      </div>
+      <div class="toggle-row" style="margin-top:9px;">
+        <span class="toggle-label">Concomitant Opioids</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="m_chkOpioids" onchange="remaState.opioids=this.checked;document.getElementById('m_lblOp').textContent=this.checked?'ON':'OFF';remaUpdate();">
+          <div class="toggle-track"></div>
+        </label>
+        <span style="font-size:10px;color:var(--text-dim);" id="m_lblOp">OFF</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Solution Concentration</div>
+      <div class="conc-row" id="m_concRow">
+        <button class="conc-btn" onclick="remaSetConc(2,this)">2 mg/mL</button>
+        <button class="conc-btn active" onclick="remaSetConc(1,this)">1 mg/mL</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Dosing Mode</div>
+      <div class="mode-row" style="margin-bottom:9px;">
+        <button class="mode-btn" id="m_btnCont" onclick="remaSetMode('continuous')">Continuous<br><small>Infusion</small></button>
+        <button class="mode-btn" id="m_btnBolInf" onclick="remaSetMode('bolusinf')">Bolus +<br><small>Infusion</small></button>
+        <button class="mode-btn active" id="m_btnRC" onclick="remaSetMode('ratechange')">Rate<br><small>Change</small></button>
+      </div>
+      <div id="m_contCtrl" style="display:none;">
+        <div class="slider-row">
+          <div class="slider-top">
+            <span class="slider-name">Infusion Rate</span>
+            <input type="number" class="num-input" id="m_inpRate" value="70" min="0" max="100" step="1" oninput="remaNum('rate',this,0,100,false)" onchange="remaNum('rate',this,0,100,true)">
+            <span class="unit-label">mL/hr</span>
+          </div>
+          <input type="range" id="m_slRate" min="0" max="100" value="70" oninput="remaSl('rate',+this.value)">
+          <div class="rate-hint" id="m_rateHint"></div>
+        </div>
+      </div>
+      <div id="m_bolInfCtrl" style="display:none;">
+        <div class="slider-group">
+          <div class="phase-label">① Bolus</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Bolus Dose</span>
+              <input type="number" class="num-input" id="m_inpBolus" value="5" min="0" max="30" step="0.5" oninput="remaNum('bolus',this,0,30,false)" onchange="remaNum('bolus',this,0,30,true)">
+              <span class="unit-label">mg</span>
+            </div>
+            <input type="range" id="m_slBolus" min="0" max="30" step="0.5" value="5" oninput="remaSl('bolus',+this.value)">
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Push Rate</span>
+              <input type="number" class="num-input" id="m_inpBRate" value="1200" min="600" max="1200" step="50" oninput="remaNum('bolusRate',this,600,1200,false)" onchange="remaNum('bolusRate',this,600,1200,true)">
+              <span class="unit-label">mL/hr</span>
+            </div>
+            <input type="range" id="m_slBRate" min="600" max="1200" step="50" value="1200" oninput="remaSl('bolusRate',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:3px;">② Maintenance</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Infusion Rate</span>
+              <input type="number" class="num-input" id="m_inpRateBI" value="70" min="0" max="100" step="1" oninput="remaNum('rateBI',this,0,100,false)" onchange="remaNum('rateBI',this,0,100,true)">
+              <span class="unit-label">mL/hr</span>
+            </div>
+            <input type="range" id="m_slRateBI" min="0" max="100" value="70" oninput="remaSl('rateBI',+this.value)">
+          <div class="rate-hint" id="m_rateBIHint"></div>
+          </div>
+        </div>
+      </div>
+      <div id="m_rcCtrl">
+        <div class="slider-group">
+          <div class="phase-label">① Initial infusion</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Initial Rate</span>
+              <input type="number" class="num-input" id="m_inpRate1" value="210" min="0" max="500" step="1" oninput="remaNum('rate1',this,0,500,false)" onchange="remaNum('rate1',this,0,500,true)">
+              <span class="unit-label">mL/hr</span>
+            </div>
+            <input type="range" id="m_slRate1" min="0" max="500" value="210" oninput="remaSl('rate1',+this.value)">
+          <div class="rate-hint" id="m_rate1Hint"></div>
+          </div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">Duration</span>
+              <input type="number" class="num-input" id="m_inpSwitchT" value="30" min="1" max="300" step="1" oninput="remaNum('switchT',this,1,300,false)" onchange="remaNum('switchT',this,1,300,true)">
+              <span class="unit-label">min</span>
+            </div>
+            <input type="range" id="m_slSwitchT" min="1" max="300" value="30" oninput="remaSl('switchT',+this.value)">
+          </div>
+          <div class="phase-label" style="margin-top:3px;">② New rate</div>
+          <div class="slider-row">
+            <div class="slider-top">
+              <span class="slider-name">New Rate</span>
+              <input type="number" class="num-input" id="m_inpRate2" value="70" min="0" max="200" step="1" oninput="remaNum('rate2',this,0,200,false)" onchange="remaNum('rate2',this,0,200,true)">
+              <span class="unit-label">mL/hr</span>
+            </div>
+            <input type="range" id="m_slRate2" min="0" max="200" value="70" oninput="remaSl('rate2',+this.value)">
+          <div class="rate-hint" id="m_rate2Hint"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Target Ce Band <span style="text-transform:none;">(ng/mL)</span></div>
+      <div class="target-row">
+        <div><div class="dose-label"><span class="dose-name">Lower</span></div>
+          <input type="number" class="target-input" id="m_targLow" value="650" min="0" max="3000" step="50" oninput="remaUpdate()"></div>
+        <div><div class="dose-label"><span class="dose-name">Upper</span></div>
+          <input type="number" class="target-input" id="m_targHigh" value="1300" min="0" max="3000" step="50" oninput="remaUpdate()"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Time Range</div>
+      <div class="time-range-row" id="m_trRow">
+        <button class="tr-btn" onclick="remaSetTR(15,this)">15 min</button>
+        <button class="tr-btn" onclick="remaSetTR(30,this)">30 min</button>
+        <button class="tr-btn active" onclick="remaSetTR(60,this)">1 hr</button>
+        <button class="tr-btn" onclick="remaSetTR(180,this)">3 hr</button>
+        <button class="tr-btn" onclick="remaSetTR(360,this)">6 hr</button>
+        <button class="tr-btn" onclick="remaSetTR(720,this)">12 hr</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">BIS Correlation (Eleveld 2025)</div>
+      <div class="bis-note">
+        <div class="bis-note-title">Ce → Predicted BIS</div>
+        <canvas id="m_bisChart" width="270" height="120" style="width:100%;height:120px;display:block;margin-bottom:6px;"></canvas>
+        <div class="bis-ref-row"><span class="bis-ref-label">Eleveld Ce@30min</span><span class="bis-ref-val" id="m_bisEstE">—</span></div>
+        <div class="bis-ref-row"><span class="bis-ref-label">Zhou Ce@30min</span><span class="bis-ref-val" id="m_bisEstZ">—</span></div>
+        <div style="height:3px;"></div>
+        <div class="bis-ref-row" style="border-top:1px solid rgba(255,255,255,.06);padding-top:4px;">
+          <span class="bis-ref-label">BIS≤60 threshold Ce</span>
+          <span class="bis-ref-val" style="color:var(--green);"><span id="m_bisCe60">—</span></span>
+        </div>
+        <div class="bis-ref-row">
+          <span class="bis-ref-label">BIS≤40 threshold Ce</span>
+          <span class="bis-ref-val" style="color:#f87171;"><span id="m_bisCe40">—</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Key Values</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--rema-e);">Eleveld 2025</div>
+          <div class="stat-row"><span class="stat-label">ke0</span><span class="stat-value" id="m_eKe0">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5min</span><span class="stat-value" id="m_eCp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5min</span><span class="stat-value" id="m_eCe5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="m_ePeak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="m_eCss">—</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-model" style="color:var(--rema-z);">Zhou 2020</div>
+          <div class="stat-row"><span class="stat-label">ke0</span><span class="stat-value" id="m_zKe0">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp @ 5min</span><span class="stat-value" id="m_zCp5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Ce @ 5min</span><span class="stat-value" id="m_zCe5">—</span></div>
+          <div class="stat-row"><span class="stat-label">Cp Peak</span><span class="stat-value" id="m_zPeak">—</span></div>
+          <div class="stat-row"><span class="stat-label">Css</span><span class="stat-value" id="m_zCss">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <div class="sec-title">Combined View Model</div>
+      <div class="model-sel">
+        <span class="model-sel-label">Select:</span>
+        <button class="model-radio active" id="m_selEleveld" onclick="remaSelectModel('eleveld')">Eleveld</button>
+        <button class="model-radio" id="m_selZhou" onclick="remaSelectModel('zhou')">Zhou</button>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="chart-area"><canvas id="m_chart"></canvas></div>
+    <div class="legend-bar">
+      <div class="legend-item" style="color:var(--rema-e);"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#22d3ee" stroke-width="2.5"/></svg>Eleveld Cp</div>
+      <div class="legend-item" style="color:var(--rema-e);"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#22d3ee" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Eleveld Ce</div>
+      <div class="legend-item" style="color:var(--rema-z);"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#fb923c" stroke-width="2.5"/></svg>Zhou Cp</div>
+      <div class="legend-item" style="color:var(--rema-z);"><svg width="26" height="10"><line x1="0" y1="5" x2="26" y2="5" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="6 4"/></svg>Zhou Ce</div>
+      <div class="legend-item" style="color:var(--green);"><svg width="26" height="10"><rect x="0" y="1" width="26" height="8" fill="rgba(52,211,153,.2)" stroke="#34d399" stroke-width="1"/></svg>Target Band</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  TAB 4: COMBINED VIEW                                        -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="tab-panel" id="panelCombined" style="flex-direction:column;">
+  <!-- Header: model selection summary + patient info -->
+  <div class="combined-header">
+    <span class="model-info" id="comb_modelInfo">Propofol: <b>Schnider</b> &nbsp;|&nbsp; Remifentanil: <b>Minto</b> &nbsp;|&nbsp; Remimazolam: <b>Eleveld</b></span>
+    <div class="patient-info" id="comb_patientInfo">
+      <span>Sex: <b id="comb_sex">M</b></span>
+      <span>Age: <b id="comb_age">50</b> yr</span>
+      <span>Wt: <b id="comb_wt">70</b> kg</span>
+      <span>Ht: <b id="comb_ht">170</b> cm</span>
+    </div>
+  </div>
+
+  <div class="combined-charts">
+    <!-- PROPOFOL mini chart -->
+    <div class="mini-chart-wrap">
+      <div class="mini-chart-header">
+        <span class="drug-name" style="color:var(--prop-s);">● Propofol</span>
+        <span class="mode-badge" id="comb_propModeBadge">Continuous</span>
+        <span class="dose-summary" id="comb_propDoseSummary">60 cc/hr</span>
+        <span class="target-badge" id="comb_propTarget">Ce 2–4 μg/mL</span>
+        <span class="mini-stats" id="comb_propStats">Cp@5min: — | Ce@5min: — | Css: —</span>
+      </div>
+      <div class="mini-chart-body"><canvas id="comb_propChart"></canvas></div>
+    </div>
+
+    <!-- REMIFENTANIL mini chart -->
+    <div class="mini-chart-wrap">
+      <div class="mini-chart-header">
+        <span class="drug-name" style="color:var(--remi-p);">● Remifentanil</span>
+        <span class="mode-badge" id="comb_remiModeBadge">Continuous</span>
+        <span class="dose-summary" id="comb_remiDoseSummary">20 cc/hr</span>
+        <span class="target-badge" id="comb_remiTarget">Ce 2–5 ng/mL</span>
+        <span class="mini-stats" id="comb_remiStats">Cp@5min: — | Ce@5min: — | Css: —</span>
+      </div>
+      <div class="mini-chart-body"><canvas id="comb_remiChart"></canvas></div>
+    </div>
+
+    <!-- REMIMAZOLAM mini chart -->
+    <div class="mini-chart-wrap">
+      <div class="mini-chart-header">
+        <span class="drug-name" style="color:var(--rema-e);">● Remimazolam</span>
+        <span class="mode-badge" id="comb_remaModeBadge">Continuous</span>
+        <span class="dose-summary" id="comb_remaDoseSummary">12 mL/hr</span>
+        <span class="target-badge" id="comb_remaTarget">Ce 650–1300 ng/mL</span>
+        <span class="mini-stats" id="comb_remaStats">Cp@5min: — | Ce@5min: — | Css: —</span>
+      </div>
+      <div class="mini-chart-body"><canvas id="comb_remaChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Linked time tooltip bar -->
+  <div id="comb_linkedBar" style="
+    display:none; padding:5px 18px; background:var(--surface2);
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+    font-size:11px; flex-shrink:0; align-items:center; gap:18px; flex-wrap:wrap;
+  ">
+    <span style="color:var(--text-dim);font-size:10px;font-weight:700;" id="comb_linkedTime">t = 0.0 min</span>
+    <span style="color:var(--prop-s);">Propofol &mdash;
+      Cp: <b id="comb_ltPropCp">—</b>
+      Ce: <b id="comb_ltPropCe">—</b>
+    </span>
+    <span style="color:var(--remi-p);">Remifentanil &mdash;
+      Cp: <b id="comb_ltRemiCp">—</b>
+      Ce: <b id="comb_ltRemiCe">—</b>
+    </span>
+    <span id="comb_ltRemaSpan" style="color:var(--rema-e);">Remimazolam &mdash;
+      Cp: <b id="comb_ltRemaCp">—</b>
+      Ce: <b id="comb_ltRemaCe">—</b>
+    </span>
+  </div>
+
+  <div class="combined-time-row">
+    <span class="sec-title" style="margin-bottom:0;">Time Range</span>
+    <div class="time-range-row" id="comb_trRow">
+      <button class="tr-btn" onclick="combSetTR(15,this)" style="border-color:rgba(52,211,153,.3);">15 min</button>
+      <button class="tr-btn" onclick="combSetTR(30,this)" style="border-color:rgba(52,211,153,.3);">30 min</button>
+      <button class="tr-btn active" onclick="combSetTR(60,this)" style="background:rgba(52,211,153,.15);color:var(--green);border-color:var(--green);">1 hr</button>
+      <button class="tr-btn" onclick="combSetTR(180,this)" style="border-color:rgba(52,211,153,.3);">3 hr</button>
+      <button class="tr-btn" onclick="combSetTR(360,this)" style="border-color:rgba(52,211,153,.3);">6 hr</button>
+      <button class="tr-btn" onclick="combSetTR(720,this)" style="border-color:rgba(52,211,153,.3);">12 hr</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <span>© 2026 부산백병원 마취통증의학과 오주석 | TIVA PK Simulator</span>
+  <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
+</footer>
+
+<script>
+/**
+ * TIVA PK Simulator — Shared PK Engine
+ * Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+ * (Dr. Joosuk Oh, Dept. of Anesthesiology & Pain Medicine,
+ *  Inje University Busan Paik Hospital)
+ * All rights reserved.
+ */
+
+// ═══════════════════════════════════════════════════════════════
+//  SHARED: Cubic Roots (Newton-Raphson)
+// ═══════════════════════════════════════════════════════════════
+function cubicRoots(a2, a1, a0) {
+  const f  = x => x*x*x - a2*x*x + a1*x - a0;
+  const df = x => 3*x*x - 2*a2*x + a1;
+  const found = [];
+  const seeds = [0.0001, a2*0.05, a2*0.2, a2*0.5, a2*0.8, a2, a2*1.2, 0.1, 0.5, 1.0, 2.0];
+  for (const s of seeds) {
+    let x = s;
+    for (let i = 0; i < 300; i++) {
+      const fx = f(x), dfx = df(x);
+      if (Math.abs(dfx) < 1e-15) break;
+      const dx = fx / dfx; x -= dx;
+      if (Math.abs(dx) < 1e-13) break;
+    }
+    if (!found.some(r => Math.abs(x-r) < 1e-6) && Math.abs(f(x)) < 1e-5 && x > 1e-9)
+      found.push(x);
+  }
+  return found.sort((a,b) => b-a);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════
+let currentTab = 'prop';
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active','active-remi','active-rema','active-combined');
+  });
+  document.getElementById('panel' + {prop:'Prop',remi:'Remi',rema:'Rema',combined:'Combined'}[tab]).classList.add('active');
+  const btn = document.getElementById('tab' + {prop:'Prop',remi:'Remi',rema:'Rema',combined:'Combined'}[tab]);
+  if (tab === 'prop') btn.classList.add('active');
+  else if (tab === 'remi') btn.classList.add('active-remi');
+  else if (tab === 'rema') btn.classList.add('active-rema');
+  else btn.classList.add('active-combined');
+
+  // Refresh charts on tab switch (Chart.js needs resize)
+  setTimeout(() => {
+    if (tab === 'prop') { propChart.resize(); propUpdate(); }
+    else if (tab === 'remi') { remiChart.resize(); remiUpdate(); }
+    else if (tab === 'rema') { remaChart.resize(); remaUpdate(); }
+    else if (tab === 'combined') { combUpdate(); }
+  }, 50);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PROPOFOL PK ENGINE
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+function schniderParams(sex, age, wt, ht) {
+  let LBM = sex === 'M'
+    ? 1.10*wt - 128*wt*wt / (10000*(ht/100)**2)
+    : 1.07*wt - 148*wt*wt / (10000*(ht/100)**2);
+  LBM = Math.max(20, LBM);
+  const V1  = 4.27;
+  const V2  = Math.max(1, 18.9 - 0.391*(age-53));
+  const V3  = 238;
+  const Cl1 = Math.max(0.1, 1.89 + 0.0456*(wt-77) - 0.0681*(LBM-59) + 0.0264*(ht-177));
+  const Cl2 = Math.max(0.01, 1.29 - 0.024*(age-53));
+  const Cl3 = 0.836;
+  const ke0 = 0.456;
+  return { V1, ke0, Cl1, k10:Cl1/V1, k12:Cl2/V1, k21:Cl2/V2, k13:Cl3/V1, k31:Cl3/V3 };
+}
+
+function marshParams(wt) {
+  const V1 = 0.228 * wt;
+  const k10=0.119, k12=0.112, k21=0.055, k13=0.0419, k31=0.0033, ke0=1.21;
+  return { V1, ke0, Cl1:k10*V1, k10, k12, k21, k13, k31 };
+}
+
+function propGetEigen(V1, k10, k12, k21, k13, k31) {
+  const a2=k10+k12+k21+k13+k31, a1=k10*k21+k31*(k10+k12)+k21*k13, a0=k10*k21*k31;
+  const [l1,l2,l3] = cubicRoots(a2, a1, a0);
+  return {
+    l1, l2, l3,
+    C1:(k21-l1)*(k31-l1)/((l1-l2)*(l1-l3)),
+    C2:(k21-l2)*(k31-l2)/((l2-l1)*(l2-l3)),
+    C3:(k21-l3)*(k31-l3)/((l3-l1)*(l3-l2))
+  };
+}
+
+function propCpSeg(t, R0, V1, DUR, l1,l2,l3, C1,C2,C3) {
+  const tI=Math.min(t,DUR), tD=Math.max(t-DUR,0);
+  return (R0/V1) * (
+    C1/l1*(1-Math.exp(-l1*tI))*Math.exp(-l1*tD) +
+    C2/l2*(1-Math.exp(-l2*tI))*Math.exp(-l2*tD) +
+    C3/l3*(1-Math.exp(-l3*tI))*Math.exp(-l3*tD)
+  );
+}
+
+function propSimulate(params, mode, ccPerHr, bolusMg, bolusRateCcHr, concMgMl, nPts, maxMin) {
+  // concMgMl: 10 = propofol 1%,  20 = propofol 2%
+  const {V1,k10,k12,k21,k13,k31,ke0} = params;
+  const {l1,l2,l3,C1,C2,C3} = propGetEigen(V1,k10,k12,k21,k13,k31);
+  const sumCiLi = C1/l1+C2/l2+C3/l3;
+  const dt = maxMin/nPts;
+  const vol_cc = bolusMg / concMgMl;             // cc for bolus
+  const DUR_b  = (vol_cc / bolusRateCcHr) * 60;  // min
+  const R0_b   = bolusMg / DUR_b;                // mg/min
+  const R0_c   = ccPerHr * concMgMl / 60;        // mg/min
+  const DUR_c = maxMin;
+  const Css = (mode==='continuous'||mode==='bolusinf') ? (R0_c/V1)*sumCiLi : null;
+  const times=[], Cp_arr=[], Ce_arr=[];
+  let Ce=0;
+  for (let i=0; i<=nPts; i++) {
+    const t=i*dt; let Cp=0;
+    if (mode==='continuous') Cp = propCpSeg(t,R0_c,V1,DUR_c,l1,l2,l3,C1,C2,C3);
+    else if (mode==='bolus') Cp = propCpSeg(t,R0_b,V1,DUR_b,l1,l2,l3,C1,C2,C3);
+    else Cp = propCpSeg(t,R0_b,V1,DUR_b,l1,l2,l3,C1,C2,C3) + propCpSeg(t,R0_c,V1,DUR_c,l1,l2,l3,C1,C2,C3);
+    if (i>0) Ce += ke0*(Cp-Ce)*dt;
+    Ce = Math.max(0,Ce);
+    times.push(+t.toFixed(4));
+    Cp_arr.push(+Cp.toFixed(4));
+    Ce_arr.push(+Ce.toFixed(4));
+  }
+  return {times, Cp:Cp_arr, Ce:Ce_arr, Css};
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SHARED PATIENT STATE
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+//  sex/age/wt/ht are shared across ALL drug tabs.
+//  Changing covariates in one tab instantly updates all others.
+// ═══════════════════════════════════════════════════════════════
+const patient = { sex:'M', age:50, wt:70, ht:170 };
+
+// Sync all six patient UI elements across all three tabs
+// `skipEl`: an input element to NOT overwrite (the one currently being typed into)
+function syncPatientUI(skipEl) {
+  const {sex,age,wt,ht} = patient;
+  // Sex buttons
+  ['p','r','m'].forEach(pre => {
+    const bM = document.getElementById(`${pre}_btnM`);
+    const bF = document.getElementById(`${pre}_btnF`);
+    if (bM) bM.classList.toggle('active', sex==='M');
+    if (bF) bF.classList.toggle('active', sex==='F');
+  });
+  // Age
+  [['p_slAge','p_inpAge'],['r_slAge','r_inpAge'],['m_slAge','m_inpAge']].forEach(([sl,inp]) => {
+    const s=document.getElementById(sl), i=document.getElementById(inp);
+    if(s) s.value=age; if(i && i!==skipEl) i.value=age;
+  });
+  // Weight
+  [['p_slWt','p_inpWt'],['r_slWt','r_inpWt'],['m_slWt','m_inpWt']].forEach(([sl,inp]) => {
+    const s=document.getElementById(sl), i=document.getElementById(inp);
+    if(s) s.value=wt; if(i && i!==skipEl) i.value=wt;
+  });
+  // Height (propofol + remi tabs only; rema tab has no ht)
+  [['p_slHt','p_inpHt'],['r_slHt','r_inpHt']].forEach(([sl,inp]) => {
+    const s=document.getElementById(sl), i=document.getElementById(inp);
+    if(s) s.value=ht; if(i && i!==skipEl) i.value=ht;
+  });
+}
+
+// Called from any tab when sex/age/wt/ht changes
+// Updates shared state, syncs all UIs, re-runs all active charts + combined view
+function setPatient(key, val, skipEl) {
+  patient[key] = val;
+  syncPatientUI(skipEl);
+  // 체중 변경 시 Remimazolam infusion rate 자동 동기화 (rate = wt mL/hr)
+  if (key === 'wt') {
+    // rate, rateBI: 1×wt (유지 용량), rate1: 3×wt (유도 용량), rate2: 1×wt (전환 용량)
+    const wtRates = {
+      rate:    { mult:1, max:100 },
+      rateBI:  { mult:1, max:100 },
+      rate1:   { mult:3, max:500 },
+      rate2:   { mult:1, max:200 }
+    };
+    Object.entries(wtRates).forEach(([rk, cfg]) => {
+      const newVal = Math.min(cfg.max, Math.max(0, Math.round(val * cfg.mult)));
+      remaState[rk] = newVal;
+      const pair = remaSlNum[rk];
+      if (pair) {
+        const sl = document.getElementById(pair[0]); if (sl) sl.value = newVal;
+        const inp = document.getElementById(pair[1]); if (inp) inp.value = newVal;
+      }
+    });
+  }
+  propUpdate();
+  remiUpdate();
+  remaUpdate();
+  if (document.getElementById('panelCombined').classList.contains('active')) combUpdate();
+}
+
+// Trigger combined view refresh when any tab changes dosing or target
+function triggerCombined() {
+  if (document.getElementById('panelCombined').classList.contains('active')) combUpdate();
+}
+
+// Propofol State
+const propState = {
+  mode:'bolus', rate:60, bolus:120, bolusRate:1200,
+  concMgMl:10, timeRange:60, combinedModel:'schnider'
+};
+
+const propCtx = document.getElementById('p_chart').getContext('2d');
+const propChart = new Chart(propCtx, {
+  type:'line', data:{labels:[],datasets:[]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:120},
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#1e2235',borderColor:'#262c45',borderWidth:1,
+        titleColor:'#dde2f0',bodyColor:'#7a85a3',padding:10,
+        filter:item=>!['TH','TL','BIS 60','BIS 40'].includes(item.dataset.label),
+        callbacks:{
+          title:items=>`t = ${(+items[0].label).toFixed(1)} min`,
+          label:ctx=>ctx.dataset.yAxisID==='yBIS'?`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)}`:`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)} μg/mL`,
+        }
+      }
+    },
+    scales:{
+      x:{type:'linear',title:{display:true,text:'Time',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3',maxTicksLimit:12,callback:v=>v>0&&v%60===0?(v/60)+'h':v+'m'},grid:{color:'rgba(38,44,69,.5)'}},
+      y:{position:'left',title:{display:true,text:'Concentration (μg/mL)',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3'},grid:{color:'rgba(38,44,69,.5)'},min:0},
+      yBIS:{position:'right',min:0,max:100,title:{display:true,text:'BIS',color:'#fb923c',font:{size:11}},ticks:{color:'#fb923c',stepSize:20},grid:{drawOnChartArea:false}}
+    }
+  }
+});
+
+function propUpdate() {
+  const {sex,age,wt,ht}=patient;
+  const {mode,rate,bolus,bolusRate,concMgMl,timeRange}=propState;
+  const N=Math.min(1440, Math.max(600, Math.round(timeRange*10)));
+  const sP=schniderParams(sex,age,wt,ht), mP=marshParams(wt);
+  const simS=propSimulate(sP,mode,rate,bolus,bolusRate,concMgMl,N,timeRange);
+  const simM=propSimulate(mP,mode,rate,bolus,bolusRate,concMgMl,N,timeRange);
+  const tL=parseFloat(document.getElementById('p_targLow').value)||0;
+  const tH=parseFloat(document.getElementById('p_targHigh').value)||0;
+  propChart.data.labels=simS.times;
+  // Eleveld 2018 BIS time-series (Schnider + Marsh Ce 기반)
+  const _E0p=93.4, _Ce50p=2.01*Math.exp(-0.00635*(age-53)), _gp=1.43;
+  const _bisFn=ce=>ce<=0?_E0p:Math.max(0,Math.min(100,_E0p/(1+Math.pow(ce/_Ce50p,_gp))));
+  const bisDataS=simS.Ce.map(_bisFn);
+  const bisDataM=simM.Ce.map(_bisFn);
+  propChart.data.datasets=[
+    {label:'TH',data:simS.times.map(()=>tH),borderColor:'transparent',backgroundColor:'rgba(52,211,153,.12)',fill:'+1',pointRadius:0,tension:0,order:10},
+    {label:'TL',data:simS.times.map(()=>tL),borderColor:'rgba(52,211,153,.5)',backgroundColor:'transparent',fill:false,pointRadius:0,borderDash:[3,4],borderWidth:1.2,tension:0,order:10},
+    {label:'Schnider Cp',data:simS.Cp,borderColor:'#4f8ef7',backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:0,order:1},
+    {label:'Schnider Ce',data:simS.Ce,borderColor:'#4f8ef7',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:2},
+    {label:'Marsh Cp',data:simM.Cp,borderColor:'#f97316',backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:0,order:3},
+    {label:'Marsh Ce',data:simM.Ce,borderColor:'#f97316',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:4},
+    {label:'BIS(Schnider)',data:bisDataS,borderColor:'rgba(79,142,247,.5)',backgroundColor:'transparent',borderWidth:1.6,borderDash:[1,4],borderCapStyle:'round',pointRadius:0,tension:0.3,yAxisID:'yBIS',order:5},
+    {label:'BIS(Marsh)',data:bisDataM,borderColor:'rgba(249,115,22,.5)',backgroundColor:'transparent',borderWidth:1.6,borderDash:[1,4],borderCapStyle:'round',pointRadius:0,tension:0.3,yAxisID:'yBIS',order:6},
+    {label:'BIS 60',data:simS.times.map(()=>60),borderColor:'rgba(52,211,153,.45)',backgroundColor:'transparent',borderWidth:0.9,borderDash:[4,3],pointRadius:0,tension:0,yAxisID:'yBIS',order:12},
+    {label:'BIS 40',data:simS.times.map(()=>40),borderColor:'rgba(248,113,113,.45)',backgroundColor:'transparent',borderWidth:0.9,borderDash:[4,3],pointRadius:0,tension:0,yAxisID:'yBIS',order:12},
+  ];
+  propChart.update();
+  const fmt=v=>v==null?'—':v.toFixed(2)+' μg/mL';
+  const idx5=Math.min(Math.round(5/(timeRange/N)),N);
+  document.getElementById('p_sS_cp5').textContent=fmt(simS.Cp[idx5]);
+  document.getElementById('p_sS_ce5').textContent=fmt(simS.Ce[idx5]);
+  document.getElementById('p_sS_peak').textContent=fmt(Math.max(...simS.Cp));
+  document.getElementById('p_sS_css').textContent=simS.Css!=null?fmt(simS.Css):'—';
+  document.getElementById('p_sM_cp5').textContent=fmt(simM.Cp[idx5]);
+  document.getElementById('p_sM_ce5').textContent=fmt(simM.Ce[idx5]);
+  document.getElementById('p_sM_peak').textContent=fmt(Math.max(...simM.Cp));
+  document.getElementById('p_sM_css').textContent=simM.Css!=null?fmt(simM.Css):'—';
+  // mg/kg/hr rate hints — Propofol (10 mg/mL)
+  (function(){
+    const concMgPerMl = concMgMl; // 10 or 20 mg/mL
+    const mgkghr = r => (r * concMgPerMl / patient.wt).toFixed(2);
+    const h1=document.getElementById('p_rateHint');
+    const h2=document.getElementById('p_rateHint2');
+    if(h1) h1.textContent = mode==='continuous' ? '≈ '+mgkghr(rate)+' mg/kg/hr' : '';
+    if(h2) h2.textContent = mode==='bolusinf'   ? '≈ '+mgkghr(rate)+' mg/kg/hr' : '';
+  })();
+
+  // ─── Propofol BIS (Eleveld 2018 PD) — Schnider + Marsh ───
+  (function(){
+    const E0=93.4, Ce50=2.01*Math.exp(-0.00635*(age-53)), gamma=1.43;
+    const bisFn = ce => ce<=0 ? E0 : Math.max(0,Math.min(100,E0/(1+Math.pow(ce/Ce50,gamma))));
+    const ceForBIS = t => t>=E0 ? null : Ce50*Math.pow(E0/t-1, 1/gamma);
+    const ce5S = parseFloat(simS.Ce[idx5])||0;
+    const ce5M = parseFloat(simM.Ce[idx5])||0;
+    const bisS = bisFn(ce5S), bisM = bisFn(ce5M);
+    const elS = document.getElementById('p_bisEstS');
+    const elM = document.getElementById('p_bisEstM');
+    if (elS) elS.textContent = 'BIS '+bisS.toFixed(0)+'  ('+ce5S.toFixed(2)+' μg/mL)';
+    if (elM) elM.textContent = 'BIS '+bisM.toFixed(0)+'  ('+ce5M.toFixed(2)+' μg/mL)';
+    const ce60=ceForBIS(60), ce40=ceForBIS(40);
+    const el60=document.getElementById('p_bisCe60'), el40=document.getElementById('p_bisCe40');
+    if (el60) el60.textContent = ce60 ? ce60.toFixed(2)+' μg/mL' : '—';
+    if (el40) el40.textContent = ce40 ? ce40.toFixed(2)+' μg/mL' : '—';
+    drawPropBisChart(age, ce5S, ce5M);
+  })();
+  triggerCombined();
+}
+
+// Patient covariate handlers — delegate to shared setPatient()
+function propSetSex(s)      { setPatient('sex', s); }
+function propSl(key,val) {
+  if (['age','wt','ht'].includes(key)) { setPatient(key, val); return; }
+  propState[key]=val;
+  const map={rate:['p_inpRate','p_inpRate2'],bolus:['p_inpBolus','p_inpBolus2'],bolusRate:['p_inpBRate','p_inpBRate2']};
+  const ids=Array.isArray(map[key])?map[key]:[map[key]];
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value=val;});
+  propUpdate();
+}
+function propNum(key,el,mn,mx,commit) {
+  let val=parseFloat(el.value);if(isNaN(val))return;
+  // On blur (commit=true), clamp and write back into the active input.
+  // During typing (commit=false), only clamp for downstream state/slider sync —
+  // don't overwrite the active input or the user can't type multi-digit values.
+  const clamped=Math.min(mx,Math.max(mn,val));
+  if(commit){ el.value=clamped; val=clamped; } else { val=clamped; }
+  if (['age','wt','ht'].includes(key)) { setPatient(key, val, commit?null:el); return; }
+  propState[key]=val;
+  const slMap={rate:['p_slRate','p_slRate2'],bolus:['p_slBolus','p_slBolus2'],bolusRate:['p_slBRate','p_slBRate2']};
+  const ids=Array.isArray(slMap[key])?slMap[key]:[slMap[key]];
+  ids.forEach(id=>{const sl=document.getElementById(id);if(sl)sl.value=val;});
+  const numMap={rate:['p_inpRate','p_inpRate2'],bolus:['p_inpBolus','p_inpBolus2'],bolusRate:['p_inpBRate','p_inpBRate2']};
+  if(numMap[key]) numMap[key].forEach(id=>{const e=document.getElementById(id);if(e&&e!==el)e.value=val;});
+  propUpdate();
+}
+function propSetMode(m) {
+  propState.mode=m;
+  ['p_btnCont','p_btnBolus','p_btnBolInf'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(m==='continuous'?'p_btnCont':m==='bolus'?'p_btnBolus':'p_btnBolInf').classList.add('active');
+  document.getElementById('p_contCtrl').style.display=m==='continuous'?'':'none';
+  document.getElementById('p_bolusCtrl').style.display=m==='bolus'?'':'none';
+  document.getElementById('p_bolInfCtrl').style.display=m==='bolusinf'?'':'none';
+  propUpdate();
+}
+function propSetTR(min,btn) {
+  propState.timeRange=min;
+  document.querySelectorAll('#p_trRow .tr-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  propUpdate();
+}
+function propSelectModel(m) {
+  propState.combinedModel=m;
+  document.getElementById('p_selSchnider').classList.toggle('active',m==='schnider');
+  document.getElementById('p_selMarsh').classList.toggle('active',m==='marsh');
+}
+function propSetConc(c, btn) {
+  propState.concMgMl = c;
+  document.querySelectorAll('#p_concRow .conc-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  propUpdate();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  REMIFENTANIL PK ENGINE
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+function mintoParams(sex, age, wt, ht) {
+  const LBM = sex==='M'
+    ? Math.max(10, 1.10*wt - 128*wt*wt/(10000*(ht/100)**2))
+    : Math.max(10, 1.07*wt - 148*wt*wt/(10000*(ht/100)**2));
+  const V1=Math.max(0.1, 5.1-0.0201*(age-40)+0.072*(LBM-55));
+  const V2=Math.max(0.1, 9.82-0.0811*(age-40)+0.108*(LBM-55));
+  const V3=5.42;
+  const Cl1=Math.max(0.01, 2.6-0.0162*(age-40)+0.0191*(LBM-55));
+  const Cl2=Math.max(0.01, 2.05-0.0301*(age-40));
+  const Cl3=Math.max(0.001, 0.076-0.00113*(age-40));
+  const ke0=Math.max(0.01, 0.595-0.007*(age-40));
+  return { V1,V2,V3,Cl1,LBM,ke0, k10:Cl1/V1, k12:Cl2/V1, k21:Cl2/V2, k13:Cl3/V1, k31:Cl3/V3 };
+}
+
+function remiGetEigen(p) {
+  const {V1,k10,k12,k21,k13,k31}=p;
+  const a2=k10+k12+k21+k13+k31, a1=k10*k21+k31*(k10+k12)+k21*k13, a0=k10*k21*k31;
+  const [l1,l2,l3]=cubicRoots(a2,a1,a0);
+  return {l1,l2,l3,
+    C1:(k21-l1)*(k31-l1)/(V1*(l1-l2)*(l1-l3)),
+    C2:(k21-l2)*(k31-l2)/(V1*(l2-l1)*(l2-l3)),
+    C3:(k21-l3)*(k31-l3)/(V1*(l3-l1)*(l3-l2))
+  };
+}
+
+function remiCpSeg(t, R0, DUR, l1,l2,l3, C1,C2,C3) {
+  const tI=Math.min(t,DUR), tD=Math.max(t-DUR,0);
+  return R0*(
+    C1/l1*(1-Math.exp(-l1*tI))*Math.exp(-l1*tD)+
+    C2/l2*(1-Math.exp(-l2*tI))*Math.exp(-l2*tD)+
+    C3/l3*(1-Math.exp(-l3*tI))*Math.exp(-l3*tD)
+  );
+}
+
+function remiSimulate(p, mode, ccPerHr, bolus, bolusRate, rateBI, rate1, rate2, switchT, concMcgMl, nPts, maxMin) {
+  const {ke0}=p;
+  const {l1,l2,l3,C1,C2,C3}=remiGetEigen(p);
+  const sumCiLi=C1/l1+C2/l2+C3/l3;
+  const dt=maxMin/nPts;
+  const R0_c=ccPerHr*concMcgMl/60;
+  const vol_cc=bolus/concMcgMl;
+  const DUR_b=(vol_cc/bolusRate)*60;
+  const R0_b=bolus/DUR_b;
+  const R0_bi=rateBI*concMcgMl/60;
+  const R0_1=rate1*concMcgMl/60;
+  const R0_2=rate2*concMcgMl/60;
+  const DUR_s2=Math.max(0,maxMin-switchT);
+  const Css_cont=R0_c*sumCiLi;
+  const Css_bi=R0_bi*sumCiLi;
+  const Css_new=R0_2*sumCiLi;
+  const times=[],Cp_arr=[],Ce_arr=[];
+  let Ce=0, prevCp=0;
+  for (let i=0;i<=nPts;i++){
+    const t=i*dt; let Cp=0;
+    if(mode==='continuous') Cp=remiCpSeg(t,R0_c,maxMin,l1,l2,l3,C1,C2,C3);
+    else if(mode==='bolusinf') Cp=remiCpSeg(t,R0_b,DUR_b,l1,l2,l3,C1,C2,C3)+remiCpSeg(t,R0_bi,maxMin,l1,l2,l3,C1,C2,C3);
+    else { Cp=remiCpSeg(t,R0_1,switchT,l1,l2,l3,C1,C2,C3); if(t>switchT) Cp+=remiCpSeg(t-switchT,R0_2,DUR_s2,l1,l2,l3,C1,C2,C3); }
+    if(i>0) Ce+=ke0*(prevCp-Ce)*dt;
+    Ce=Math.max(0,Ce);
+    times.push(+t.toFixed(4));
+    Cp_arr.push(+Math.max(0,Cp).toFixed(5));
+    Ce_arr.push(+Ce.toFixed(5));
+    prevCp=Cp;
+  }
+  const Css=mode==='continuous'?Css_cont:mode==='bolusinf'?Css_bi:Css_new;
+  return {times,Cp:Cp_arr,Ce:Ce_arr,Css};
+}
+
+// Remi State (sex/age/wt/ht now come from shared 'patient' object)
+const remiState = {
+  mode:'ratechange', rate:20, bolus:25, bolusRate:1200, rateBI:20,
+  rate1:20, rate2:10, switchT:30, concMcgMl:50, timeRange:60
+};
+
+const remiCtx = document.getElementById('r_chart').getContext('2d');
+const remiChart = new Chart(remiCtx, {
+  type:'line', data:{labels:[],datasets:[]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:120},
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#1e2235',borderColor:'#262c45',borderWidth:1,
+        titleColor:'#dde2f0',bodyColor:'#7a85a3',padding:10,
+        filter:item=>!['TH','TL'].includes(item.dataset.label),
+        callbacks:{
+          title:items=>`t = ${(+items[0].label).toFixed(1)} min`,
+          label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)} ng/mL`,
+        }
+      }
+    },
+    scales:{
+      x:{type:'linear',title:{display:true,text:'Time',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3',maxTicksLimit:12,callback:v=>v>0&&v%60===0?(v/60)+'h':v+'m'},grid:{color:'rgba(38,44,69,.5)'}},
+      y:{title:{display:true,text:'Concentration (ng/mL)',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3'},grid:{color:'rgba(38,44,69,.5)'},min:0}
+    }
+  }
+});
+
+function remiUpdate() {
+  const {sex,age,wt,ht}=patient;
+  const {mode,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,concMcgMl,timeRange}=remiState;
+  const N=Math.min(1440, Math.max(600, Math.round(timeRange*10)));
+  const p=mintoParams(sex,age,wt,ht);
+  const sim=remiSimulate(p,mode,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,concMcgMl,N,timeRange);
+  const tL=parseFloat(document.getElementById('r_targLow').value)||0;
+  const tH=parseFloat(document.getElementById('r_targHigh').value)||0;
+  remiChart.data.labels=sim.times;
+  remiChart.data.datasets=[
+    {label:'TH',data:sim.times.map(()=>tH),borderColor:'transparent',backgroundColor:'rgba(52,211,153,.12)',fill:'+1',pointRadius:0,tension:0,order:10},
+    {label:'TL',data:sim.times.map(()=>tL),borderColor:'rgba(52,211,153,.5)',backgroundColor:'transparent',fill:false,pointRadius:0,borderDash:[3,4],borderWidth:1.2,tension:0,order:10},
+    {label:'Cp',data:sim.Cp,borderColor:'#a78bfa',backgroundColor:'transparent',borderWidth:2.5,pointRadius:0,tension:0,order:1},
+    {label:'Ce',data:sim.Ce,borderColor:'#a78bfa',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:2},
+  ];
+  remiChart.update();
+  const fmt=v=>v==null?'—':v.toFixed(3)+' ng/mL';
+  const idx5=Math.min(Math.round(5/(timeRange/N)),N);
+  document.getElementById('r_sLBM').textContent=p.LBM.toFixed(1)+' kg';
+  document.getElementById('r_sKe0').textContent=p.ke0.toFixed(4)+' /min';
+  document.getElementById('r_sCp5').textContent=fmt(sim.Cp[idx5]);
+  document.getElementById('r_sCe5').textContent=fmt(sim.Ce[idx5]);
+  document.getElementById('r_sPeak').textContent=fmt(Math.max(...sim.Cp));
+  document.getElementById('r_sCss').textContent=sim.Css!=null?fmt(sim.Css):'—';
+  // mcg/kg/min rate hints — Remifentanil (selected concentration)
+  (function(){
+    const c=remiState.concMcgMl, m2=remiState.mode;
+    const mcg = r => (r*c/patient.wt/60).toFixed(2);
+    const rh  = document.getElementById('r_rateHint');
+    const rhBI= document.getElementById('r_rateBIHint');
+    const rh1 = document.getElementById('r_rate1Hint');
+    const rh2 = document.getElementById('r_rate2Hint');
+    if(rh)   rh.textContent   = m2==='continuous' ? '≈ '+mcg(remiState.rate)+' µg/kg/min'   : '';
+    if(rhBI) rhBI.textContent = m2==='bolusinf'   ? '≈ '+mcg(remiState.rateBI)+' µg/kg/min' : '';
+    if(rh1)  rh1.textContent  = m2==='ratechange' ? '≈ '+mcg(remiState.rate1)+' µg/kg/min'  : '';
+    if(rh2)  rh2.textContent  = m2==='ratechange' ? '≈ '+mcg(remiState.rate2)+' µg/kg/min'  : '';
+  })();
+  triggerCombined();
+}
+
+function remiSetSex(s) { setPatient('sex', s); }
+function remiSl(key,val) {
+  remiState[key]=val;
+  const map={rate:'r_inpRate',bolus:'r_inpBolus',bolusRate:'r_inpBRate',rateBI:'r_inpRateBI',rate1:'r_inpRate1',rate2:'r_inpRate2',switchT:'r_inpSwitchT'};
+  if (['age','wt','ht'].includes(key)) { setPatient(key, val); return; }
+  const el=document.getElementById(map[key]);if(el)el.value=val;
+  remiUpdate();
+}
+function remiNum(key,el,mn,mx,commit) {
+  let val=parseFloat(el.value);if(isNaN(val))return;
+  const clamped=Math.min(mx,Math.max(mn,val));
+  if(commit){ el.value=clamped; val=clamped; } else { val=clamped; }
+  if (['age','wt','ht'].includes(key)) { setPatient(key, val, commit?null:el); return; }
+  remiState[key]=val;
+  const slMap={rate:'r_slRate',bolus:'r_slBolus',bolusRate:'r_slBRate',rateBI:'r_slRateBI',rate1:'r_slRate1',rate2:'r_slRate2',switchT:'r_slSwitchT'};
+  const sl=document.getElementById(slMap[key]);if(sl)sl.value=val;
+  remiUpdate();
+}
+function remiSetMode(m) {
+  remiState.mode=m;
+  ['r_btnCont','r_btnBolInf','r_btnRC'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(m==='continuous'?'r_btnCont':m==='bolusinf'?'r_btnBolInf':'r_btnRC').classList.add('active');
+  document.getElementById('r_contCtrl').style.display=m==='continuous'?'':'none';
+  document.getElementById('r_bolInfCtrl').style.display=m==='bolusinf'?'':'none';
+  document.getElementById('r_rcCtrl').style.display=m==='ratechange'?'':'none';
+  remiUpdate();
+}
+function remiSetConc(c,btn) {
+  remiState.concMcgMl=c;
+  document.querySelectorAll('#r_concRow .conc-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  remiUpdate();
+}
+function remiSetTR(min,btn) {
+  remiState.timeRange=min;
+  document.querySelectorAll('#r_trRow .tr-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  remiUpdate();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  REMIMAZOLAM PK ENGINE
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+function eleveldParams(sex, age, wt, opioids) {
+  const Fs=wt/70;
+  const V1=4.31*Fs, V2=12.3*Fs;
+  const V3=18.6*Fs*Math.exp(7.31/1000*(age-35))*(sex==='F'?Math.exp(28.7/100):1);
+  const CL=1.12*Math.pow(Fs,0.75)*(sex==='F'?Math.exp(16.3/100):1)*(opioids?Math.exp(-13.9/100):1);
+  const Q2=1.45*Math.pow(V2/12.3,0.75), Q3=0.298*Math.pow(V3/18.6,0.75);
+  const ke0=0.145*Math.exp(-10.6/1000*(age-35));
+  return {V1,V2,V3,CL,Q2,Q3,ke0,k10:CL/V1,k12:Q2/V1,k21:Q2/V2,k13:Q3/V1,k31:Q3/V3};
+}
+
+function zhouParams(sex, age, wt) {
+  const Fs=Math.pow(wt/70,0.75), Fv=wt/70;
+  const CL=(sex==='F'?1.14:1.03)*Fs;
+  const V1=2.92*Fv, V2=9.81*Fv, V3=19.1*Fv;
+  const Q2=1.16*Fs, Q3=0.38*Fs;
+  const ke0=0.134;
+  return {V1,V2,V3,CL,Q2,Q3,ke0,k10:CL/V1,k12:Q2/V1,k21:Q2/V2,k13:Q3/V1,k31:Q3/V3};
+}
+
+function remaGetEigen(p) {
+  const {V1,k10,k12,k21,k13,k31}=p;
+  const a2=k10+k12+k21+k13+k31, a1=k10*k21+k31*(k10+k12)+k21*k13, a0=k10*k21*k31;
+  const [l1,l2,l3]=cubicRoots(a2,a1,a0);
+  return {l1,l2,l3,
+    C1:(k21-l1)*(k31-l1)/(V1*(l1-l2)*(l1-l3)),
+    C2:(k21-l2)*(k31-l2)/(V1*(l2-l1)*(l2-l3)),
+    C3:(k21-l3)*(k31-l3)/(V1*(l3-l1)*(l3-l2))
+  };
+}
+
+function remaCpSeg(t, R0, DUR, l1,l2,l3, C1,C2,C3) {
+  const tI=Math.min(t,DUR), tD=Math.max(t-DUR,0);
+  return R0*1000*(
+    C1/l1*(1-Math.exp(-l1*tI))*Math.exp(-l1*tD)+
+    C2/l2*(1-Math.exp(-l2*tI))*Math.exp(-l2*tD)+
+    C3/l3*(1-Math.exp(-l3*tI))*Math.exp(-l3*tD)
+  );
+}
+
+function remaSimulate(p, mode, concMgMl, mLperHr, bolusMg, bolusRateMlHr, rateBI, rate1, rate2, switchT, nPts, maxMin) {
+  const {ke0}=p;
+  const {l1,l2,l3,C1,C2,C3}=remaGetEigen(p);
+  const sumCiLi=C1/l1+C2/l2+C3/l3;
+  const dt=maxMin/nPts;
+  const R0_c=mLperHr*concMgMl/60;
+  const R0_bi=rateBI*concMgMl/60;
+  const vol_b=bolusMg/concMgMl;
+  const DUR_b=(vol_b/bolusRateMlHr)*60;
+  const R0_b=bolusMg/DUR_b;
+  const R0_1=rate1*concMgMl/60, R0_2=rate2*concMgMl/60;
+  const DUR_s2=Math.max(0,maxMin-switchT);
+  const Css_c=R0_c*sumCiLi*1000, Css_bi=R0_bi*sumCiLi*1000, Css_rc=R0_2*sumCiLi*1000;
+  const times=[],Cp_arr=[],Ce_arr=[];
+  let Ce=0, prevCp=0;
+  for (let i=0;i<=nPts;i++){
+    const t=i*dt; let Cp=0;
+    if(mode==='continuous') Cp=remaCpSeg(t,R0_c,maxMin,l1,l2,l3,C1,C2,C3);
+    else if(mode==='bolusinf') Cp=remaCpSeg(t,R0_b,DUR_b,l1,l2,l3,C1,C2,C3)+remaCpSeg(t,R0_bi,maxMin,l1,l2,l3,C1,C2,C3);
+    else { Cp=remaCpSeg(t,R0_1,switchT,l1,l2,l3,C1,C2,C3); if(t>switchT) Cp+=remaCpSeg(t-switchT,R0_2,DUR_s2,l1,l2,l3,C1,C2,C3); }
+    if(i>0) Ce+=ke0*(prevCp-Ce)*dt;
+    Ce=Math.max(0,Ce);
+    times.push(+t.toFixed(4));
+    Cp_arr.push(+Math.max(0,Cp).toFixed(3));
+    Ce_arr.push(+Ce.toFixed(3));
+    prevCp=Cp;
+  }
+  const Css=mode==='continuous'?Css_c:mode==='bolusinf'?Css_bi:Css_rc;
+  return {times,Cp:Cp_arr,Ce:Ce_arr,Css};
+}
+
+// Rema State (sex/age/wt now come from shared 'patient' object)
+const remaState = {
+  opioids:false,
+  mode:'ratechange', concMgMl:1, rate:70,
+  bolus:5, bolusRate:1200, rateBI:70,
+  rate1:210, rate2:70, switchT:30, timeRange:60,
+  combinedModel:'eleveld'
+};
+
+const remaCtx = document.getElementById('m_chart').getContext('2d');
+const remaChart = new Chart(remaCtx, {
+  type:'line', data:{labels:[],datasets:[]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:120},
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        backgroundColor:'#1e2235',borderColor:'#262c45',borderWidth:1,
+        titleColor:'#dde2f0',bodyColor:'#7a85a3',padding:9,
+        filter:item=>!['TH','TL'].includes(item.dataset.label),
+        callbacks:{
+          title:items=>`t = ${(+items[0].label).toFixed(1)} min`,
+          label:ctx=>ctx.dataset.yAxisID==='y2'
+            ?`${ctx.dataset.label}: BIS ${ctx.parsed.y.toFixed(0)}`
+            :`${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)} ng/mL`,
+        }
+      }
+    },
+    scales:{
+      x:{type:'linear',title:{display:true,text:'Time',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3',maxTicksLimit:12,callback:v=>v>0&&v%60===0?(v/60)+'h':v+'m'},grid:{color:'rgba(38,44,69,.5)'}},
+      y:{title:{display:true,text:'Concentration (ng/mL)',color:'#7a85a3',font:{size:11}},ticks:{color:'#7a85a3'},grid:{color:'rgba(38,44,69,.5)'},min:0},
+      y2:{type:'linear',position:'right',title:{display:true,text:'Predicted BIS',color:'rgba(200,220,255,.35)',font:{size:10}},ticks:{color:'rgba(200,220,255,.35)',stepSize:20},grid:{drawOnChartArea:false},min:0,max:100}
+    }
+  }
+});
+
+function remaUpdate() {
+  const {sex,age,wt}=patient;
+  const {opioids,mode,concMgMl,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,timeRange}=remaState;
+  const N=Math.min(1440, Math.max(600, Math.round(timeRange*10)));
+  const pE=eleveldParams(sex,age,wt,opioids), pZ=zhouParams(sex,age,wt);
+  const simE=remaSimulate(pE,mode,concMgMl,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,N,timeRange);
+  const simZ=remaSimulate(pZ,mode,concMgMl,rate,bolus,bolusRate,rateBI,rate1,rate2,switchT,N,timeRange);
+  const tL=parseFloat(document.getElementById('m_targLow').value)||0;
+  const tH=parseFloat(document.getElementById('m_targHigh').value)||0;
+
+  // BIS prediction
+  const E0=93.7, Emax=56.7, KCe50age=-16.4/1000;
+  const Ce50_BIS=982*Math.exp(KCe50age*(age-35));
+  function bisPred(ce){if(ce<=0)return E0;return Math.max(0,Math.min(100,E0-Emax*ce/(Ce50_BIS+ce)));}
+  const bisArrE=simE.Ce.map(ce=>+bisPred(ce).toFixed(1));
+  const bisArrZ=simZ.Ce.map(ce=>+bisPred(ce).toFixed(1));
+
+  remaChart.data.labels=simE.times;
+  remaChart.data.datasets=[
+    {label:'TH',data:simE.times.map(()=>tH),borderColor:'transparent',backgroundColor:'rgba(52,211,153,.1)',fill:'+1',pointRadius:0,tension:0,order:10},
+    {label:'TL',data:simE.times.map(()=>tL),borderColor:'rgba(52,211,153,.45)',backgroundColor:'transparent',fill:false,pointRadius:0,borderDash:[3,4],borderWidth:1.2,tension:0,order:10},
+    {label:'Eleveld Cp',data:simE.Cp,borderColor:'#22d3ee',backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:0,order:1},
+    {label:'Eleveld Ce',data:simE.Ce,borderColor:'#22d3ee',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:2},
+    {label:'Zhou Cp',data:simZ.Cp,borderColor:'#fb923c',backgroundColor:'transparent',borderWidth:2.2,pointRadius:0,tension:0,order:3},
+    {label:'Zhou Ce',data:simZ.Ce,borderColor:'#fb923c',backgroundColor:'transparent',borderWidth:2,borderDash:[7,4],pointRadius:0,tension:0,order:4},
+    {label:'BIS(Eleveld)',data:bisArrE,borderColor:'rgba(34,211,238,.5)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[2,3],pointRadius:0,tension:0,yAxisID:'y2',order:8},
+    {label:'BIS(Zhou)',data:bisArrZ,borderColor:'rgba(251,146,60,.5)',backgroundColor:'transparent',borderWidth:1.5,borderDash:[2,3],pointRadius:0,tension:0,yAxisID:'y2',order:9},
+  ];
+  remaChart.update();
+
+  const fmt=v=>v==null?'—':v.toFixed(0)+' ng/mL';
+  const idx5=Math.min(Math.round(5/(timeRange/N)),N);
+  const idx30=Math.min(Math.round(30/(timeRange/N)),N-1);
+  document.getElementById('m_eKe0').textContent=pE.ke0.toFixed(4)+' /min';
+  document.getElementById('m_eCp5').textContent=fmt(simE.Cp[idx5]);
+  document.getElementById('m_eCe5').textContent=fmt(simE.Ce[idx5]);
+  document.getElementById('m_ePeak').textContent=fmt(Math.max(...simE.Cp));
+  document.getElementById('m_eCss').textContent=simE.Css!=null?fmt(simE.Css):'—';
+  document.getElementById('m_zKe0').textContent=pZ.ke0.toFixed(4)+' /min';
+  document.getElementById('m_zCp5').textContent=fmt(simZ.Cp[idx5]);
+  document.getElementById('m_zCe5').textContent=fmt(simZ.Ce[idx5]);
+  document.getElementById('m_zPeak').textContent=fmt(Math.max(...simZ.Cp));
+  document.getElementById('m_zCss').textContent=simZ.Css!=null?fmt(simZ.Css):'—';
+
+  // BIS stats
+  const ceE30=simE.Ce[idx30], ceZ30=simZ.Ce[idx30];
+  const bisE=bisPred(ceE30), bisZ=bisPred(ceZ30);
+  document.getElementById('m_bisEstE').textContent=`BIS ${bisE.toFixed(0)}  (Ce=${ceE30.toFixed(0)} ng/mL)`;
+  document.getElementById('m_bisEstZ').textContent=`BIS ${bisZ.toFixed(0)}  (Ce=${ceZ30.toFixed(0)} ng/mL)`;
+  function ceForBIS(target){const diff=E0-target;if(diff<=0||diff>=Emax)return null;return Ce50_BIS*diff/(Emax-diff);}
+  const ce60=ceForBIS(60), ce40=ceForBIS(40);
+  document.getElementById('m_bisCe60').textContent=ce60?`${ce60.toFixed(0)} ng/mL`:'—';
+  document.getElementById('m_bisCe40').textContent=(ce40&&ce40<9999)?`${ce40.toFixed(0)} ng/mL`:'>5000 ng/mL';
+
+  drawBisChart(Ce50_BIS, ceE30, ceZ30);
+  // mg/kg/hr rate hints — Remimazolam (selected concentration mg/mL)
+  (function(){
+    const c=remaState.concMgMl, m2=remaState.mode;
+    const mgkghr = r => (r*c/patient.wt).toFixed(2);
+    const mh  = document.getElementById('m_rateHint');
+    const mhBI= document.getElementById('m_rateBIHint');
+    const mh1 = document.getElementById('m_rate1Hint');
+    const mh2 = document.getElementById('m_rate2Hint');
+    if(mh)   mh.textContent   = m2==='continuous' ? '≈ '+mgkghr(remaState.rate)+' mg/kg/hr'   : '';
+    if(mhBI) mhBI.textContent = m2==='bolusinf'   ? '≈ '+mgkghr(remaState.rateBI)+' mg/kg/hr' : '';
+    if(mh1)  mh1.textContent  = m2==='ratechange' ? '≈ '+mgkghr(remaState.rate1)+' mg/kg/hr'  : '';
+    if(mh2)  mh2.textContent  = m2==='ratechange' ? '≈ '+mgkghr(remaState.rate2)+' mg/kg/hr'  : '';
+  })();
+  triggerCombined();
+}
+
+function remaSetSex(s){ setPatient('sex', s); }
+const remaSlNum={rate:['m_slRate','m_inpRate'],bolus:['m_slBolus','m_inpBolus'],bolusRate:['m_slBRate','m_inpBRate'],rateBI:['m_slRateBI','m_inpRateBI'],rate1:['m_slRate1','m_inpRate1'],rate2:['m_slRate2','m_inpRate2'],switchT:['m_slSwitchT','m_inpSwitchT']};
+function remaSl(key,val){
+  if(['age','wt'].includes(key)){ setPatient(key,val); return; }
+  remaState[key]=val;
+  const inp=document.getElementById(remaSlNum[key]?remaSlNum[key][1]:null);
+  if(inp)inp.value=val;
+  remaUpdate();
+}
+function remaNum(key,el,mn,mx,commit){
+  let val=parseFloat(el.value);if(isNaN(val))return;
+  const clamped=Math.min(mx,Math.max(mn,val));
+  if(commit){ el.value=clamped; val=clamped; } else { val=clamped; }
+  if(['age','wt'].includes(key)){ setPatient(key,val,commit?null:el); return; }
+  remaState[key]=val;
+  const pair=remaSlNum[key];
+  if(pair){ const sl=document.getElementById(pair[0]);if(sl)sl.value=val; }
+  remaUpdate();
+}
+function remaSetMode(m){
+  remaState.mode=m;
+  ['m_btnCont','m_btnBolInf','m_btnRC'].forEach(id=>document.getElementById(id).classList.remove('active'));
+  document.getElementById(m==='continuous'?'m_btnCont':m==='bolusinf'?'m_btnBolInf':'m_btnRC').classList.add('active');
+  document.getElementById('m_contCtrl').style.display=m==='continuous'?'':'none';
+  document.getElementById('m_bolInfCtrl').style.display=m==='bolusinf'?'':'none';
+  document.getElementById('m_rcCtrl').style.display=m==='ratechange'?'':'none';
+  remaUpdate();
+}
+function remaSetConc(c,btn){remaState.concMgMl=c;document.querySelectorAll('#m_concRow .conc-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');remaUpdate();}
+function remaSetTR(min,btn){remaState.timeRange=min;document.querySelectorAll('#m_trRow .tr-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');remaUpdate();}
+function remaSelectModel(m){remaState.combinedModel=m;document.getElementById('m_selEleveld').classList.toggle('active',m==='eleveld');document.getElementById('m_selZhou').classList.toggle('active',m==='zhou');}
+
+// ── Propofol BIS Chart (Eleveld 2018 PD, Canvas 2D) ──
+function drawPropBisChart(age, ceS5, ceM5) {
+  const canvas = document.getElementById('p_bisChart');
+  if (!canvas) return;
+  const E0 = 93.4, Ce50 = 2.01 * Math.exp(-0.00635 * (age - 53)), gamma = 1.43;
+  const bisFn = ce => ce <= 0 ? E0 : Math.max(0, Math.min(100, E0 / (1 + Math.pow(ce / Ce50, gamma))));
+
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  if (!W || !H) return;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const g = canvas.getContext('2d');
+  g.scale(dpr, dpr);
+  const PAD = {top:6, right:14, bottom:22, left:26};
+  const cw = W - PAD.left - PAD.right, ch = H - PAD.top - PAD.bottom;
+  const xMax = 8;
+  const xP = ce => PAD.left + (ce / xMax) * cw;
+  const yP = bis => PAD.top + (1 - bis / 100) * ch;
+
+  // 배경 구역
+  const zones = [
+    {hi:100, lo:80, color:'rgba(248,113,113,.14)', label:'Awake'},
+    {hi:80,  lo:60, color:'rgba(251,191,36,.11)',  label:'Light'},
+    {hi:60,  lo:40, color:'rgba(52,211,153,.11)',  label:'Adequate'},
+    {hi:40,  lo:0,  color:'rgba(79,142,247,.09)',  label:'Deep'}
+  ];
+  for (const z of zones) {
+    g.fillStyle = z.color;
+    g.fillRect(PAD.left, yP(z.hi), cw, yP(z.lo) - yP(z.hi));
+    g.fillStyle = 'rgba(160,170,190,.45)';
+    g.font = '7px sans-serif'; g.textAlign = 'right';
+    g.fillText(z.label, PAD.left + cw - 2, yP((z.hi + z.lo) / 2) + 3);
+  }
+  // BIS 60 / 40 기준선
+  for (const [bis, col] of [[60,'rgba(52,211,153,.6)'],[40,'rgba(248,113,113,.6)']]) {
+    g.strokeStyle = col; g.lineWidth = 0.8; g.setLineDash([4,3]);
+    g.beginPath(); g.moveTo(PAD.left, yP(bis)); g.lineTo(PAD.left+cw, yP(bis)); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = col; g.font = '7px sans-serif'; g.textAlign = 'left';
+    g.fillText(bis, PAD.left+2, yP(bis)-2);
+  }
+  // X축
+  g.fillStyle = 'rgba(120,130,160,.7)'; g.font = '7px sans-serif'; g.textAlign = 'center';
+  for (let x = 0; x <= xMax; x += 2) g.fillText(x, xP(x), PAD.top + ch + 12);
+  g.fillText('μg/mL', PAD.left + cw/2, PAD.top + ch + 21);
+  // Y축
+  g.textAlign = 'right';
+  for (const b of [0, 50, 100]) g.fillText(b, PAD.left-3, yP(b)+3);
+
+  // ── Schnider BIS 곡선 (파란색) ──
+  g.strokeStyle = 'rgba(79,142,247,.9)'; g.lineWidth = 1.8; g.setLineDash([]);
+  g.beginPath();
+  for (let i=0; i<=160; i++) {
+    const ce = (i/160)*xMax;
+    i===0 ? g.moveTo(xP(ce),yP(bisFn(ce))) : g.lineTo(xP(ce),yP(bisFn(ce)));
+  }
+  g.stroke();
+
+  // ── Marsh BIS 곡선 (주황색, 파선) ── 동일 Ce50, 단지 표시용으로 다른 색
+  g.strokeStyle = 'rgba(249,115,22,.85)'; g.lineWidth = 1.8; g.setLineDash([6,3]);
+  g.beginPath();
+  for (let i=0; i<=160; i++) {
+    const ce = (i/160)*xMax;
+    i===0 ? g.moveTo(xP(ce),yP(bisFn(ce))) : g.lineTo(xP(ce),yP(bisFn(ce)));
+  }
+  g.stroke();
+  g.setLineDash([]);
+
+  // Ce50 세로 기준선
+  if (Ce50 > 0 && Ce50 <= xMax) {
+    g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = 0.8; g.setLineDash([3,4]);
+    g.beginPath(); g.moveTo(xP(Ce50),yP(0)); g.lineTo(xP(Ce50),yP(100)); g.stroke();
+    g.setLineDash([]);
+  }
+
+  // Schnider Ce@5min 점
+  if (ceS5 > 0 && ceS5 <= xMax) {
+    const bS = bisFn(ceS5);
+    g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth=1; g.setLineDash([3,3]);
+    g.beginPath(); g.moveTo(xP(ceS5),yP(0)); g.lineTo(xP(ceS5),yP(100)); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = '#4f8ef7';
+    g.beginPath(); g.arc(xP(ceS5), yP(bS), 3.5, 0, Math.PI*2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.8)'; g.font = '8px sans-serif';
+    const lxS = ceS5 > xMax*0.7 ? 'right' : 'left';
+    g.textAlign = lxS;
+    g.fillText('S:'+bS.toFixed(0), lxS==='right'?xP(ceS5)-5:xP(ceS5)+4, yP(bS)-5);
+  }
+  // Marsh Ce@5min 점
+  if (ceM5 > 0 && ceM5 <= xMax) {
+    const bM = bisFn(ceM5);
+    g.strokeStyle = 'rgba(249,115,22,.3)'; g.lineWidth=1; g.setLineDash([3,3]);
+    g.beginPath(); g.moveTo(xP(ceM5),yP(0)); g.lineTo(xP(ceM5),yP(100)); g.stroke();
+    g.setLineDash([]);
+    g.fillStyle = '#f97316';
+    g.beginPath(); g.arc(xP(ceM5), yP(bM), 3.5, 0, Math.PI*2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.8)'; g.font = '8px sans-serif';
+    const lxM = ceM5 > xMax*0.7 ? 'right' : 'left';
+    g.textAlign = lxM;
+    g.fillText('M:'+bM.toFixed(0), lxM==='right'?xP(ceM5)-5:xP(ceM5)+4, yP(bM)+12);
+  }
+}
+
+// ── Mini BIS-Ce Chart (Canvas 2D) ──
+function drawBisChart(Ce50_BIS, ceE_ngml, ceZ_ngml) {
+  const canvas=document.getElementById('m_bisChart');
+  if(!canvas)return;
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.offsetWidth, H=canvas.offsetHeight;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  const g=canvas.getContext('2d'); g.scale(dpr,dpr);
+  const PAD={top:6,right:14,bottom:22,left:30};
+  const cw=W-PAD.left-PAD.right, ch=H-PAD.top-PAD.bottom;
+  const xMax=3000;
+  const xP=ce=>PAD.left+(ce/xMax)*cw;
+  const yP=bis=>PAD.top+(1-bis/100)*ch;
+  const E0=93.7, Emax=56.7;
+  const bisFn=ce=>ce<=0?E0:Math.max(0,Math.min(100,E0-Emax*ce/(Ce50_BIS+ce)));
+  const zones=[{hi:100,lo:80,color:'rgba(248,113,113,.15)',label:'Awake'},{hi:80,lo:60,color:'rgba(251,191,36,.13)',label:'Light'},{hi:60,lo:40,color:'rgba(52,211,153,.12)',label:'Adequate'},{hi:40,lo:0,color:'rgba(34,211,238,.10)',label:'Deep'}];
+  for(const z of zones){g.fillStyle=z.color;g.fillRect(PAD.left,yP(z.hi),cw,yP(z.lo)-yP(z.hi));g.fillStyle='rgba(160,170,190,.5)';g.font='7px sans-serif';g.textAlign='right';g.fillText(z.label,PAD.left+cw-2,yP((z.hi+z.lo)/2)+3);}
+  for(const[bis,col]of[[60,'rgba(52,211,153,.5)'],[40,'rgba(248,113,113,.5)']]) {g.strokeStyle=col;g.lineWidth=0.8;g.setLineDash([4,3]);g.beginPath();g.moveTo(PAD.left,yP(bis));g.lineTo(PAD.left+cw,yP(bis));g.stroke();g.setLineDash([]);g.fillStyle=col;g.font='7px sans-serif';g.textAlign='left';g.fillText(bis,PAD.left+2,yP(bis)-2);}
+  g.strokeStyle='rgba(180,190,220,.75)';g.lineWidth=1.8;g.setLineDash([]);g.beginPath();
+  for(let ce=0;ce<=xMax;ce+=15){const fn=ce===0?g.moveTo.bind(g):g.lineTo.bind(g);fn(xP(ce),yP(bisFn(ce)));}g.stroke();
+  function drawMarker(ce_val,color,ly_off){if(ce_val==null||ce_val<0||ce_val>xMax)return;const bv=bisFn(ce_val),x=xP(ce_val),y=yP(bv);g.strokeStyle=color;g.lineWidth=1.1;g.setLineDash([3,3]);g.beginPath();g.moveTo(x,PAD.top);g.lineTo(x,PAD.top+ch);g.stroke();g.setLineDash([]);g.fillStyle=color;g.beginPath();g.arc(x,y,3.5,0,Math.PI*2);g.fill();g.font='bold 8px sans-serif';g.textAlign='center';const ly=Math.max(PAD.top+9,Math.min(PAD.top+ch-3,y+ly_off));g.fillText(`BIS ${bv.toFixed(0)}`,x,ly);}
+  drawMarker(ceE_ngml,'#22d3ee',-6);drawMarker(ceZ_ngml,'#fb923c',12);
+  g.strokeStyle='rgba(100,115,150,.45)';g.lineWidth=0.7;g.setLineDash([]);g.beginPath();g.moveTo(PAD.left,PAD.top);g.lineTo(PAD.left,PAD.top+ch);g.lineTo(PAD.left+cw,PAD.top+ch);g.stroke();
+  g.fillStyle='rgba(120,130,165,.8)';g.font='7px sans-serif';g.textAlign='center';
+  for(const ce of[0,500,1000,1500,2000,2500,3000]){const x=xP(ce);g.strokeStyle='rgba(100,115,150,.3)';g.beginPath();g.moveTo(x,PAD.top+ch);g.lineTo(x,PAD.top+ch+3);g.stroke();g.fillText(ce===0?'0':(ce/1000)+'k',x,PAD.top+ch+11);}
+  g.textAlign='right';for(const bis of[0,20,40,60,80,100]){const y=yP(bis);g.strokeStyle='rgba(100,115,150,.25)';g.beginPath();g.moveTo(PAD.left-3,y);g.lineTo(PAD.left,y);g.stroke();g.fillStyle='rgba(120,130,165,.8)';g.fillText(bis,PAD.left-4,y+3);}
+  g.fillStyle='rgba(120,130,165,.65)';g.textAlign='center';g.font='7.5px sans-serif';g.fillText('Ce (ng/mL)',PAD.left+cw/2,H-1);g.save();g.translate(7,PAD.top+ch/2);g.rotate(-Math.PI/2);g.fillText('BIS',0,0);g.restore();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  COMBINED VIEW
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+let combTimeRange = 60;
+let combPropChart, combRemiChart, combRemaChart;
+let combLinkedX = null;  // shared crosshair x position (data time value)
+
+// ── Custom crosshair plugin: draws vertical line + dot at linked time ──
+const crosshairPlugin = {
+  id: 'linkedCrosshair',
+  afterDraw(chart) {
+    if (combLinkedX === null) return;
+    const xScale = chart.scales.x;
+    const yScale = chart.scales.y;
+    if (!xScale || !yScale) return;
+    const x = xScale.getPixelForValue(combLinkedX);
+    if (x < xScale.left || x > xScale.right) return;
+    const ctx = chart.ctx;
+    // Vertical dashed line
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.moveTo(x, yScale.top);
+    ctx.lineTo(x, yScale.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Dots at Cp and Ce intersections (datasets index 2=Cp, 3=Ce after TH/TL)
+    chart.data.datasets.forEach((ds, idx) => {
+      if (['TH','TL'].includes(ds.label)) return;
+      // find nearest data point
+      const pts = ds.data;
+      if (!pts || pts.length === 0) return;
+      // binary search for closest t
+      const labels = chart.data.labels;
+      let lo=0, hi=labels.length-1;
+      while (lo < hi) {
+        const mid = (lo+hi)>>1;
+        if (labels[mid] < combLinkedX) lo=mid+1; else hi=mid;
+      }
+      const val = pts[lo];
+      if (val == null) return;
+      const cy = yScale.getPixelForValue(val);
+      ctx.beginPath();
+      ctx.arc(x, cy, 3.5, 0, Math.PI*2);
+      ctx.fillStyle = ds.borderColor || 'white';
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+};
+Chart.register(crosshairPlugin);
+
+// ── Linked mousemove across combined charts ──
+function attachCombLinked() {
+  const area = document.getElementById('panelCombined');
+  const canvases = ['comb_propChart','comb_remiChart','comb_remaChart'].map(id=>document.getElementById(id));
+
+  canvases.forEach(canvas => {
+    canvas.addEventListener('mousemove', e => {
+      const chart = [combPropChart, combRemiChart, combRemaChart]
+        .find(c => c && c.canvas === canvas);
+      if (!chart) return;
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const xScale = chart.scales.x;
+      if (!xScale) return;
+      combLinkedX = xScale.getValueForPixel(mouseX);
+      // Redraw all charts to show crosshair
+      [combPropChart, combRemiChart, combRemaChart].forEach(c => c && c.draw());
+      // Update linked bar
+      updateLinkedBar();
+    });
+    canvas.addEventListener('mouseleave', () => {
+      combLinkedX = null;
+      [combPropChart, combRemiChart, combRemaChart].forEach(c => c && c.draw());
+      document.getElementById('comb_linkedBar').style.display = 'none';
+    });
+  });
+}
+
+// ── Update the linked concentration bar at the bottom ──
+function updateLinkedBar() {
+  if (combLinkedX === null) return;
+  const bar = document.getElementById('comb_linkedBar');
+  bar.style.display = 'flex';
+  document.getElementById('comb_linkedTime').textContent = `t = ${combLinkedX.toFixed(1)} min`;
+
+  function readAt(chart, cpIdx, ceIdx) {
+    if (!chart || !chart.data.labels) return [null,null];
+    const labels = chart.data.labels;
+    let lo=0, hi=labels.length-1;
+    while (lo < hi) { const m=(lo+hi)>>1; if(labels[m]<combLinkedX) lo=m+1; else hi=m; }
+    const cp = chart.data.datasets[cpIdx]?.data[lo];
+    const ce = chart.data.datasets[ceIdx]?.data[lo];
+    return [cp, ce];
+  }
+
+  // Propofol: datasets [TH=0, TL=1, Cp=2, Ce=3]
+  const [pCp, pCe] = readAt(combPropChart, 2, 3);
+  document.getElementById('comb_ltPropCp').textContent = pCp!=null ? pCp.toFixed(2)+' μg/mL' : '—';
+  document.getElementById('comb_ltPropCe').textContent = pCe!=null ? pCe.toFixed(2)+' μg/mL' : '—';
+
+  // Remifentanil: datasets [TH=0, TL=1, Cp=2, Ce=3]
+  const [rCp, rCe] = readAt(combRemiChart, 2, 3);
+  document.getElementById('comb_ltRemiCp').textContent = rCp!=null ? rCp.toFixed(2)+' ng/mL' : '—';
+  document.getElementById('comb_ltRemiCe').textContent = rCe!=null ? rCe.toFixed(2)+' ng/mL' : '—';
+
+  // Remimazolam: datasets [TH=0, TL=1, Cp=2, Ce=3]
+  const [mCp, mCe] = readAt(combRemaChart, 2, 3);
+  const remaColor = remaState.combinedModel==='eleveld' ? 'var(--rema-e)' : 'var(--rema-z)';
+  document.getElementById('comb_ltRemaSpan').style.color = remaColor==='var(--rema-e)' ? '#22d3ee' : '#fb923c';
+  document.getElementById('comb_ltRemaCp').textContent = mCp!=null ? mCp.toFixed(0)+' ng/mL' : '—';
+  document.getElementById('comb_ltRemaCe').textContent = mCe!=null ? mCe.toFixed(0)+' ng/mL' : '—';
+}
+
+function makeCombChart(canvasId, color, unit) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  return new Chart(ctx, {
+    type:'line', data:{labels:[],datasets:[]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      animation:{duration:100},
+      interaction:{mode:'nearest',intersect:false},  // disable built-in tooltip
+      events:['mousemove','mouseout'],               // keep events for plugin
+      plugins:{
+        legend:{display:false},
+        tooltip:{enabled:false},  // disable Chart.js tooltip — we use our linked bar
+        linkedCrosshair:{}        // our custom plugin
+      },
+      scales:{
+        x:{type:'linear',display:true,ticks:{color:'#7a85a3',maxTicksLimit:10,font:{size:9}},grid:{color:'rgba(38,44,69,.4)'}},
+        y:{ticks:{color:'#7a85a3',font:{size:9}},grid:{color:'rgba(38,44,69,.4)'},min:0,
+           title:{display:true,text:unit,color:'#7a85a3',font:{size:9}}}
+      }
+    }
+  });
+}
+
+function initCombCharts() {
+  combPropChart = makeCombChart('comb_propChart','#4f8ef7','μg/mL');
+  combRemiChart = makeCombChart('comb_remiChart','#a78bfa','ng/mL');
+  combRemaChart = makeCombChart('comb_remaChart','#22d3ee','ng/mL');
+  attachCombLinked();
+}
+
+// ── Helper: build target-band datasets for a chart ──
+function targetDatasets(times, lo, hi) {
+  return [
+    {label:'TH',data:times.map(()=>hi),
+     borderColor:'transparent',backgroundColor:'rgba(52,211,153,.10)',
+     fill:'+1',pointRadius:0,tension:0,order:20},
+    {label:'TL',data:times.map(()=>lo),
+     borderColor:'rgba(52,211,153,.4)',backgroundColor:'transparent',
+     fill:false,pointRadius:0,borderDash:[3,4],borderWidth:1,tension:0,order:20},
+  ];
+}
+
+// ── Helper: describe dosing mode badge label ──
+function modeBadgeLabel(mode) {
+  return mode==='continuous'?'Continuous':mode==='bolus'?'Bolus':mode==='bolusinf'?'Bolus+Inf':'Rate Change';
+}
+
+// ── Helper: build a one-line dose summary string ──
+function propDoseSummary(state) {
+  const m=state.mode, c=state.concMgMl||10;
+  const pct = c===10 ? '1%' : '2%';
+  const mgkghr = r => (r * c / patient.wt).toFixed(2);
+  const hint = r => '<span style="color:var(--yellow);font-size:10px;"> \u2248'+mgkghr(r)+' mg/kg/hr</span>';
+  if(m==='continuous') return state.rate+' cc/hr ('+pct+')'+hint(state.rate);
+  if(m==='bolus')      return state.bolus+'mg @ '+state.bolusRate+'cc/hr ('+pct+')';
+  if(m==='bolusinf')   return state.bolus+'mg + '+(state.rate||60)+'cc/hr ('+pct+')'+hint(state.rate||60);
+  return state.rate1+'\u2192'+state.rate2+'cc/hr @ '+state.switchT+'min ('+pct+')';
+}
+function remiDoseSummary(state) {
+  const m=state.mode, c=state.concMcgMl;
+  const mcg = r => (r*c/patient.wt/60).toFixed(2);
+  const hint = r => '<span style="color:var(--yellow);font-size:10px;"> \u2248'+mcg(r)+'\u00b5g/kg/min</span>';
+  if(m==='continuous') return state.rate+'cc/hr ('+c+'mcg/mL)'+hint(state.rate);
+  if(m==='bolusinf')   return state.bolus+'mcg + '+state.rateBI+'cc/hr'+hint(state.rateBI);
+  return state.rate1+'\u2192'+state.rate2+'cc/hr @ '+state.switchT+'min'
+    +'<span style="color:var(--yellow);font-size:10px;"> '+mcg(state.rate1)+'\u2192'+mcg(state.rate2)+'\u00b5g/kg/min</span>';
+}
+function remaDoseSummary(state) {
+  const m=state.mode, c=state.concMgMl;
+  const mgkghr = r => (r*c/patient.wt).toFixed(2);
+  const hint = r => '<span style="color:var(--yellow);font-size:10px;"> \u2248'+mgkghr(r)+' mg/kg/hr</span>';
+  if(m==='continuous') return state.rate+'mL/hr ('+c+'mg/mL)'+hint(state.rate);
+  if(m==='bolusinf')   return state.bolus+'mg + '+state.rateBI+'mL/hr'+hint(state.rateBI);
+  return state.rate1+'\u2192'+state.rate2+'mL/hr @ '+state.switchT+'min'
+    +'<span style="color:var(--yellow);font-size:10px;"> '+mgkghr(state.rate1)+'\u2192'+mgkghr(state.rate2)+' mg/kg/hr</span>';
+}
+
+function combUpdate() {
+  if (!combPropChart) initCombCharts();
+  const N=400, maxMin=combTimeRange;
+
+  // ─ Patient info header ─
+  document.getElementById('comb_sex').textContent  = patient.sex==='M' ? 'Male' : 'Female';
+  document.getElementById('comb_age').textContent  = patient.age;
+  document.getElementById('comb_wt').textContent   = patient.wt;
+  document.getElementById('comb_ht').textContent   = patient.ht;
+
+  // ─ Model info ─
+  const propModel = propState.combinedModel==='schnider' ? 'Schnider' : 'Mod. Marsh';
+  const remaModel = remaState.combinedModel==='eleveld'  ? 'Eleveld'  : 'Zhou';
+  document.getElementById('comb_modelInfo').innerHTML =
+    `Propofol: <b>${propModel}</b> &nbsp;|&nbsp; Remifentanil: <b>Minto</b> &nbsp;|&nbsp; Remimazolam: <b>${remaModel}</b>`;
+
+  // ─ Read target Ce values from each tab ─
+  const pTL = parseFloat(document.getElementById('p_targLow').value)||0;
+  const pTH = parseFloat(document.getElementById('p_targHigh').value)||0;
+  const rTL = parseFloat(document.getElementById('r_targLow').value)||0;
+  const rTH = parseFloat(document.getElementById('r_targHigh').value)||0;
+  const mTL = parseFloat(document.getElementById('m_targLow').value)||0;
+  const mTH = parseFloat(document.getElementById('m_targHigh').value)||0;
+
+  const idx5 = Math.min(Math.round(5/(maxMin/N)), N);
+
+  // ── PROPOFOL ──
+  const pParams = propState.combinedModel==='schnider'
+    ? schniderParams(patient.sex,patient.age,patient.wt,patient.ht)
+    : marshParams(patient.wt);
+  const pSim = propSimulate(pParams,propState.mode,propState.rate,propState.bolus,propState.bolusRate,propState.concMgMl,N,maxMin);
+  const propColor = propState.combinedModel==='schnider' ? '#4f8ef7' : '#f97316';
+  combPropChart.data.labels = pSim.times;
+  combPropChart.data.datasets = [
+    ...targetDatasets(pSim.times, pTL, pTH),
+    {label:'Cp',data:pSim.Cp,borderColor:propColor,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0,order:1},
+    {label:'Ce',data:pSim.Ce,borderColor:propColor,backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,3],pointRadius:0,tension:0,order:2},
+  ];
+  combPropChart.update();
+  // Dosing badges
+  document.getElementById('comb_propModeBadge').textContent   = modeBadgeLabel(propState.mode);
+  document.getElementById('comb_propDoseSummary').innerHTML   = propDoseSummary(propState);
+  document.getElementById('comb_propTarget').textContent      = `Ce ${pTL}–${pTH} μg/mL`;
+  document.getElementById('comb_propStats').innerHTML =
+    `Cp@5min: <b>${(pSim.Cp[idx5]||0).toFixed(2)}</b> | Ce@5min: <b>${(pSim.Ce[idx5]||0).toFixed(2)}</b> | Css: <b>${pSim.Css!=null?pSim.Css.toFixed(2):'—'}</b> μg/mL`;
+
+  // ── REMIFENTANIL ──
+  const rp = mintoParams(patient.sex,patient.age,patient.wt,patient.ht);
+  const rSim = remiSimulate(rp,remiState.mode,remiState.rate,remiState.bolus,remiState.bolusRate,
+    remiState.rateBI,remiState.rate1,remiState.rate2,remiState.switchT,remiState.concMcgMl,N,maxMin);
+  combRemiChart.data.labels = rSim.times;
+  combRemiChart.data.datasets = [
+    ...targetDatasets(rSim.times, rTL, rTH),
+    {label:'Cp',data:rSim.Cp,borderColor:'#a78bfa',backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0,order:1},
+    {label:'Ce',data:rSim.Ce,borderColor:'#a78bfa',backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,3],pointRadius:0,tension:0,order:2},
+  ];
+  combRemiChart.update();
+  document.getElementById('comb_remiModeBadge').textContent   = modeBadgeLabel(remiState.mode);
+  document.getElementById('comb_remiDoseSummary').innerHTML   = remiDoseSummary(remiState);
+  document.getElementById('comb_remiTarget').textContent      = `Ce ${rTL}–${rTH} ng/mL`;
+  document.getElementById('comb_remiStats').innerHTML =
+    `Cp@5min: <b>${(rSim.Cp[idx5]||0).toFixed(2)}</b> | Ce@5min: <b>${(rSim.Ce[idx5]||0).toFixed(2)}</b> | Css: <b>${rSim.Css!=null?rSim.Css.toFixed(2):'—'}</b> ng/mL`;
+
+  // ── REMIMAZOLAM ──
+  const mp = remaState.combinedModel==='eleveld'
+    ? eleveldParams(patient.sex,patient.age,patient.wt,remaState.opioids)
+    : zhouParams(patient.sex,patient.age,patient.wt);
+  const mSim = remaSimulate(mp,remaState.mode,remaState.concMgMl,remaState.rate,remaState.bolus,
+    remaState.bolusRate,remaState.rateBI,remaState.rate1,remaState.rate2,remaState.switchT,N,maxMin);
+  const remaColor = remaState.combinedModel==='eleveld' ? '#22d3ee' : '#fb923c';
+  combRemaChart.data.labels = mSim.times;
+  combRemaChart.data.datasets = [
+    ...targetDatasets(mSim.times, mTL, mTH),
+    {label:'Cp',data:mSim.Cp,borderColor:remaColor,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:0,order:1},
+    {label:'Ce',data:mSim.Ce,borderColor:remaColor,backgroundColor:'transparent',borderWidth:1.5,borderDash:[6,3],pointRadius:0,tension:0,order:2},
+  ];
+  combRemaChart.update();
+  document.getElementById('comb_remaModeBadge').textContent   = modeBadgeLabel(remaState.mode);
+  document.getElementById('comb_remaDoseSummary').innerHTML   = remaDoseSummary(remaState);
+  document.getElementById('comb_remaTarget').textContent      = `Ce ${mTL}–${mTH} ng/mL`;
+  document.getElementById('comb_remaStats').innerHTML =
+    `Cp@5min: <b>${(mSim.Cp[idx5]||0).toFixed(0)}</b> | Ce@5min: <b>${(mSim.Ce[idx5]||0).toFixed(0)}</b> | Css: <b>${mSim.Css!=null?mSim.Css.toFixed(0):'—'}</b> ng/mL`;
+
+  // Sync rema drug name color
+  document.querySelector('#panelCombined .mini-chart-wrap:nth-child(3) .drug-name').style.color = remaColor;
+}
+
+function combSetTR(min,btn) {
+  combTimeRange=min;
+  document.querySelectorAll('#comb_trRow .tr-btn').forEach(b=>{
+    b.classList.remove('active');
+    b.style.background='';b.style.color='';b.style.borderColor='rgba(52,211,153,.3)';
+  });
+  btn.classList.add('active');
+  btn.style.background='rgba(52,211,153,.15)';btn.style.color='var(--green)';btn.style.borderColor='var(--green)';
+  combUpdate();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+//  Copyright (c) 2026 부산백병원 마취통증의학과 오주석
+// ═══════════════════════════════════════════════════════════════
+// Sync all patient UIs to initial values, then run all charts
+syncPatientUI();
+propUpdate();
+remiUpdate();
+remaUpdate();
+</script>
+<script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script><script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script><script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script></body>
+</html>
